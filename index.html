@@ -1,0 +1,2460 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NextTurnAI – Smart Queue System</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#070910; --surf:#0f1117; --surf2:#171b24; --border:#1e2230;
+  --accent:#00d4ff; --accent2:#ff6b35; --accent3:#7c3aed;
+  --green:#10b981; --yellow:#f59e0b; --red:#ef4444;
+  --text:#e8eaf0; --dim:#4b5563; --mid:#9ca3af;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── HEADER ── */
+header{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:var(--surf);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:300;}
+.logo{display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-size:1.05rem;font-weight:700;}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.logo span{color:var(--accent);}
+.nav-tabs{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:10px;border:1px solid var(--border);}
+.nav-tab{padding:6px 13px;border-radius:7px;cursor:pointer;font-weight:600;font-size:0.8rem;letter-spacing:0.5px;transition:all 0.2s;color:var(--dim);border:none;background:none;font-family:'Rajdhani',sans-serif;}
+.nav-tab.active{background:var(--surf2);color:var(--accent);border:1px solid var(--border);}
+.live-dot{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--green);font-family:'Space Mono',monospace;}
+.pulse{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+
+/* ── VIEWS / SCREENS ── */
+.view{display:none;}
+.view.active{display:block;animation:fadeUp 0.3s ease;}
+.screen{display:none;}
+.screen.active{display:block;animation:fadeUp 0.25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════════════════════════════
+   ROLE SELECTION SCREEN
+══════════════════════════════════════ */
+.role-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;
+  overflow-y:auto;
+}
+.role-overlay.hidden{display:none;}
+
+.role-logo-wrap{text-align:center;margin-bottom:32px;}
+.role-logo-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 12px;}
+.role-logo-name{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;letter-spacing:-1px;}
+.role-logo-name span{color:var(--accent);}
+.role-logo-sub{font-family:'Noto Sans Devanagari',sans-serif;font-size:0.88rem;color:var(--mid);margin-top:4px;}
+
+.role-question{font-size:1.15rem;font-weight:700;text-align:center;margin-bottom:6px;color:var(--text);}
+.role-question-sub{font-family:'Noto Sans Devanagari',sans-serif;font-size:0.82rem;color:var(--mid);text-align:center;margin-bottom:28px;}
+
+.role-cards{display:flex;flex-direction:column;gap:14px;width:100%;max-width:380px;}
+
+.role-card{
+  background:var(--surf);
+  border:2px solid var(--border);
+  border-radius:20px;
+  padding:24px 22px;
+  cursor:pointer;
+  transition:all 0.25s;
+  display:flex;align-items:center;gap:18px;
+  position:relative;overflow:hidden;
+}
+.role-card::before{
+  content:'';position:absolute;inset:0;
+  opacity:0;transition:opacity 0.25s;
+}
+.role-card.customer::before{background:linear-gradient(135deg,rgba(0,212,255,0.06),transparent);}
+.role-card.provider::before{background:linear-gradient(135deg,rgba(255,107,53,0.06),transparent);}
+.role-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,0.4);}
+.role-card.customer:hover{border-color:var(--accent);}
+.role-card.provider:hover{border-color:var(--accent2);}
+.role-card:hover::before{opacity:1;}
+
+.role-card-icon{
+  width:60px;height:60px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;flex-shrink:0;
+}
+.role-card.customer .role-card-icon{background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);}
+.role-card.provider .role-card-icon{background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.25);}
+
+.role-card-text{flex:1;}
+.role-card-title{font-size:1.2rem;font-weight:700;margin-bottom:4px;}
+.role-card.customer .role-card-title{color:var(--accent);}
+.role-card.provider .role-card-title{color:var(--accent2);}
+.role-card-desc{font-family:'Noto Sans Devanagari',sans-serif;font-size:0.78rem;color:var(--mid);line-height:1.5;}
+.role-card-features{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;}
+.role-feat{font-size:0.62rem;padding:3px 9px;border-radius:20px;font-family:'Space Mono',monospace;}
+.role-card.customer .role-feat{background:rgba(0,212,255,0.08);color:var(--accent);border:1px solid rgba(0,212,255,0.2);}
+.role-card.provider .role-feat{background:rgba(255,107,53,0.08);color:var(--accent2);border:1px solid rgba(255,107,53,0.2);}
+
+.role-card-arrow{font-size:1.4rem;color:var(--dim);transition:all 0.2s;flex-shrink:0;}
+.role-card.customer:hover .role-card-arrow{color:var(--accent);transform:translateX(4px);}
+.role-card.provider:hover .role-card-arrow{color:var(--accent2);transform:translateX(4px);}
+
+.role-already{margin-top:20px;text-align:center;font-size:0.75rem;color:var(--dim);}
+.role-already span{color:var(--accent);cursor:pointer;text-decoration:underline;}
+
+/* animated bg dots */
+.role-overlay::before{
+  content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 50%,rgba(0,212,255,0.04) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(124,58,237,0.04) 0%,transparent 60%),
+             radial-gradient(ellipse at 60% 80%,rgba(255,107,53,0.03) 0%,transparent 60%);
+}
+
+/* ══════════════════════════════════════
+   ONBOARDING OVERLAY
+══════════════════════════════════════ */
+.onboard-overlay{
+  position:fixed;inset:0;background:#070910;z-index:500;
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.onboard-overlay.hidden{display:none;}
+
+.ob-header{
+  padding:20px 24px 0;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.ob-logo{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:1.1rem;font-weight:700;}
+.ob-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.ob-logo span{color:var(--accent);}
+.ob-skip{font-size:0.75rem;color:var(--dim);cursor:pointer;font-family:'Space Mono',monospace;padding:6px 12px;border:1px solid var(--border);border-radius:8px;}
+.ob-skip:hover{color:var(--mid);}
+
+/* Step Progress */
+.ob-steps{display:flex;align-items:center;gap:0;padding:24px 24px 0;}
+.ob-step-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-family:'Space Mono',monospace;color:var(--dim);transition:all 0.3s;flex-shrink:0;}
+.ob-step-dot.done{background:var(--green);border-color:var(--green);color:#fff;}
+.ob-step-dot.active{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700;}
+.ob-step-line{flex:1;height:2px;background:var(--border);transition:background 0.3s;}
+.ob-step-line.done{background:var(--green);}
+
+/* Hero area */
+.ob-hero{padding:28px 24px 16px;text-align:center;}
+.ob-step-label{font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);font-family:'Space Mono',monospace;margin-bottom:8px;}
+.ob-title{font-size:1.7rem;font-weight:700;line-height:1.2;margin-bottom:6px;}
+.ob-subtitle{font-family:'Noto Sans Devanagari',sans-serif;font-size:0.88rem;color:var(--mid);}
+
+/* Form */
+.ob-form{padding:0 24px 24px;display:flex;flex-direction:column;gap:14px;}
+
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--mid);font-family:'Space Mono',monospace;}
+.form-input{
+  padding:14px 16px;
+  background:var(--surf);
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-size:1rem;
+  font-weight:500;
+  transition:border-color 0.2s;
+  outline:none;
+}
+.form-input:focus{border-color:var(--accent);}
+.form-input::placeholder{color:var(--dim);}
+.form-select{
+  padding:14px 16px;
+  background:var(--surf);
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-size:1rem;
+  font-weight:500;
+  outline:none;
+  cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239ca3af' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+}
+.form-select:focus{border-color:var(--accent);}
+.form-select option{background:#111;}
+
+/* Category Grid */
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.cat-tile{
+  background:var(--surf);
+  border:2px solid var(--border);
+  border-radius:12px;
+  padding:12px 6px;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.cat-tile:hover{border-color:rgba(0,212,255,0.3);background:var(--surf2);}
+.cat-tile.sel{border-color:var(--accent);background:rgba(0,212,255,0.07);}
+.cat-tile-icon{font-size:1.5rem;margin-bottom:4px;}
+.cat-tile-label{font-size:0.65rem;font-weight:600;color:var(--mid);}
+.cat-tile.sel .cat-tile-label{color:var(--accent);}
+
+/* Location Box */
+.loc-box{
+  background:var(--surf);
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+}
+.loc-map-area{
+  height:120px;
+  background:linear-gradient(135deg,#0d1520,#0a1018);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  border-bottom:1px solid var(--border);
+}
+.loc-map-area::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 20px,rgba(0,212,255,0.03) 20px,rgba(0,212,255,0.03) 21px),repeating-linear-gradient(90deg,transparent,transparent 20px,rgba(0,212,255,0.03) 20px,rgba(0,212,255,0.03) 21px);}
+.loc-pin{font-size:2.5rem;position:relative;z-index:1;animation:pinBounce 1.5s ease-in-out infinite;}
+@keyframes pinBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.loc-info-row{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;}
+.loc-text{font-size:0.85rem;font-weight:600;}
+.loc-coords{font-size:0.65rem;color:var(--dim);font-family:'Space Mono',monospace;margin-top:2px;}
+.loc-btn{padding:8px 14px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:var(--accent);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.loc-btn:hover{background:rgba(0,212,255,0.18);}
+
+.divider-or{display:flex;align-items:center;gap:10px;color:var(--dim);font-size:0.75rem;font-family:'Space Mono',monospace;}
+.divider-or::before,.divider-or::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* OTP Box */
+.otp-row{display:flex;gap:10px;justify-content:center;}
+.otp-input{
+  width:52px;height:56px;
+  background:var(--surf);
+  border:2px solid var(--border);
+  border-radius:12px;
+  text-align:center;
+  font-family:'Space Mono',monospace;
+  font-size:1.4rem;
+  font-weight:700;
+  color:var(--accent);
+  outline:none;
+  transition:border-color 0.2s;
+}
+.otp-input:focus{border-color:var(--accent);}
+
+/* Profile Card Preview */
+.profile-preview{
+  background:var(--surf2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  display:flex;align-items:center;gap:14px;
+}
+.profile-avatar{
+  width:52px;height:52px;
+  background:linear-gradient(135deg,var(--accent3),var(--accent));
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;flex-shrink:0;
+}
+.profile-info .p-name{font-size:1.05rem;font-weight:700;}
+.profile-info .p-phone{font-size:0.75rem;color:var(--mid);font-family:'Space Mono',monospace;}
+.profile-info .p-tag{display:inline-block;margin-top:4px;font-size:0.65rem;padding:2px 10px;border-radius:20px;background:rgba(0,212,255,0.1);color:var(--accent);border:1px solid rgba(0,212,255,0.2);font-family:'Space Mono',monospace;}
+
+/* Next Button */
+.ob-next{
+  margin:8px 24px 12px;
+  padding:16px;
+  background:linear-gradient(135deg,var(--accent3),var(--accent));
+  color:#fff;border:none;border-radius:14px;
+  font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;
+  cursor:pointer;letter-spacing:1px;text-transform:uppercase;
+  transition:all 0.2s;
+  box-shadow:0 6px 24px rgba(0,212,255,0.2);
+}
+.ob-next:hover{opacity:0.9;transform:translateY(-1px);}
+.ob-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.ob-back-link{text-align:center;margin-bottom:24px;font-size:0.8rem;color:var(--dim);cursor:pointer;}
+.ob-back-link:hover{color:var(--mid);}
+
+/* Success screen */
+.success-screen{text-align:center;padding:40px 24px;}
+.success-icon{font-size:4rem;margin-bottom:16px;animation:pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275);}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.success-title{font-size:1.8rem;font-weight:700;margin-bottom:8px;}
+.success-sub{font-family:'Noto Sans Devanagari',sans-serif;color:var(--mid);font-size:0.9rem;margin-bottom:28px;}
+.saved-data-box{background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:left;margin-bottom:20px;}
+.saved-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.85rem;}
+.saved-row:last-child{border-bottom:none;}
+.saved-key{color:var(--dim);font-family:'Space Mono',monospace;font-size:0.72rem;}
+.saved-val{font-weight:600;color:var(--text);}
+
+/* ══════════════════════════════════════
+   MAIN APP (after onboarding)
+══════════════════════════════════════ */
+
+/* Customer Home */
+.home-hero{background:linear-gradient(160deg,#0d1117,#0a0e18);padding:24px 20px 18px;position:relative;overflow:hidden;}
+.home-hero::after{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(0,212,255,0.07),transparent 70%);pointer-events:none;}
+.greeting-row{display:flex;align-items:center;justify-content:space-between;}
+.greeting-name{font-size:1.4rem;font-weight:700;}
+.greeting-sub{font-family:'Noto Sans Devanagari',sans-serif;font-size:0.82rem;color:var(--mid);margin-top:2px;}
+.user-avatar-sm{width:40px;height:40px;background:linear-gradient(135deg,var(--accent3),var(--accent));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;}
+
+.loc-bar{margin:14px 18px 0;background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color 0.2s;}
+.loc-bar:hover{border-color:rgba(0,212,255,0.3);}
+.lb-icon{font-size:1rem;}
+.lb-info{flex:1;}
+.lb-label{font-size:0.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-family:'Space Mono',monospace;}
+.lb-name{font-size:0.85rem;font-weight:600;}
+.lb-update{font-size:0.68rem;color:var(--accent);font-family:'Space Mono',monospace;}
+
+.sec-head{padding:18px 18px 8px;display:flex;justify-content:space-between;align-items:center;}
+.sec-head h2{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--mid);}
+.sec-head span{font-size:0.7rem;color:var(--accent);font-family:'Space Mono',monospace;cursor:pointer;}
+
+.cats-row{padding:0 18px 14px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;}
+.cats-row::-webkit-scrollbar{display:none;}
+.ccat{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 16px;background:var(--surf);border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s;min-width:72px;}
+.ccat:hover{border-color:rgba(0,212,255,0.3);}
+.ccat.active{border-color:var(--accent);background:rgba(0,212,255,0.06);}
+.ccat-icon{font-size:1.4rem;}
+.ccat-lbl{font-size:0.65rem;font-weight:600;color:var(--mid);}
+.ccat.active .ccat-lbl{color:var(--accent);}
+
+.shops-wrap{padding:0 18px 20px;display:flex;flex-direction:column;gap:10px;}
+.scard{background:var(--surf);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all 0.2s;}
+.scard:hover{border-color:rgba(0,212,255,0.3);transform:translateY(-1px);}
+.scard-top{padding:13px 15px;display:flex;align-items:center;gap:12px;}
+.savatar{width:46px;height:46px;background:var(--surf2);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.smeta{flex:1;}
+.sname{font-size:0.95rem;font-weight:700;margin-bottom:3px;}
+.stags{display:flex;gap:5px;flex-wrap:wrap;}
+.stag{font-size:0.6rem;padding:2px 7px;border-radius:20px;background:var(--surf2);color:var(--dim);border:1px solid var(--border);}
+.stag.on{background:rgba(16,185,129,0.1);color:var(--green);border-color:rgba(16,185,129,0.2);}
+.scard-bottom{border-top:1px solid var(--border);padding:9px 15px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.sstat{text-align:center;}
+.sstat-val{font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;}
+.sstat-val.or{color:var(--accent2);}.sstat-val.bl{color:var(--accent);}.sstat-val.gr{color:var(--green);}
+.sstat-lbl{font-size:0.58rem;color:var(--dim);}
+.join-btn{display:block;margin:8px 15px 13px;padding:11px;background:linear-gradient(135deg,var(--accent3),var(--accent));color:#fff;border:none;border-radius:10px;font-family:'Rajdhani',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;letter-spacing:0.8px;text-transform:uppercase;width:calc(100% - 30px);transition:all 0.2s;}
+.join-btn:hover{opacity:0.9;transform:translateY(-1px);}
+
+/* Token Screen */
+.tok-back{padding:14px 18px 0;display:flex;align-items:center;gap:8px;}
+.back-btn{padding:7px 14px;background:var(--surf);border:1px solid var(--border);border-radius:8px;color:var(--mid);font-family:'Rajdhani',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.back-btn:hover{color:var(--text);border-color:rgba(255,255,255,0.2);}
+.cat-badge{font-size:0.65rem;padding:4px 11px;border-radius:20px;background:rgba(0,212,255,0.1);color:var(--accent);border:1px solid rgba(0,212,255,0.2);font-family:'Space Mono',monospace;}
+
+.tok-loc{margin:12px 18px;background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;}
+.tlm{width:48px;height:48px;background:linear-gradient(135deg,#1a2744,#0d1117);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;border:1px solid var(--border);position:relative;overflow:hidden;}
+.tlm::after{content:'';position:absolute;width:6px;height:6px;background:var(--red);border-radius:50%;box-shadow:0 0 8px var(--red);animation:pulse 1.5s infinite;}
+.tloc-detail{flex:1;}
+.tloc-name{font-size:0.88rem;font-weight:700;}
+.tloc-addr{font-size:0.7rem;color:var(--mid);margin-top:1px;}
+.tloc-dist{font-size:0.65rem;color:var(--accent);font-family:'Space Mono',monospace;margin-top:2px;}
+
+.tok-card{margin:0 18px 14px;background:var(--surf);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.tok-card-head{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(0,212,255,0.05),rgba(124,58,237,0.05));}
+.tch-name{font-size:1rem;font-weight:700;}
+.tch-type{font-size:0.7rem;color:var(--mid);font-family:'Space Mono',monospace;}
+.tok-body{padding:28px 18px;text-align:center;}
+.tok-lbl{font-size:0.65rem;letter-spacing:2px;color:var(--dim);font-family:'Space Mono',monospace;text-transform:uppercase;margin-bottom:6px;}
+.tok-num{font-family:'Space Mono',monospace;font-size:5.5rem;font-weight:700;color:var(--accent);line-height:1;text-shadow:0 0 40px rgba(0,212,255,0.4);}
+.tok-holder{font-size:0.82rem;color:var(--mid);margin-top:6px;}
+.tok-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);}
+.tstat{background:var(--surf2);padding:14px 6px;text-align:center;}
+.tstat-val{font-family:'Space Mono',monospace;font-size:1.3rem;font-weight:700;}
+.tstat-val.or{color:var(--accent2);}.tstat-val.bl{color:var(--accent);}.tstat-val.gr{color:var(--green);}
+.tstat-lbl{font-size:0.6rem;color:var(--dim);margin-top:2px;}
+.prog-wrap{padding:14px 18px;}
+.prog-bg{height:7px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:5px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent3),var(--accent));border-radius:4px;transition:width 0.5s;}
+.prog-lbls{display:flex;justify-content:space-between;font-size:0.62rem;color:var(--dim);font-family:'Space Mono',monospace;}
+
+.notif-bar{margin:0 18px 14px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.22);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;font-size:0.82rem;}
+.notif-bar-icon{font-size:1.1rem;}
+.notif-text{flex:1;color:var(--yellow);}
+.notif-text small{display:block;font-size:0.65rem;color:var(--dim);margin-top:1px;}
+
+.cancel-tok-btn{display:block;width:calc(100% - 36px);margin:0 18px 20px;padding:13px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.22);color:var(--red);border-radius:12px;font-family:'Rajdhani',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:all 0.2s;}
+.cancel-tok-btn:hover{background:rgba(239,68,68,0.14);}
+
+/* ── PROVIDER MAIN ── */
+.prov-topbar{background:var(--surf);padding:16px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.prov-name-row{font-size:1.2rem;font-weight:700;}
+.prov-meta-row{font-size:0.68rem;color:var(--mid);font-family:'Space Mono',monospace;margin-top:2px;}
+.prov-status{display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--green);font-family:'Space Mono',monospace;}
+.dash-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px 10px;}
+.dc{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:14px;position:relative;overflow:hidden;}
+.dc-lbl{font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);font-family:'Space Mono',monospace;margin-bottom:5px;}
+.dc-val{font-family:'Space Mono',monospace;font-size:2.6rem;font-weight:700;line-height:1;}
+.dc-val.bl{color:var(--accent);text-shadow:0 0 20px rgba(0,212,255,0.25);}
+.dc-val.or{color:var(--accent2);}
+.dc-val.gr{color:var(--green);}
+.dc-val.pu{color:#a78bfa;}
+.dc-sub{font-size:0.65rem;color:var(--dim);margin-top:3px;}
+.dc-glow{position:absolute;right:-15px;bottom:-15px;width:55px;height:55px;border-radius:50%;opacity:0.07;}
+.pbtns{padding:0 16px 10px;display:flex;flex-direction:column;gap:8px;}
+.big-next-btn{padding:16px;background:linear-gradient(135deg,rgba(0,212,255,0.14),rgba(0,212,255,0.05));border:1px solid rgba(0,212,255,0.38);color:var(--accent);border-radius:13px;font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.2s;}
+.big-next-btn:hover{background:linear-gradient(135deg,rgba(0,212,255,0.22),rgba(0,212,255,0.1));box-shadow:0 5px 20px rgba(0,212,255,0.12);}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pbtn{padding:12px;background:var(--surf);border:1px solid var(--border);border-radius:12px;font-family:'Rajdhani',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.pbtn.p{color:var(--yellow);border-color:rgba(245,158,11,0.28);}.pbtn.p:hover{background:rgba(245,158,11,0.07);}
+.pbtn.r{color:var(--green);border-color:rgba(16,185,129,0.28);}.pbtn.r:hover{background:rgba(16,185,129,0.07);}
+.pbtn.l{color:var(--mid);width:100%;}
+.qlist{padding:0 16px 20px;}
+.qlist-title{font-size:0.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);font-family:'Space Mono',monospace;margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--border);}
+.qitems{display:flex;flex-direction:column;gap:6px;}
+.qi{background:var(--surf);border:1px solid var(--border);border-radius:11px;padding:11px 13px;display:flex;align-items:center;gap:11px;transition:all 0.15s;}
+.qi.now{border-color:rgba(0,212,255,0.32);background:rgba(0,212,255,0.025);}
+.qn{font-family:'Space Mono',monospace;font-size:1.1rem;font-weight:700;width:38px;text-align:center;}
+.qn.s{color:var(--accent);}.qn.w{color:var(--dim);}
+.qi-info{flex:1;}
+.qi-name{font-size:0.85rem;font-weight:600;}
+.qi-time{font-size:0.64rem;color:var(--dim);font-family:'Space Mono',monospace;}
+.qb{font-size:0.6rem;padding:3px 9px;border-radius:20px;font-family:'Space Mono',monospace;font-weight:700;}
+.qb.s{background:rgba(0,212,255,0.1);color:var(--accent);border:1px solid rgba(0,212,255,0.22);}
+.qb.w{background:rgba(107,114,128,0.1);color:var(--dim);border:1px solid var(--border);}
+
+/* TV */
+#view-tv{background:#000;min-height:calc(100vh - 57px);}
+.tv-wrap{display:flex;flex-direction:column;min-height:calc(100vh - 57px);}
+.tv-top{background:#0d0d0d;padding:9px 26px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1a1a1a;}
+.tv-sname{font-family:'Space Mono',monospace;font-size:1rem;color:#fff;font-weight:700;letter-spacing:1px;}
+.tv-clk{font-family:'Space Mono',monospace;font-size:0.9rem;color:#444;}
+.tv-body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#141414;}
+.tv-pan{background:#070707;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;}
+.tv-pan-lbl{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:4px;color:#2a2a2a;text-transform:uppercase;margin-bottom:14px;}
+.tv-big{font-family:'Space Mono',monospace;font-size:8rem;font-weight:700;color:var(--accent);line-height:1;text-shadow:0 0 60px rgba(0,212,255,0.45);animation:tvglow 2s infinite;}
+@keyframes tvglow{0%,100%{text-shadow:0 0 60px rgba(0,212,255,0.45)}50%{text-shadow:0 0 90px rgba(0,212,255,0.65)}}
+.tv-nxt{font-family:'Space Mono',monospace;font-size:5.5rem;font-weight:700;color:#232323;line-height:1;}
+.tv-foot{background:#0a0a0a;padding:12px 26px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #141414;}
+.tv-wnum{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--accent2);}
+.tv-wlbl{font-size:0.75rem;color:#444;font-family:'Space Mono',monospace;}
+.tv-tick{font-family:'Space Mono',monospace;font-size:0.6rem;color:#222;letter-spacing:2px;text-transform:uppercase;}
+
+/* Admin */
+.admin-top{background:var(--surf);padding:16px 18px;border-bottom:1px solid var(--border);}
+.admin-ttl{font-size:1.15rem;font-weight:700;}
+.admin-sub-lbl{font-size:0.68rem;color:var(--dim);font-family:'Space Mono',monospace;}
+.astats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px;}
+.ast{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:14px;}
+.ast-ico{font-size:1.2rem;margin-bottom:7px;}
+.ast-num{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;margin-bottom:2px;}
+.ast-lbl{font-size:0.62rem;color:var(--dim);}
+.chart-sec{padding:0 16px 14px;}
+.chart-box{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:16px;}
+.chart-ttl{font-size:0.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);font-family:'Space Mono',monospace;margin-bottom:12px;}
+.barchart{display:flex;align-items:flex-end;gap:7px;height:80px;}
+.bitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar{width:100%;border-radius:3px 3px 0 0;}
+.blbl{font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--dim);}
+.ptbl-sec{padding:0 16px 20px;}
+.ptbl-ttl{font-size:0.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);font-family:'Space Mono',monospace;margin-bottom:9px;}
+.ptbl{background:var(--surf);border:1px solid var(--border);border-radius:13px;overflow:hidden;}
+.pt-row{display:grid;grid-template-columns:2fr 1.1fr 0.9fr 0.9fr;padding:11px 15px;font-size:0.8rem;border-bottom:1px solid var(--border);align-items:center;transition:background 0.15s;}
+.pt-row:last-child{border-bottom:none;}
+.pt-row:hover:not(.h){background:var(--surf2);}
+.pt-row.h{background:var(--surf2);font-size:0.62rem;color:var(--dim);font-family:'Space Mono',monospace;letter-spacing:0.5px;text-transform:uppercase;}
+.sb{display:inline-block;font-size:0.6rem;padding:2px 8px;border-radius:20px;font-family:'Space Mono',monospace;font-weight:700;}
+.sb.on{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.28);}
+.sb.off{background:rgba(245,158,11,0.1);color:var(--yellow);border:1px solid rgba(245,158,11,0.28);}
+.pb{font-size:0.6rem;padding:2px 8px;border-radius:20px;font-family:'Space Mono',monospace;}
+.pb.pro{background:rgba(124,58,237,0.14);color:#a78bfa;border:1px solid rgba(124,58,237,0.28);}
+.pb.basic{background:rgba(107,114,128,0.1);color:var(--dim);border:1px solid var(--border);}
+
+/* TOAST */
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--surf2);border:1px solid var(--border);border-left:3px solid var(--accent);padding:11px 18px;border-radius:11px;font-size:0.85rem;font-weight:600;z-index:999;transition:transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275);white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,0.5);max-width:88vw;text-align:center;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.ok{border-left-color:var(--green);}
+.toast.warn{border-left-color:var(--yellow);}
+.toast.err{border-left-color:var(--red);}
+
+@media(max-width:420px){
+  .cat-grid{grid-template-columns:repeat(4,1fr);}
+  .nav-tab{padding:5px 8px;font-size:0.72rem;}
+  .tv-big{font-size:5rem;}
+  .tv-nxt{font-size:3.5rem;}
+}
+
+/* ══ QUICK DETAILS MODAL ══ */
+.qd-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:800;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.qd-backdrop.show{opacity:1;pointer-events:all;}
+.qd-sheet{width:100%;max-width:480px;background:var(--surf);border-radius:24px 24px 0 0;border:1px solid var(--border);border-bottom:none;padding-bottom:28px;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);}
+.qd-backdrop.show .qd-sheet{transform:translateY(0);}
+.qd-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:14px auto 20px;}
+.qd-title{text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:4px;padding:0 20px;}
+.qd-sub{text-align:center;font-family:'Noto Sans Devanagari',sans-serif;font-size:0.78rem;color:var(--mid);margin-bottom:20px;padding:0 20px;}
+.qd-form{padding:0 20px;display:flex;flex-direction:column;gap:12px;}
+.qd-inp{background:var(--surf2);border:1px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:1rem;outline:none;transition:border-color 0.2s;width:100%;}
+.qd-inp:focus{border-color:var(--accent);}
+.qd-inp::placeholder{color:var(--dim);}
+.qd-inp-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-family:'Space Mono',monospace;margin-bottom:4px;}
+.qd-field{display:flex;flex-direction:column;}
+.qd-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.qd-submit{margin:16px 20px 0;width:calc(100% - 40px);padding:15px;background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:14px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:all 0.2s;}
+.qd-submit:hover{filter:brightness(1.1);}
+.qd-skip{display:block;text-align:center;margin-top:12px;font-size:0.78rem;color:var(--dim);cursor:pointer;padding:6px;}
+.qd-skip:hover{color:var(--mid);}
+.qd-shop-preview{margin:0 20px 16px;background:var(--surf2);border:1px solid var(--border);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;}
+.qd-shop-icon{font-size:1.6rem;}
+.qd-shop-info{}
+.qd-shop-name{font-size:0.95rem;font-weight:700;}
+.qd-shop-meta{font-size:0.68rem;color:var(--mid);font-family:'Space Mono',monospace;margin-top:2px;}
+
+/* ══ CUSTOMER NOTIFICATION MODAL ══ */
+.notif-modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(6px);
+  z-index:800;
+  display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:0;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.3s ease;
+}
+.notif-modal-backdrop.show{opacity:1;pointer-events:all;}
+
+.notif-modal{
+  width:100%;max-width:480px;
+  background:var(--surf);
+  border-radius:24px 24px 0 0;
+  border:1px solid var(--border);
+  border-bottom:none;
+  padding:0 0 32px;
+  transform:translateY(100%);
+  transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  overflow:hidden;
+}
+.notif-modal-backdrop.show .notif-modal{transform:translateY(0);}
+
+.notif-modal-handle{
+  width:40px;height:4px;background:var(--border);
+  border-radius:2px;margin:14px auto 20px;
+}
+
+.notif-modal-type{
+  margin:0 24px 4px;
+  font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;
+  font-family:'Space Mono',monospace;
+}
+
+.notif-modal-icon-wrap{
+  width:72px;height:72px;border-radius:22px;
+  margin:0 auto 16px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;
+  position:relative;
+}
+.notif-modal-icon-wrap::after{
+  content:'';position:absolute;inset:-4px;
+  border-radius:26px;
+  animation:iconRing 1.5s ease-out infinite;
+}
+@keyframes iconRing{
+  0%{opacity:0.6;transform:scale(1);}
+  100%{opacity:0;transform:scale(1.4);}
+}
+
+/* Accepted style */
+.notif-modal.accepted .notif-modal-type{color:var(--green);}
+.notif-modal.accepted .notif-modal-icon-wrap{background:rgba(16,185,129,0.15);border:2px solid rgba(16,185,129,0.3);}
+.notif-modal.accepted .notif-modal-icon-wrap::after{border:2px solid var(--green);}
+
+/* Waitlisted style */
+.notif-modal.waitlisted .notif-modal-type{color:var(--yellow);}
+.notif-modal.waitlisted .notif-modal-icon-wrap{background:rgba(245,158,11,0.12);border:2px solid rgba(245,158,11,0.3);}
+.notif-modal.waitlisted .notif-modal-icon-wrap::after{border:2px solid var(--yellow);}
+
+/* Rejected style */
+.notif-modal.rejected .notif-modal-type{color:var(--red);}
+.notif-modal.rejected .notif-modal-icon-wrap{background:rgba(239,68,68,0.1);border:2px solid rgba(239,68,68,0.25);}
+.notif-modal.rejected .notif-modal-icon-wrap::after{border:2px solid var(--red);}
+
+.notif-modal-title{
+  text-align:center;font-size:1.5rem;font-weight:700;
+  margin:0 24px 8px;
+}
+.notif-modal-msg{
+  text-align:center;
+  font-family:'Noto Sans Devanagari',sans-serif;
+  font-size:0.88rem;color:var(--mid);
+  margin:0 24px 20px;line-height:1.6;
+}
+.notif-detail-box{
+  margin:0 20px 20px;
+  background:var(--surf2);border:1px solid var(--border);
+  border-radius:14px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.notif-detail-row{
+  display:flex;justify-content:space-between;align-items:center;
+}
+.notif-detail-key{font-size:0.68rem;color:var(--dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:0.5px;}
+.notif-detail-val{font-size:0.9rem;font-weight:700;}
+
+.notif-modal-close{
+  display:block;width:calc(100% - 40px);margin:0 20px;
+  padding:14px;border:none;border-radius:13px;
+  font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;
+  cursor:pointer;letter-spacing:0.5px;transition:all 0.2s;
+}
+.notif-modal.accepted .notif-modal-close{background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(16,185,129,0.1));color:var(--green);border:1px solid rgba(16,185,129,0.3);}
+.notif-modal.waitlisted .notif-modal-close{background:rgba(245,158,11,0.1);color:var(--yellow);border:1px solid rgba(245,158,11,0.25);}
+.notif-modal.rejected .notif-modal-close{background:rgba(239,68,68,0.08);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.notif-modal-close:hover{filter:brightness(1.2);}
+
+/* Notification Bell — on customer token screen */
+.notif-bell-btn{
+  position:fixed;bottom:80px;right:20px;
+  width:52px;height:52px;
+  background:linear-gradient(135deg,var(--accent3),var(--accent));
+  border-radius:16px;border:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,212,255,0.3);
+  z-index:100;
+  animation:bellBounce 2s ease-in-out infinite;
+  display:none;
+}
+@keyframes bellBounce{
+  0%,100%{transform:translateY(0) rotate(0deg);}
+  10%{transform:translateY(-3px) rotate(-10deg);}
+  20%{transform:translateY(-3px) rotate(10deg);}
+  30%{transform:translateY(0) rotate(0deg);}
+}
+.notif-bell-badge{
+  position:absolute;top:-4px;right:-4px;
+  width:18px;height:18px;
+  background:var(--red);border-radius:50%;
+  font-size:0.6rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;
+  border:2px solid var(--bg);
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     ROLE SELECTION SCREEN
+══════════════════════════════════════════════ -->
+<div class="role-overlay hidden" id="roleScreen">
+
+  <div class="role-logo-wrap">
+    <div class="role-logo-icon">🔢</div>
+    <div class="role-logo-name">Next<span>Turn</span>AI</div>
+    <div class="role-logo-sub">India का Smart Queue System</div>
+  </div>
+
+  <div class="role-question">आप कौन हैं? 🤔</div>
+  <div class="role-question-sub">अपना role चुनें — आपके लिए सही setup होगा</div>
+
+  <div class="role-cards">
+
+    <div class="role-card customer" onclick="selectRole('customer')">
+      <div class="role-card-icon">👤</div>
+      <div class="role-card-text">
+        <div class="role-card-title">Customer हूँ</div>
+        <div class="role-card-desc">मुझे queue join करनी है और digital token लेना है</div>
+        <div class="role-card-features">
+          <span class="role-feat">🎫 Token लो</span>
+          <span class="role-feat">📍 Live Track</span>
+          <span class="role-feat">🔔 Notification</span>
+        </div>
+      </div>
+      <div class="role-card-arrow">›</div>
+    </div>
+
+    <div class="role-card provider" onclick="selectRole('provider')">
+      <div class="role-card-icon">🏪</div>
+      <div class="role-card-text">
+        <div class="role-card-title">Service Provider हूँ</div>
+        <div class="role-card-desc">मेरी दुकान / clinic है, queue manage करनी है</div>
+        <div class="role-card-features">
+          <span class="role-feat">📊 Dashboard</span>
+          <span class="role-feat">▶ Token System</span>
+          <span class="role-feat">📈 Analytics</span>
+        </div>
+      </div>
+      <div class="role-card-arrow">›</div>
+    </div>
+
+  </div>
+
+  <div class="role-already" id="roleAlreadyText" style="display:none;">
+    Already account है? <span onclick="skipToApp()">सीधे App में जाएं →</span>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════
+     CUSTOMER ONBOARDING OVERLAY
+══════════════════════════════════════════════ -->
+<div class="onboard-overlay hidden" id="custOnboard">
+
+  <div class="ob-header">
+    <div class="ob-logo"><div class="ob-logo-icon">🔢</div>Next<span>Turn</span>AI</div>
+    <div class="ob-skip" onclick="skipOnboard('cust')">Skip →</div>
+  </div>
+
+  <!-- Step Indicator -->
+  <div class="ob-steps" id="custSteps">
+    <div class="ob-step-dot active" id="csd1">1</div>
+    <div class="ob-step-line" id="csl1"></div>
+    <div class="ob-step-dot" id="csd2">2</div>
+    <div class="ob-step-line" id="csl2"></div>
+    <div class="ob-step-dot" id="csd3">3</div>
+    <div class="ob-step-line" id="csl3"></div>
+    <div class="ob-step-dot" id="csd4">4</div>
+  </div>
+
+  <!-- STEP 1: Mobile Number -->
+  <div class="screen active" id="cust-step1">
+    <div class="ob-hero">
+      <div class="ob-step-label">Step 1 of 4</div>
+      <div class="ob-title">अपना Mobile नंबर दें 📱</div>
+      <div class="ob-subtitle">OTP से verify होगा — एक बार का process है</div>
+    </div>
+    <div class="ob-form">
+      <div class="form-group">
+        <div class="form-label">Mobile Number</div>
+        <input class="form-input" id="cMobile" type="tel" maxlength="10" placeholder="10 digit mobile number" oninput="this.value=this.value.replace(/\D/g,'')">
+      </div>
+    </div>
+    <button class="ob-next" onclick="custStep1Next()">OTP भेजें →</button>
+  </div>
+
+  <!-- STEP 2: OTP Verify -->
+  <div class="screen" id="cust-step2">
+    <div class="ob-hero">
+      <div class="ob-step-label">Step 2 of 4</div>
+      <div class="ob-title">OTP Verify करें 🔐</div>
+      <div class="ob-subtitle" id="custOtpSub">आपके नंबर पर OTP भेजा गया है</div>
+    </div>
+    <div class="ob-form">
+      <div class="form-group" style="align-items:center;">
+        <div class="form-label">Enter 4-Digit OTP</div>
+        <div class="otp-row">
+          <input class="otp-input" id="co1" maxlength="1" oninput="otpMove('co1','co2')">
+          <input class="otp-input" id="co2" maxlength="1" oninput="otpMove('co2','co3')">
+          <input class="otp-input" id="co3" maxlength="1" oninput="otpMove('co3','co4')">
+          <input class="otp-input" id="co4" maxlength="1" oninput="otpMove('co4',null)">
+        </div>
+        <div style="font-size:0.72rem;color:var(--dim);font-family:'Space Mono',monospace;margin-top:6px;">Demo: enter <strong style="color:var(--accent)">1234</strong></div>
+      </div>
+    </div>
+    <button class="ob-next" onclick="custStep2Next()">Verify करें ✓</button>
+    <div class="ob-back-link" onclick="custGoBack(1)">← Back</div>
+  </div>
+
+  <!-- STEP 3: Personal Details -->
+  <div class="screen" id="cust-step3">
+    <div class="ob-hero">
+      <div class="ob-step-label">Step 3 of 4</div>
+      <div class="ob-title">आपकी Details 👤</div>
+      <div class="ob-subtitle">सिर्फ एक बार भरना है, save हो जाएगा</div>
+    </div>
+    <div class="ob-form">
+      <div class="form-group">
+        <div class="form-label">Full Name</div>
+        <input class="form-input" id="cName" type="text" placeholder="आपका पूरा नाम">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Email (Optional)</div>
+        <input class="form-input" id="cEmail" type="email" placeholder="example@gmail.com">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Language</div>
+        <select class="form-select" id="cLang">
+          <option value="Hindi">हिंदी</option>
+          <option value="English">English</option>
+          <option value="Marathi">मराठी</option>
+          <option value="Punjabi">ਪੰਜਾਬੀ</option>
+          <option value="Bengali">বাংলা</option>
+        </select>
+      </div>
+    </div>
+    <button class="ob-next" onclick="custStep3Next()">आगे बढ़ें →</button>
+    <div class="ob-back-link" onclick="custGoBack(2)">← Back</div>
+  </div>
+
+  <!-- STEP 4: Done -->
+  <div class="screen" id="cust-step4">
+    <div class="success-screen">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Profile बन गई!</div>
+      <div class="success-sub">आपका account ready है। अब कहीं भी queue join करें।</div>
+      <div class="saved-data-box" id="custSavedBox"></div>
+    </div>
+    <button class="ob-next" onclick="finishCustOnboard()">App में जाएं 🚀</button>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PROVIDER ONBOARDING OVERLAY
+══════════════════════════════════════════════ -->
+<div class="onboard-overlay hidden" id="provOnboard">
+
+  <div class="ob-header">
+    <div class="ob-logo"><div class="ob-logo-icon">🔢</div>Next<span>Turn</span>AI <span style="font-size:0.7rem;color:var(--accent2);margin-left:4px;">PRO</span></div>
+    <div class="ob-skip" onclick="skipOnboard('prov')">Skip →</div>
+  </div>
+
+  <div class="ob-steps" id="provSteps">
+    <div class="ob-step-dot active" id="psd1">1</div>
+    <div class="ob-step-line" id="psl1"></div>
+    <div class="ob-step-dot" id="psd2">2</div>
+    <div class="ob-step-line" id="psl2"></div>
+    <div class="ob-step-dot" id="psd3">3</div>
+    <div class="ob-step-line" id="psl3"></div>
+    <div class="ob-step-dot" id="psd4">4</div>
+    <div class="ob-step-line" id="psl4"></div>
+    <div class="ob-step-dot" id="psd5">5</div>
+  </div>
+
+  <!-- P-STEP 1: Mobile -->
+  <div class="screen active" id="prov-step1">
+    <div class="ob-hero">
+      <div class="ob-step-label">Step 1 of 5</div>
+      <div class="ob-title">Provider Login 🏪</div>
+      <div class="ob-subtitle">अपना mobile number दें — OTP से verify होगा</div>
+    </div>
+    <div class="ob-form">
+      <div class="form-group">
+        <div class="form-label">Owner Mobile Number</div>
+        <input class="form-input" id="pMobile" type="tel" maxlength="10" placeholder="10 digit mobile number" oninput="this.value=this.value.replace(/\D/g,'')">
+      </div>
+    </div>
+    <button class="ob-next" onclick="provStep1Next()">OTP भेजें →</button>
+  </div>
+
+  <!-- P-STEP 2: OTP -->
+  <div class="screen" id="prov-step2">
+    <div class="ob-hero">
+      <div class="ob-step-label">Step 2 of 5</div>
+      <div class="ob-title">OTP Verify करें 🔐</div>
+      <div class="ob-subtitle" id="provOtpSub">OTP भेजा गया</div>
+    </div>
+    <div class="ob-form">
+      <div class="form-group" style="align-items:center;">
+        <div class="form-label">4-Digit OTP</div>
+        <div class="otp-row">
+          <input class="otp-input" id="po1" maxlength="1" oninput="otpMove('po1','po2')">
+          <input class="otp-input" id="po2" maxlength="1" oninput="otpMove('po2','po3')">
+          <input class="otp-input" id="po3" maxlength="1" oninput="otpMove('po3','po4')">
+          <input class="otp-input" id="po4" maxlength="1" oninput="otpMove('po4',null)">
+        </div>
+        <div style="font-size:0.72rem;color:var(--dim);font-family:'Space Mono',monospace;margin-top:6px;">Demo: enter <strong style="color:var(--accent)">1234</strong></div>
+      </div>
+    </div>
+    <button class="ob-next" onclick="provStep2Next()">Verify ✓</button>
+    <div class="ob-back-link" onclick="provGoBack(1)">← Back</div>
+  </div>
+
+  <!-- P-STEP 3: Shop Details -->
+  <div class="screen" id="prov-step3">
+    <div class="ob-hero">
+      <div class="ob-step-label">Step 3 of 5</div>
+      <div class="ob-title">दुकान की Details 🏪</div>
+      <div class="ob-subtitle">Shop name, owner name और contact fill करें</div>
+    </div>
+    <div class="ob-form">
+      <div class="form-group">
+        <div class="form-label">Shop / Dukan का नाम</div>
+        <input class="form-input" id="pShopName" type="text" placeholder="जैसे: Sharma Hair Studio">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Owner का नाम</div>
+        <input class="form-input" id="pOwnerName" type="text" placeholder="आपका पूरा नाम">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Shop Number / Door No.</div>
+        <input class="form-input" id="pShopNum" type="text" placeholder="जैसे: Shop 12, Ground Floor">
+      </div>
+      <div class="form-group">
+        <div class="form-label">पूरा Address</div>
+        <input class="form-input" id="pAddress" type="text" placeholder="गली, मोहल्ला, शहर">
+      </div>
+    </div>
+    <button class="ob-next" onclick="provStep3Next()">आगे →</button>
+    <div class="ob-back-link" onclick="provGoBack(2)">← Back</div>
+  </div>
+
+  <!-- P-STEP 4: Category -->
+  <div class="screen" id="prov-step4">
+    <div class="ob-hero">
+      <div class="ob-step-label">Step 4 of 5</div>
+      <div class="ob-title">Service Category चुनें 🗂</div>
+      <div class="ob-subtitle">आपकी दुकान किस type की है?</div>
+    </div>
+    <div class="ob-form">
+      <div class="cat-grid" id="provCatGrid">
+        <div class="cat-tile" onclick="selectProvCat(this,'✂️','Barber')"><div class="cat-tile-icon">✂️</div><div class="cat-tile-label">Barber</div></div>
+        <div class="cat-tile" onclick="selectProvCat(this,'💆','Salon')"><div class="cat-tile-icon">💆</div><div class="cat-tile-label">Salon</div></div>
+        <div class="cat-tile" onclick="selectProvCat(this,'🏥','Clinic')"><div class="cat-tile-icon">🏥</div><div class="cat-tile-label">Clinic</div></div>
+        <div class="cat-tile" onclick="selectProvCat(this,'🔧','Service')"><div class="cat-tile-icon">🔧</div><div class="cat-tile-label">Service</div></div>
+        <div class="cat-tile" onclick="selectProvCat(this,'💊','Pharmacy')"><div class="cat-tile-icon">💊</div><div class="cat-tile-label">Pharmacy</div></div>
+        <div class="cat-tile" onclick="selectProvCat(this,'🏦','Bank')"><div class="cat-tile-icon">🏦</div><div class="cat-tile-label">Bank</div></div>
+        <div class="cat-tile" onclick="selectProvCat(this,'👁️','Eye Care')"><div class="cat-tile-icon">👁️</div><div class="cat-tile-label">Eye Care</div></div>
+        <div class="cat-tile" onclick="selectProvCat(this,'🍽️','Restaurant')"><div class="cat-tile-icon">🍽️</div><div class="cat-tile-label">Food</div></div>
+      </div>
+    </div>
+    <button class="ob-next" id="provCatNext" disabled onclick="provStep4Next()">Category चुनें →</button>
+    <div class="ob-back-link" onclick="provGoBack(3)">← Back</div>
+  </div>
+
+  <!-- P-STEP 5: Location -->
+  <div class="screen" id="prov-step5">
+    <div class="ob-hero">
+      <div class="ob-step-label">Step 5 of 5</div>
+      <div class="ob-title">Location Set करें 📍</div>
+      <div class="ob-subtitle">Customers आपको map पर find कर सकें</div>
+    </div>
+    <div class="ob-form">
+      <div class="loc-box">
+        <div class="loc-map-area">
+          <div class="loc-pin">📍</div>
+        </div>
+        <div class="loc-info-row">
+          <div>
+            <div class="loc-text" id="provLocName">Location detect हो रही है...</div>
+            <div class="loc-coords" id="provLocCoords">—</div>
+          </div>
+          <button class="loc-btn" onclick="getProvLoc()">📡 Live Location</button>
+        </div>
+      </div>
+
+      <div class="divider-or">या Manual Address डालें</div>
+
+      <div class="form-group">
+        <div class="form-label">Manual Location / Landmark</div>
+        <input class="form-input" id="pManualLoc" type="text" placeholder="जैसे: Near Sharma Market, Delhi">
+      </div>
+    </div>
+    <button class="ob-next" onclick="provStep5Next()">Setup Complete करें 🎉</button>
+    <div class="ob-back-link" onclick="provGoBack(4)">← Back</div>
+  </div>
+
+  <!-- P-STEP DONE -->
+  <div class="screen" id="prov-done">
+    <div class="success-screen">
+      <div class="success-icon">🏪</div>
+      <div class="success-title">दुकान Register हो गई!</div>
+      <div class="success-sub">आपका Provider account ready है। Queue manage करना शुरू करें।</div>
+      <div class="saved-data-box" id="provSavedBox"></div>
+    </div>
+    <button class="ob-next" onclick="finishProvOnboard()">Dashboard खोलें 🚀</button>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════════ -->
+<header>
+  <div class="logo"><div class="logo-icon">🔢</div>Next<span>Turn</span>AI</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchView('customer',event)">Customer</button>
+    <button class="nav-tab" onclick="switchView('provider',event)">Provider</button>
+    <button class="nav-tab" onclick="switchView('tv',event)">TV</button>
+    <button class="nav-tab" onclick="switchView('admin',event)">Admin</button>
+  </div>
+  <div class="live-dot"><div class="pulse"></div>LIVE</div>
+</header>
+
+<!-- ════ CUSTOMER VIEW ════ -->
+<div id="view-customer" class="view active">
+
+  <!-- HOME SCREEN -->
+  <div id="cscreen-home" class="screen active">
+    <div class="home-hero">
+      <div class="greeting-row">
+        <div>
+          <div class="greeting-name">नमस्ते, <span id="appUserName">User</span> 👋</div>
+          <div class="greeting-sub">Queue छोड़ो, Token लो!</div>
+        </div>
+        <div class="user-avatar-sm" onclick="showProfile()" title="Profile">👤</div>
+      </div>
+    </div>
+
+    <div class="loc-bar" onclick="refreshAppLoc()">
+      <div class="lb-icon">📍</div>
+      <div class="lb-info">
+        <div class="lb-label">Current Location</div>
+        <div class="lb-name" id="appLocName">Location detect हो रही है...</div>
+      </div>
+      <div class="lb-update" id="appLocBtn">🔄</div>
+    </div>
+
+    <div class="sec-head"><h2>Category चुनें</h2><span onclick="clearAppCat()">All</span></div>
+    <div class="cats-row" id="appCatRow">
+      <div class="ccat active" onclick="filterAppCat(this,'all')"><div class="ccat-icon">🌐</div><div class="ccat-lbl">All</div></div>
+      <div class="ccat" onclick="filterAppCat(this,'barber')"><div class="ccat-icon">✂️</div><div class="ccat-lbl">Barber</div></div>
+      <div class="ccat" onclick="filterAppCat(this,'salon')"><div class="ccat-icon">💆</div><div class="ccat-lbl">Salon</div></div>
+      <div class="ccat" onclick="filterAppCat(this,'clinic')"><div class="ccat-icon">🏥</div><div class="ccat-lbl">Clinic</div></div>
+      <div class="ccat" onclick="filterAppCat(this,'service')"><div class="ccat-icon">🔧</div><div class="ccat-lbl">Service</div></div>
+      <div class="ccat" onclick="filterAppCat(this,'pharmacy')"><div class="ccat-icon">💊</div><div class="ccat-lbl">Pharmacy</div></div>
+      <div class="ccat" onclick="filterAppCat(this,'bank')"><div class="ccat-icon">🏦</div><div class="ccat-lbl">Bank</div></div>
+      <div class="ccat" onclick="filterAppCat(this,'eye')"><div class="ccat-icon">👁️</div><div class="ccat-lbl">Eye Care</div></div>
+    </div>
+
+    <div class="sec-head"><h2>Nearby Shops</h2><span id="shopCountLbl">6 open</span></div>
+    <div class="shops-wrap" id="appShopsWrap">
+      <div class="scard" data-cat="barber">
+        <div class="scard-top"><div class="savatar">✂️</div><div class="smeta"><div class="sname">Sharma Hair Studio</div><div class="stags"><span class="stag on">● Open</span><span class="stag">0.4 km</span><span class="stag">Barber</span><span class="stag">9AM–9PM</span></div></div></div>
+        <div class="scard-bottom"><div class="sstat"><div class="sstat-val or">8</div><div class="sstat-lbl">Waiting</div></div><div class="sstat"><div class="sstat-val bl">19</div><div class="sstat-lbl">Serving</div></div><div class="sstat"><div class="sstat-val gr">~20m</div><div class="sstat-lbl">Est. Wait</div></div></div>
+        <button class="join-btn" onclick="openToken('Sharma Hair Studio','✂️','Barber','0.4','8','19','~20 min','Connaught Place, New Delhi')">🎫 Token लो – Join Queue</button>
+      </div>
+      <div class="scard" data-cat="clinic">
+        <div class="scard-top"><div class="savatar">🏥</div><div class="smeta"><div class="sname">Kumar Clinic</div><div class="stags"><span class="stag on">● Open</span><span class="stag">0.2 km</span><span class="stag">Clinic</span><span class="stag">10AM–8PM</span></div></div></div>
+        <div class="scard-bottom"><div class="sstat"><div class="sstat-val or">3</div><div class="sstat-lbl">Waiting</div></div><div class="sstat"><div class="sstat-val bl">7</div><div class="sstat-lbl">Serving</div></div><div class="sstat"><div class="sstat-val gr">~8m</div><div class="sstat-lbl">Est. Wait</div></div></div>
+        <button class="join-btn" onclick="openToken('Kumar Clinic','🏥','Clinic','0.2','3','7','~8 min','Kashmere Gate, New Delhi')">🎫 Token लो – Join Queue</button>
+      </div>
+      <div class="scard" data-cat="salon">
+        <div class="scard-top"><div class="savatar">💆</div><div class="smeta"><div class="sname">Beauty Zone Salon</div><div class="stags"><span class="stag on">● Open</span><span class="stag">0.6 km</span><span class="stag">Salon</span><span class="stag">11AM–9PM</span></div></div></div>
+        <div class="scard-bottom"><div class="sstat"><div class="sstat-val or">7</div><div class="sstat-lbl">Waiting</div></div><div class="sstat"><div class="sstat-val bl">12</div><div class="sstat-lbl">Serving</div></div><div class="sstat"><div class="sstat-val gr">~18m</div><div class="sstat-lbl">Est. Wait</div></div></div>
+        <button class="join-btn" onclick="openToken('Beauty Zone Salon','💆','Salon','0.6','7','12','~18 min','Rajouri Garden, New Delhi')">🎫 Token लो – Join Queue</button>
+      </div>
+      <div class="scard" data-cat="service">
+        <div class="scard-top"><div class="savatar">🔧</div><div class="smeta"><div class="sname">Rajan Auto Service</div><div class="stags"><span class="stag on">● Open</span><span class="stag">1.1 km</span><span class="stag">Service</span><span class="stag">8AM–7PM</span></div></div></div>
+        <div class="scard-bottom"><div class="sstat"><div class="sstat-val or">12</div><div class="sstat-lbl">Waiting</div></div><div class="sstat"><div class="sstat-val bl">5</div><div class="sstat-lbl">Serving</div></div><div class="sstat"><div class="sstat-val gr">~35m</div><div class="sstat-lbl">Est. Wait</div></div></div>
+        <button class="join-btn" onclick="openToken('Rajan Auto Service','🔧','Service','1.1','12','5','~35 min','Karol Bagh, New Delhi')">🎫 Token लो – Join Queue</button>
+      </div>
+      <div class="scard" data-cat="eye">
+        <div class="scard-top"><div class="savatar">👁️</div><div class="smeta"><div class="sname">Patel Eye Care</div><div class="stags"><span class="stag on">● Open</span><span class="stag">1.4 km</span><span class="stag">Eye Care</span><span class="stag">10AM–6PM</span></div></div></div>
+        <div class="scard-bottom"><div class="sstat"><div class="sstat-val or">2</div><div class="sstat-lbl">Waiting</div></div><div class="sstat"><div class="sstat-val bl">3</div><div class="sstat-lbl">Serving</div></div><div class="sstat"><div class="sstat-val gr">~5m</div><div class="sstat-lbl">Est. Wait</div></div></div>
+        <button class="join-btn" onclick="openToken('Patel Eye Care','👁️','Eye Care','1.4','2','3','~5 min','Lajpat Nagar, New Delhi')">🎫 Token लो – Join Queue</button>
+      </div>
+      <div class="scard" data-cat="pharmacy">
+        <div class="scard-top"><div class="savatar">💊</div><div class="smeta"><div class="sname">MedPlus Pharmacy</div><div class="stags"><span class="stag on">● Open</span><span class="stag">0.8 km</span><span class="stag">Pharmacy</span><span class="stag">8AM–10PM</span></div></div></div>
+        <div class="scard-bottom"><div class="sstat"><div class="sstat-val or">5</div><div class="sstat-lbl">Waiting</div></div><div class="sstat"><div class="sstat-val bl">9</div><div class="sstat-lbl">Serving</div></div><div class="sstat"><div class="sstat-val gr">~12m</div><div class="sstat-lbl">Est. Wait</div></div></div>
+        <button class="join-btn" onclick="openToken('MedPlus Pharmacy','💊','Pharmacy','0.8','5','9','~12 min','Nehru Place, New Delhi')">🎫 Token लो – Join Queue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOKEN SCREEN -->
+  <div id="cscreen-token" class="screen">
+    <div class="tok-back">
+      <button class="back-btn" onclick="goBackHome()">← वापस</button>
+      <span class="cat-badge" id="tCatBadge">Category</span>
+    </div>
+    <div class="tok-loc">
+      <div class="tlm">🗺️</div>
+      <div class="tloc-detail">
+        <div class="tloc-name" id="tLocName">—</div>
+        <div class="tloc-addr" id="tLocAddr">—</div>
+        <div class="tloc-dist" id="tLocDist">—</div>
+      </div>
+    </div>
+    <div class="tok-card">
+      <div class="tok-card-head">
+        <div><div class="tch-name" id="tShopName">—</div><div class="tch-type" id="tShopType">—</div></div>
+        <div class="pulse" style="background:var(--green);width:9px;height:9px;box-shadow:0 0 8px var(--green);"></div>
+      </div>
+      <div class="tok-body">
+        <div class="tok-lbl">आपका Token Number</div>
+        <div class="tok-num" id="tNum">—</div>
+        <div class="tok-holder" id="tHolder">—</div>
+      </div>
+      <div class="tok-stats">
+        <div class="tstat"><div class="tstat-val or" id="tAhead">—</div><div class="tstat-lbl">People Ahead</div></div>
+        <div class="tstat"><div class="tstat-val bl" id="tEst">—</div><div class="tstat-lbl">Est. Wait</div></div>
+        <div class="tstat"><div class="tstat-val gr" id="tServ">—</div><div class="tstat-lbl">Now Serving</div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-bg"><div class="prog-fill" id="tProg" style="width:60%"></div></div>
+        <div class="prog-lbls"><span>Token 1</span><span id="tProgLbl">—</span></div>
+      </div>
+    </div>
+    <div class="notif-bar">
+      <div class="notif-bar-icon">🔔</div>
+      <div class="notif-text">Notification ON<small>2 token पहले alert मिलेगा</small></div>
+    </div>
+    <button class="cancel-tok-btn" onclick="cancelTok()">❌ Token Cancel करें</button>
+  </div>
+
+</div>
+
+<!-- ════ PROVIDER VIEW ════ -->
+<div id="view-provider" class="view">
+  <div class="prov-topbar">
+    <div>
+      <div class="prov-name-row" id="provDashName">🏪 Provider Dashboard</div>
+      <div class="prov-meta-row" id="provDashMeta">PRO PLAN</div>
+    </div>
+    <div class="prov-status"><div class="pulse"></div><span id="provStatusTxt">ACTIVE</span></div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="dash-g">
+    <div class="dc"><div class="dc-lbl">Current Token</div><div class="dc-val bl" id="pCurr">19</div><div class="dc-sub">Now Serving</div><div class="dc-glow" style="background:var(--accent);"></div></div>
+    <div class="dc"><div class="dc-lbl">Waiting</div><div class="dc-val or" id="pWait">8</div><div class="dc-sub">In Queue</div><div class="dc-glow" style="background:var(--accent2);"></div></div>
+    <div class="dc"><div class="dc-lbl">Served Today</div><div class="dc-val gr" id="pServedToday">31</div><div class="dc-sub">Customers</div></div>
+    <div class="dc"><div class="dc-lbl">Auto Limit</div><div class="dc-val pu" id="pLim">10</div><div class="dc-sub" id="pLimStatus">Auto ON</div></div>
+  </div>
+
+  <!-- Auto Accept Limit Card -->
+  <div style="margin:0 16px 12px;">
+    <div style="background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div>
+          <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mid);">⚙ Auto Token Accept Limit</div>
+          <div style="font-size:0.7rem;color:var(--dim);font-family:'Space Mono',monospace;margin-top:2px;">Limit के बाद नया token auto-accept नहीं होगा</div>
+        </div>
+        <!-- Toggle Switch -->
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <span style="font-size:0.72rem;color:var(--dim);font-family:'Space Mono',monospace;" id="autoLimLabel">ON</span>
+          <div style="position:relative;width:44px;height:24px;" onclick="toggleAutoLimit()">
+            <div id="toggleBg" style="width:44px;height:24px;background:var(--green);border-radius:12px;transition:background 0.2s;"></div>
+            <div id="toggleKnob" style="position:absolute;top:3px;left:23px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left 0.2s;"></div>
+          </div>
+        </label>
+      </div>
+      <!-- Limit Slider -->
+      <div style="display:flex;align-items:center;gap:12px;">
+        <input type="range" id="limitSlider" min="1" max="50" value="10"
+          style="flex:1;accent-color:var(--accent3);height:6px;cursor:pointer;"
+          oninput="updateLimitSlider(this.value)">
+        <div style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:6px 14px;font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:#a78bfa;min-width:52px;text-align:center;" id="sliderDisplay">10</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:0.6rem;color:var(--dim);font-family:'Space Mono',monospace;">
+        <span>1</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⚠️ Limit Crossed Banner — shows when queue >= limit -->
+  <div id="limitCrossedBanner" style="display:none;margin:0 16px 12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.35);border-left:4px solid var(--yellow);border-radius:12px;padding:12px 14px;align-items:center;gap:12px;">
+    <div style="font-size:1.3rem;">⚠️</div>
+    <div style="flex:1;">
+      <div style="font-size:0.85rem;font-weight:700;color:var(--yellow);">Auto Limit पूरा हो गया!</div>
+      <div style="font-size:0.7rem;color:var(--dim);font-family:'Space Mono',monospace;margin-top:2px;">
+        Queue: <span id="bannerWaitNum" style="color:var(--accent2);font-weight:700;">8</span> /
+        Limit: <span id="bannerLimitNum" style="color:var(--yellow);font-weight:700;">10</span> —
+        नए customers Waiting List में जाएंगे
+      </div>
+    </div>
+    <div style="font-size:0.68rem;color:var(--yellow);font-family:'Space Mono',monospace;text-align:right;cursor:pointer;" onclick="document.getElementById('limitCrossedBanner').style.display='none'">✕</div>
+  </div>
+
+  <!-- 📋 Waiting List — customers past the limit -->
+  <div id="waitingListBox" style="display:none;margin:0 16px 12px;">
+    <div style="background:var(--surf);border:1px solid rgba(245,158,11,0.28);border-radius:14px;padding:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--yellow);">📋 Waiting List <span style="font-size:0.62rem;color:var(--dim);font-weight:400;">(Limit के बाद)</span></div>
+        <div id="waitingListCount" style="background:rgba(245,158,11,0.12);color:var(--yellow);font-family:'Space Mono',monospace;font-size:0.68rem;padding:3px 10px;border-radius:20px;border:1px solid rgba(245,158,11,0.25);">0 waiting</div>
+      </div>
+      <div style="font-size:0.68rem;color:var(--dim);font-family:'Space Mono',monospace;margin-bottom:10px;padding:6px 10px;background:var(--surf2);border-radius:8px;">
+        💡 ये customers queue में हैं — जब चाहें "Move to Queue" से active कर सकते हैं
+      </div>
+      <div id="waitingListItems" style="display:flex;flex-direction:column;gap:7px;"></div>
+    </div>
+  </div>
+
+  <!-- 📥 Pending Requests -->
+  <div style="margin:0 16px 12px;">
+    <div style="background:var(--surf);border:1px solid rgba(255,107,53,0.3);border-radius:14px;padding:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);">📥 Pending Requests</div>
+        <div style="background:rgba(255,107,53,0.15);color:var(--accent2);font-family:'Space Mono',monospace;font-size:0.72rem;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,107,53,0.3);" id="pendingCount">3 pending</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;" id="pendingList">
+        <div style="background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text);flex:1;">Vikram Mehta <span style="font-size:0.65rem;color:var(--dim);font-family:'Space Mono',monospace;">11:32 AM</span></div>
+          <button onclick="acceptRequest(this,'Vikram Mehta')" style="padding:6px 14px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:var(--green);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">✓ Accept</button>
+          <button onclick="rejectRequest(this)" style="padding:6px 10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:var(--red);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">✕</button>
+        </div>
+        <div style="background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text);flex:1;">Neha Gupta <span style="font-size:0.65rem;color:var(--dim);font-family:'Space Mono',monospace;">11:35 AM</span></div>
+          <button onclick="acceptRequest(this,'Neha Gupta')" style="padding:6px 14px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:var(--green);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">✓ Accept</button>
+          <button onclick="rejectRequest(this)" style="padding:6px 10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:var(--red);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">✕</button>
+        </div>
+        <div style="background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text);flex:1;">Suresh Yadav <span style="font-size:0.65rem;color:var(--dim);font-family:'Space Mono',monospace;">11:38 AM</span></div>
+          <button onclick="acceptRequest(this,'Suresh Yadav')" style="padding:6px 14px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:var(--green);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">✓ Accept</button>
+          <button onclick="rejectRequest(this)" style="padding:6px 10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:var(--red);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Action Buttons -->
+  <div class="pbtns">
+    <button class="big-next-btn" onclick="nxtTok()">▶ NEXT TOKEN</button>
+    <div class="btn-row">
+      <button class="pbtn p" onclick="pauseQ()" id="pauseBtn">⏸ Pause Queue</button>
+      <button class="pbtn r" onclick="resumeQ()">▶ Resume</button>
+    </div>
+  </div>
+
+  <!-- Live Queue List -->
+  <div class="qlist">
+    <div class="qlist-title">Live Queue</div>
+    <div class="qitems" id="qitems">
+      <div class="qi now"><div class="qn s" id="q1">19</div><div class="qi-info"><div class="qi-name">Rahul Sharma</div><div class="qi-time">10:42 AM</div></div><div class="qb s">SERVING</div></div>
+      <div class="qi"><div class="qn w" id="q2">20</div><div class="qi-info"><div class="qi-name">Priya Singh</div><div class="qi-time">10:55 AM</div></div><div class="qb w">WAITING</div></div>
+      <div class="qi"><div class="qn w" id="q3">21</div><div class="qi-info"><div class="qi-name">Amit Kumar</div><div class="qi-time">11:02 AM</div></div><div class="qb w">WAITING</div></div>
+      <div class="qi"><div class="qn w" id="q4">22</div><div class="qi-info"><div class="qi-name">Sunita Devi</div><div class="qi-time">11:10 AM</div></div><div class="qb w">WAITING</div></div>
+      <div class="qi"><div class="qn w" id="q5">23</div><div class="qi-info"><div class="qi-name">Deepak Verma</div><div class="qi-time">11:18 AM</div></div><div class="qb w">WAITING</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TV VIEW ════ -->
+<div id="view-tv" class="view">
+  <div class="tv-wrap">
+    <div class="tv-top">
+      <div class="tv-sname" id="tvShopName">✂️ SHARMA HAIR STUDIO</div>
+      <div class="tv-clk" id="tvClk">11:24 AM</div>
+    </div>
+    <div class="tv-body">
+      <div class="tv-pan"><div class="tv-pan-lbl">NOW SERVING</div><div class="tv-big" id="tvNow">19</div></div>
+      <div class="tv-pan"><div class="tv-pan-lbl">NEXT</div><div class="tv-nxt" id="tvNxt">20</div></div>
+    </div>
+    <div class="tv-foot">
+      <div style="display:flex;align-items:center;gap:10px;"><div class="tv-wnum" id="tvWait">8</div><div class="tv-wlbl">WAITING</div></div>
+      <div class="tv-tick">NextTurnAI · nextturnai.in</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ ADMIN VIEW ════ -->
+<div id="view-admin" class="view">
+  <div class="admin-top"><div class="admin-ttl">Admin Dashboard</div><div class="admin-sub-lbl">NextTurnAI · March 2026</div></div>
+  <div class="astats">
+    <div class="ast"><div class="ast-ico">🏪</div><div class="ast-num" style="color:var(--accent)">248</div><div class="ast-lbl">Total Providers</div></div>
+    <div class="ast"><div class="ast-ico">👤</div><div class="ast-num" style="color:var(--accent2)">4,192</div><div class="ast-lbl">Total Users</div></div>
+    <div class="ast"><div class="ast-ico">🎫</div><div class="ast-num" style="color:var(--green)">1,847</div><div class="ast-lbl">Tokens Today</div></div>
+    <div class="ast"><div class="ast-ico">💰</div><div class="ast-num" style="color:#a78bfa">₹89K</div><div class="ast-lbl">Monthly Revenue</div></div>
+  </div>
+  <div class="chart-sec"><div class="chart-box"><div class="chart-ttl">Tokens / Day – This Week</div><div class="barchart"><div class="bitem"><div class="bar" style="height:50px;background:linear-gradient(to top,var(--accent3),var(--accent))"></div><div class="blbl">MON</div></div><div class="bitem"><div class="bar" style="height:75px;background:linear-gradient(to top,var(--accent3),var(--accent))"></div><div class="blbl">TUE</div></div><div class="bitem"><div class="bar" style="height:62px;background:linear-gradient(to top,var(--accent3),var(--accent))"></div><div class="blbl">WED</div></div><div class="bitem"><div class="bar" style="height:80px;background:linear-gradient(to top,var(--accent3),var(--accent))"></div><div class="blbl">THU</div></div><div class="bitem"><div class="bar" style="height:70px;background:linear-gradient(to top,var(--accent3),var(--accent));opacity:0.5"></div><div class="blbl">FRI</div></div><div class="bitem"><div class="bar" style="height:28px;background:var(--border)"></div><div class="blbl">SAT</div></div><div class="bitem"><div class="bar" style="height:28px;background:var(--border)"></div><div class="blbl">SUN</div></div></div></div></div>
+  <div class="ptbl-sec"><div class="ptbl-ttl">Providers</div><div class="ptbl"><div class="pt-row h"><span>Shop</span><span>Category</span><span>Status</span><span>Plan</span></div><div class="pt-row"><span>✂️ Sharma Hair</span><span>Barber</span><span><span class="sb on">Active</span></span><span><span class="pb pro">PRO</span></span></div><div class="pt-row"><span>🏥 Kumar Clinic</span><span>Clinic</span><span><span class="sb on">Active</span></span><span><span class="pb basic">Basic</span></span></div><div class="pt-row"><span>💆 Beauty Zone</span><span>Salon</span><span><span class="sb off">Paused</span></span><span><span class="pb pro">PRO</span></span></div><div class="pt-row"><span>🔧 Rajan Auto</span><span>Service</span><span><span class="sb on">Active</span></span><span><span class="pb basic">Basic</span></span></div></div></div>
+</div>
+
+<!-- ══ CUSTOMER NOTIFICATION MODAL ══ -->
+<div class="notif-modal-backdrop" id="notifBackdrop" onclick="closeNotifModal(event)">
+  <div class="notif-modal" id="notifModal">
+    <div class="notif-modal-handle"></div>
+
+    <div class="notif-modal-type" id="notifType">TOKEN UPDATE</div>
+
+    <div class="notif-modal-icon-wrap" id="notifIconWrap">
+      <span id="notifIcon">✅</span>
+    </div>
+
+    <div class="notif-modal-title" id="notifTitle">Request Accepted!</div>
+    <div class="notif-modal-msg" id="notifMsg">आपकी token request accept हो गई है</div>
+
+    <div class="notif-detail-box" id="notifDetailBox">
+      <div class="notif-detail-row">
+        <span class="notif-detail-key">Shop</span>
+        <span class="notif-detail-val" id="nd-shop">—</span>
+      </div>
+      <div class="notif-detail-row">
+        <span class="notif-detail-key">Token Number</span>
+        <span class="notif-detail-val" id="nd-token" style="font-family:'Space Mono',monospace;color:var(--accent);font-size:1.4rem;">—</span>
+      </div>
+      <div class="notif-detail-row">
+        <span class="notif-detail-key">People Ahead</span>
+        <span class="notif-detail-val" id="nd-ahead" style="color:var(--accent2);">—</span>
+      </div>
+      <div class="notif-detail-row">
+        <span class="notif-detail-key">Est. Wait</span>
+        <span class="notif-detail-val" id="nd-wait" style="color:var(--green);">—</span>
+      </div>
+      <div class="notif-detail-row" id="nd-status-row">
+        <span class="notif-detail-key">Status</span>
+        <span class="notif-detail-val" id="nd-status">—</span>
+      </div>
+    </div>
+
+    <button class="notif-modal-close" id="notifCloseBtn" onclick="closeNotifModal()">
+      समझ गया — ठीक है 👍
+    </button>
+  </div>
+</div>
+
+<!-- ══ QUICK DETAILS MODAL (before joining queue) ══ -->
+<div class="qd-backdrop" id="qdBackdrop">
+  <div class="qd-sheet">
+    <div class="qd-handle"></div>
+    <div class="qd-title">📋 पहले अपनी Details दें</div>
+    <div class="qd-sub">Token के लिए आपका नाम और mobile ज़रूरी है — एक बार भरें, हमेशा काम आएगा!</div>
+
+    <!-- Shop preview -->
+    <div class="qd-shop-preview">
+      <div class="qd-shop-icon" id="qdShopIcon">🏪</div>
+      <div class="qd-shop-info">
+        <div class="qd-shop-name" id="qdShopName">Shop</div>
+        <div class="qd-shop-meta" id="qdShopMeta">— · — km</div>
+      </div>
+    </div>
+
+    <div class="qd-form">
+      <div class="qd-field">
+        <div class="qd-inp-label">आपका नाम *</div>
+        <input class="qd-inp" id="qdName" placeholder="जैसे: Rahul Sharma" maxlength="40">
+      </div>
+      <div class="qd-field">
+        <div class="qd-inp-label">Mobile Number *</div>
+        <input class="qd-inp" id="qdMobile" placeholder="10 digit mobile" type="tel" maxlength="10" pattern="[0-9]*">
+      </div>
+      <div class="qd-row">
+        <div class="qd-field">
+          <div class="qd-inp-label">Email (optional)</div>
+          <input class="qd-inp" id="qdEmail" placeholder="email@example.com" type="email">
+        </div>
+        <div class="qd-field">
+          <div class="qd-inp-label">Language</div>
+          <select class="qd-inp" id="qdLang" style="cursor:pointer;">
+            <option value="hi">हिंदी</option>
+            <option value="en">English</option>
+            <option value="hi-en">Hinglish</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button class="qd-submit" onclick="qdSubmit()">🎫 Details Save करें & Token लो!</button>
+    <span class="qd-skip" onclick="qdSkip()">अभी नहीं — Guest के रूप में join करें</span>
+  </div>
+</div>
+
+<!-- Bell button -->
+<button class="notif-bell-btn" id="notifBellBtn" onclick="reopenNotif()">
+  🔔
+  <div class="notif-bell-badge" id="notifBadge">1</div>
+</button>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA STORE (localStorage)
+// ══════════════════════════════════════════
+const DB = {
+  get: (k) => { try { return JSON.parse(localStorage.getItem('ntai_'+k)); } catch(e){ return null; } },
+  set: (k,v) => { localStorage.setItem('ntai_'+k, JSON.stringify(v)); },
+  has: (k) => localStorage.getItem('ntai_'+k) !== null
+};
+
+// ── Toast ──
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast '+type+' show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast '+type, 2800);
+}
+
+// ── View Switch ──
+function switchView(name, e) {
+  if (name === 'provider' && !DB.has('provProfile')) {
+    document.getElementById('provOnboard').classList.remove('hidden');
+    return;
+  }
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if (e && e.target) e.target.classList.add('active');
+  if (name === 'provider') loadProvDash();
+}
+
+// ══════════════════════════════════════════
+// CUSTOMER ONBOARDING
+// ══════════════════════════════════════════
+let custStepN = 1;
+
+function showCustOnboard() {
+  document.getElementById('custOnboard').classList.remove('hidden');
+}
+function skipOnboard(who) {
+  if (who === 'cust') { finishCustOnboard(); }
+  else { finishProvOnboard(); }
+}
+
+function updateCustSteps(n) {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById('csd'+i);
+    if (i < n) { dot.className = 'ob-step-dot done'; dot.textContent = '✓'; }
+    else if (i === n) { dot.className = 'ob-step-dot active'; dot.textContent = i; }
+    else { dot.className = 'ob-step-dot'; dot.textContent = i; }
+  }
+  for (let i = 1; i <= 3; i++) {
+    const line = document.getElementById('csl'+i);
+    line.className = 'ob-step-line' + (i < n ? ' done' : '');
+  }
+}
+
+function showCustScreen(n) {
+  document.querySelectorAll('#custOnboard .screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('cust-step'+n).classList.add('active');
+  updateCustSteps(n);
+  custStepN = n;
+}
+
+function custGoBack(n) { showCustScreen(n); }
+
+function custStep1Next() {
+  const mob = document.getElementById('cMobile').value;
+  if (mob.length !== 10) { toast('⚠ 10 digit number डालें', 'warn'); return; }
+  document.getElementById('custOtpSub').textContent = '+91 '+mob+' पर OTP भेजा गया';
+  showCustScreen(2);
+  toast('📱 OTP sent! (Demo: 1234)', 'ok');
+}
+
+function custStep2Next() {
+  const otp = ['co1','co2','co3','co4'].map(id => document.getElementById(id).value).join('');
+  if (otp !== '1234') { toast('❌ Wrong OTP. Demo: 1234', 'err'); return; }
+  showCustScreen(3);
+  toast('✅ Verified!', 'ok');
+}
+
+function custStep3Next() {
+  const name = document.getElementById('cName').value.trim();
+  if (!name) { toast('⚠ नाम जरूरी है', 'warn'); return; }
+  const data = {
+    name, mobile: document.getElementById('cMobile').value,
+    email: document.getElementById('cEmail').value || '—',
+    lang: document.getElementById('cLang').value,
+    joinedAt: new Date().toLocaleString('hi-IN')
+  };
+  DB.set('custProfile', data);
+
+  // Show saved data
+  document.getElementById('custSavedBox').innerHTML = `
+    <div class="saved-row"><span class="saved-key">NAME</span><span class="saved-val">${data.name}</span></div>
+    <div class="saved-row"><span class="saved-key">MOBILE</span><span class="saved-val">+91 ${data.mobile}</span></div>
+    <div class="saved-row"><span class="saved-key">EMAIL</span><span class="saved-val">${data.email}</span></div>
+    <div class="saved-row"><span class="saved-key">LANGUAGE</span><span class="saved-val">${data.lang}</span></div>
+    <div class="saved-row"><span class="saved-key">JOINED</span><span class="saved-val">${data.joinedAt}</span></div>
+  `;
+  showCustScreen(4);
+  document.getElementById('cust-step4').classList.remove('screen');
+  document.getElementById('cust-step4').classList.add('screen','active');
+}
+
+function finishCustOnboard() {
+  document.getElementById('custOnboard').classList.add('hidden');
+  loadCustProfile();
+  switchToMainView('customer');
+  toast('🎉 Welcome to NextTurnAI!', 'ok');
+}
+
+function loadCustProfile() {
+  const d = DB.get('custProfile');
+  if (d) {
+    document.getElementById('appUserName').textContent = d.name.split(' ')[0];
+  }
+}
+
+// OTP auto-move
+function otpMove(cur, next) {
+  const el = document.getElementById(cur);
+  el.value = el.value.replace(/\D/g,'');
+  if (el.value && next) document.getElementById(next).focus();
+}
+
+// ══════════════════════════════════════════
+// PROVIDER ONBOARDING
+// ══════════════════════════════════════════
+let provSelCat = null, provSelCatIcon = null;
+
+function showProvOnboard() {
+  document.getElementById('provOnboard').classList.remove('hidden');
+}
+
+function updateProvSteps(n) {
+  for (let i = 1; i <= 5; i++) {
+    const dot = document.getElementById('psd'+i);
+    if (i < n) { dot.className = 'ob-step-dot done'; dot.textContent = '✓'; }
+    else if (i === n) { dot.className = 'ob-step-dot active'; dot.textContent = i; }
+    else { dot.className = 'ob-step-dot'; dot.textContent = i; }
+  }
+  for (let i = 1; i <= 4; i++) {
+    const line = document.getElementById('psl'+i);
+    line.className = 'ob-step-line' + (i < n ? ' done' : '');
+  }
+}
+
+function showProvScreen(n) {
+  document.querySelectorAll('#provOnboard .screen').forEach(s => s.classList.remove('active'));
+  const id = n === 'done' ? 'prov-done' : 'prov-step'+n;
+  document.getElementById(id).classList.add('active');
+  if (n !== 'done') updateProvSteps(n);
+}
+
+function provGoBack(n) { showProvScreen(n); }
+
+function provStep1Next() {
+  const mob = document.getElementById('pMobile').value;
+  if (mob.length !== 10) { toast('⚠ 10 digit number डालें', 'warn'); return; }
+  document.getElementById('provOtpSub').textContent = '+91 '+mob+' पर OTP भेजा गया';
+  showProvScreen(2);
+  toast('📱 OTP sent! (Demo: 1234)', 'ok');
+}
+
+function provStep2Next() {
+  const otp = ['po1','po2','po3','po4'].map(id => document.getElementById(id).value).join('');
+  if (otp !== '1234') { toast('❌ Wrong OTP. Demo: 1234', 'err'); return; }
+  showProvScreen(3);
+  toast('✅ Verified!', 'ok');
+}
+
+function provStep3Next() {
+  const sn = document.getElementById('pShopName').value.trim();
+  const on = document.getElementById('pOwnerName').value.trim();
+  const snum = document.getElementById('pShopNum').value.trim();
+  const addr = document.getElementById('pAddress').value.trim();
+  if (!sn || !on) { toast('⚠ Shop name और Owner name जरूरी है', 'warn'); return; }
+  showProvScreen(4);
+}
+
+function selectProvCat(el, icon, cat) {
+  document.querySelectorAll('.cat-tile').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
+  provSelCat = cat; provSelCatIcon = icon;
+  document.getElementById('provCatNext').disabled = false;
+  document.getElementById('provCatNext').textContent = icon + ' ' + cat + ' — आगे →';
+}
+
+function provStep4Next() {
+  if (!provSelCat) { toast('⚠ Category चुनें', 'warn'); return; }
+  showProvScreen(5);
+  getProvLoc();
+}
+
+function getProvLoc() {
+  document.getElementById('provLocName').textContent = 'Locating...';
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const lat = pos.coords.latitude.toFixed(4);
+      const lon = pos.coords.longitude.toFixed(4);
+      document.getElementById('provLocName').textContent = 'Live Location Detected ✅';
+      document.getElementById('provLocCoords').textContent = lat + '° N, ' + lon + '° E';
+      toast('📍 Location set!', 'ok');
+    }, () => {
+      document.getElementById('provLocName').textContent = 'Location unavailable';
+      document.getElementById('provLocCoords').textContent = 'Manually fill below';
+      toast('⚠ GPS off — manual fill करें', 'warn');
+    });
+  }
+}
+
+function provStep5Next() {
+  const manualLoc = document.getElementById('pManualLoc').value.trim();
+  const locName = document.getElementById('provLocName').textContent;
+  const locCoords = document.getElementById('provLocCoords').textContent;
+  const finalLoc = (locName !== 'Location unavailable' && locName !== 'Locating...') ? locName : (manualLoc || 'Not set');
+
+  const data = {
+    shopName: document.getElementById('pShopName').value.trim(),
+    ownerName: document.getElementById('pOwnerName').value.trim(),
+    mobile: document.getElementById('pMobile').value,
+    shopNum: document.getElementById('pShopNum').value.trim() || '—',
+    address: document.getElementById('pAddress').value.trim() || '—',
+    category: provSelCat,
+    catIcon: provSelCatIcon,
+    location: finalLoc,
+    coords: locCoords,
+    registeredAt: new Date().toLocaleString('hi-IN')
+  };
+
+  DB.set('provProfile', data);
+
+  document.getElementById('provSavedBox').innerHTML = `
+    <div class="saved-row"><span class="saved-key">SHOP NAME</span><span class="saved-val">${data.catIcon} ${data.shopName}</span></div>
+    <div class="saved-row"><span class="saved-key">OWNER</span><span class="saved-val">${data.ownerName}</span></div>
+    <div class="saved-row"><span class="saved-key">MOBILE</span><span class="saved-val">+91 ${data.mobile}</span></div>
+    <div class="saved-row"><span class="saved-key">SHOP NO.</span><span class="saved-val">${data.shopNum}</span></div>
+    <div class="saved-row"><span class="saved-key">ADDRESS</span><span class="saved-val">${data.address}</span></div>
+    <div class="saved-row"><span class="saved-key">CATEGORY</span><span class="saved-val">${data.catIcon} ${data.category}</span></div>
+    <div class="saved-row"><span class="saved-key">LOCATION</span><span class="saved-val">${data.location}</span></div>
+  `;
+
+  showProvScreen('done');
+}
+
+function finishProvOnboard() {
+  document.getElementById('provOnboard').classList.add('hidden');
+  loadProvDash();
+  switchToMainView('provider');
+  toast('🏪 Welcome, Provider!', 'ok');
+}
+
+function loadProvDash() {
+  const d = DB.get('provProfile');
+  if (d) {
+    document.getElementById('provDashName').textContent = d.catIcon + ' ' + d.shopName;
+    document.getElementById('provDashMeta').textContent = d.category.toUpperCase() + ' · ' + d.ownerName.toUpperCase();
+    document.getElementById('tvShopName').textContent = d.catIcon + ' ' + d.shopName.toUpperCase();
+  }
+}
+
+// ══════════════════════════════════════════
+// CUSTOMER APP LOGIC
+// ══════════════════════════════════════════
+let activeCat = 'all';
+let curTok = 19, waitN = 8, pausedQ = false, limV = 10;
+
+function filterAppCat(el, cat) {
+  activeCat = cat;
+  document.querySelectorAll('.ccat').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  let vis = 0;
+  document.querySelectorAll('.scard').forEach(c => {
+    const m = cat === 'all' || c.dataset.cat === cat;
+    c.style.display = m ? 'block' : 'none';
+    if (m) vis++;
+  });
+  document.getElementById('shopCountLbl').textContent = vis + ' open';
+}
+
+function clearAppCat() {
+  filterAppCat(document.querySelector('.ccat'), 'all');
+}
+
+function refreshAppLoc() {
+  const btn = document.getElementById('appLocBtn');
+  btn.textContent = '⏳';
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const lat = pos.coords.latitude.toFixed(4);
+      const lon = pos.coords.longitude.toFixed(4);
+      document.getElementById('appLocName').textContent = lat + '° N, ' + lon + '° E';
+      btn.textContent = '✅';
+      setTimeout(() => btn.textContent = '🔄', 2000);
+      toast('📍 Location updated!', 'ok');
+    }, () => {
+      btn.textContent = '🔄';
+      toast('⚠ Location permission denied', 'warn');
+    });
+  }
+}
+
+// Store pending token args when profile check interrupts
+let pendingTokenArgs = null;
+
+function openToken(name, icon, cat, dist, waiting, serving, est, addr) {
+  const custData = DB.get('custProfile');
+  const hasFullProfile = custData && custData.name && custData.name !== 'User' && custData.mobile && custData.mobile.length === 10;
+
+  if (!hasFullProfile) {
+    // Save what the user wanted to do, show details form first
+    pendingTokenArgs = { name, icon, cat, dist, waiting, serving, est, addr };
+    showQDModal(name, icon, cat, dist);
+    return;
+  }
+  // Profile complete — proceed to token
+  _doOpenToken(name, icon, cat, dist, waiting, serving, est, addr);
+}
+
+function showQDModal(shopName, shopIcon, cat, dist) {
+  // Pre-fill if partial data exists
+  const d = DB.get('custProfile');
+  if (d) {
+    if (d.name && d.name !== 'User') document.getElementById('qdName').value = d.name;
+    if (d.mobile) document.getElementById('qdMobile').value = d.mobile;
+    if (d.email) document.getElementById('qdEmail').value = d.email;
+  }
+  document.getElementById('qdShopIcon').textContent = shopIcon || '🏪';
+  document.getElementById('qdShopName').textContent = shopName || 'Shop';
+  document.getElementById('qdShopMeta').textContent = cat + ' · ' + dist + ' km दूर';
+  document.getElementById('qdBackdrop').classList.add('show');
+}
+
+function qdSubmit() {
+  const name   = document.getElementById('qdName').value.trim();
+  const mobile = document.getElementById('qdMobile').value.trim();
+  const email  = document.getElementById('qdEmail').value.trim();
+  const lang   = document.getElementById('qdLang').value;
+
+  if (!name) { document.getElementById('qdName').focus(); toast('⚠ नाम ज़रूरी है', 'warn'); return; }
+  if (!mobile || mobile.length !== 10 || isNaN(mobile)) { document.getElementById('qdMobile').focus(); toast('⚠ सही 10 digit mobile डालें', 'warn'); return; }
+
+  // Save profile
+  const existing = DB.get('custProfile') || {};
+  const updated = { ...existing, name, mobile, email, lang, registeredAt: new Date().toLocaleString('hi-IN') };
+  DB.set('custProfile', updated);
+  loadCustProfile();
+
+  // Close modal
+  document.getElementById('qdBackdrop').classList.remove('show');
+  toast('✅ Details saved! Token मिल रहा है...', 'ok');
+
+  // Now open the token they originally wanted
+  if (pendingTokenArgs) {
+    const { name: n, icon, cat, dist, waiting, serving, est, addr } = pendingTokenArgs;
+    pendingTokenArgs = null;
+    setTimeout(() => _doOpenToken(n, icon, cat, dist, waiting, serving, est, addr), 400);
+  }
+}
+
+function qdSkip() {
+  document.getElementById('qdBackdrop').classList.remove('show');
+  // Allow guest join with whatever name is saved or "Guest"
+  if (pendingTokenArgs) {
+    const { name, icon, cat, dist, waiting, serving, est, addr } = pendingTokenArgs;
+    pendingTokenArgs = null;
+    _doOpenToken(name, icon, cat, dist, waiting, serving, est, addr);
+  }
+}
+
+function _doOpenToken(name, icon, cat, dist, waiting, serving, est, addr) {
+  const custData = DB.get('custProfile');
+  const holderName = custData && custData.name ? custData.name : 'Guest User';
+  const tokenNum = parseInt(serving) + parseInt(waiting) + 1;
+  const now = new Date();
+  const timeStr = (now.getHours()%12||12) + ':' + String(now.getMinutes()).padStart(2,'0') + (now.getHours()>=12?' PM':' AM');
+
+  document.getElementById('tCatBadge').textContent = cat;
+  document.getElementById('tShopName').textContent = icon + ' ' + name;
+  document.getElementById('tShopType').textContent = cat + ' · Open Now';
+  document.getElementById('tLocName').textContent = name;
+  document.getElementById('tLocAddr').textContent = addr;
+  document.getElementById('tLocDist').textContent = dist + ' km from your location';
+  document.getElementById('tNum').textContent = tokenNum;
+  document.getElementById('tHolder').textContent = holderName + ' · ' + timeStr;
+  document.getElementById('tAhead').textContent = waiting;
+  document.getElementById('tEst').textContent = est;
+  document.getElementById('tServ').textContent = serving;
+
+  const prog = Math.min(95, (parseInt(serving) / (parseInt(serving)+parseInt(waiting)+5)) * 100);
+  document.getElementById('tProg').style.width = prog + '%';
+  document.getElementById('tProgLbl').textContent = serving + ' / ' + (parseInt(serving)+parseInt(waiting)+5);
+
+  document.getElementById('cscreen-home').classList.remove('active');
+  document.getElementById('cscreen-token').classList.add('active');
+  toast('🎫 Token #'+tokenNum+' issued!', 'ok');
+}
+
+function goBackHome() {
+  document.getElementById('cscreen-token').classList.remove('active');
+  document.getElementById('cscreen-home').classList.add('active');
+}
+
+function cancelTok() {
+  if (confirm('Token cancel करें?')) {
+    toast('🗑 Token cancelled', 'warn');
+    setTimeout(goBackHome, 1000);
+  }
+}
+
+function showProfile() {
+  const d = DB.get('custProfile');
+  if (d) toast('👤 ' + d.name + ' · +91 ' + d.mobile);
+  else toast('Profile not set', 'warn');
+}
+
+// ── Provider Logic ──
+function nxtTok() {
+  if (pausedQ) { toast('⚠ Queue paused', 'warn'); return; }
+  curTok++; waitN = Math.max(0, waitN-1);
+  document.getElementById('pCurr').textContent = curTok;
+  document.getElementById('pWait').textContent = waitN;
+  document.getElementById('tvNow').textContent = curTok;
+  document.getElementById('tvNxt').textContent = curTok+1;
+  document.getElementById('tvWait').textContent = waitN;
+  for (let i=1;i<=5;i++) { const e=document.getElementById('q'+i); if(e) e.textContent=curTok+(i-1); }
+  document.querySelectorAll('.qi').forEach((it,i)=>{
+    it.classList.toggle('now',i===0);
+    it.querySelector('.qn').className='qn '+(i===0?'s':'w');
+    const b=it.querySelector('.qb'); b.className='qb '+(i===0?'s':'w'); b.textContent=i===0?'SERVING':'WAITING';
+  });
+  updateLimitWarningBanner();
+  toast('▶ Now Serving #'+curTok, 'ok');
+}
+function pauseQ() {
+  pausedQ=true;
+  document.getElementById('provStatusTxt').textContent='PAUSED';
+  document.getElementById('provStatusTxt').style.color='var(--yellow)';
+  toast('⏸ Queue paused','warn');
+}
+function resumeQ() {
+  pausedQ=false;
+  document.getElementById('provStatusTxt').textContent='ACTIVE';
+  document.getElementById('provStatusTxt').style.color='var(--green)';
+  toast('▶ Queue resumed','ok');
+}
+
+// ── Auto Limit Toggle ──
+let autoLimitOn = true;
+function toggleAutoLimit() {
+  autoLimitOn = !autoLimitOn;
+  document.getElementById('toggleBg').style.background = autoLimitOn ? 'var(--green)' : 'var(--dim)';
+  document.getElementById('toggleKnob').style.left = autoLimitOn ? '23px' : '3px';
+  document.getElementById('autoLimLabel').textContent = autoLimitOn ? 'ON' : 'OFF';
+  document.getElementById('pLimStatus').textContent = autoLimitOn ? 'Auto ON' : 'Auto OFF';
+  updateLimitWarningBanner();
+  toast(autoLimitOn ? '✅ Auto limit ON — limit के बाद Waiting List में जाएगा' : '⚠ Auto limit OFF', autoLimitOn ? 'ok' : 'warn');
+}
+
+function updateLimitSlider(val) {
+  limV = parseInt(val);
+  document.getElementById('sliderDisplay').textContent = val;
+  document.getElementById('pLim').textContent = val;
+  DB.set('autoLimit', limV);
+  updateLimitWarningBanner();
+}
+
+// Show/hide limit crossed banner
+function updateLimitWarningBanner() {
+  const banner = document.getElementById('limitCrossedBanner');
+  if (!banner) return;
+  if (autoLimitOn && waitN >= limV) {
+    banner.style.display = 'flex';
+    banner.querySelector('#bannerLimitNum').textContent = limV;
+    banner.querySelector('#bannerWaitNum').textContent = waitN;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// ── Accept / Reject Token Requests ──
+let pendingN = 3;
+let waitingListN = 0;
+
+function acceptRequest(btn, name) {
+  const row = btn.closest('div[style*="surf2"]');
+  const isOverLimit = autoLimitOn && waitN >= limV;
+  const shopName = DB.get('provProfile') ? DB.get('provProfile').shopName : 'Shop';
+
+  if (isOverLimit) {
+    waitingListN++;
+    row.style.borderColor = 'rgba(245,158,11,0.5)';
+    row.style.background  = 'rgba(245,158,11,0.06)';
+    btn.textContent = '📋 Waitlisted';
+    btn.style.color = 'var(--yellow)';
+    btn.style.borderColor = 'rgba(245,158,11,0.4)';
+    btn.disabled = true;
+    btn.nextElementSibling.style.display = 'none';
+    pendingN = Math.max(0, pendingN - 1);
+    document.getElementById('pendingCount').textContent = pendingN + ' pending';
+    addToWaitingList(name);
+    toast('📋 ' + name + ' → Waiting List! (Limit: ' + limV + ' cross)', 'warn');
+
+    // 🔔 Customer notification — waitlisted
+    showCustomerNotif('waitlisted', {
+      shop      : shopName,
+      token     : '—',
+      ahead     : waitingListN,
+      wait      : 'Queue खुलने पर',
+      statusText: 'Waiting List'
+    });
+
+  } else {
+    row.style.borderColor = 'rgba(16,185,129,0.4)';
+    row.style.background  = 'rgba(16,185,129,0.06)';
+    btn.textContent = '✓ Done';
+    btn.disabled = true;
+    btn.nextElementSibling.style.display = 'none';
+    pendingN = Math.max(0, pendingN - 1);
+    waitN++;
+    const newTokenNum = curTok + waitN;
+    document.getElementById('pWait').textContent = waitN;
+    document.getElementById('tvWait').textContent = waitN;
+    document.getElementById('pendingCount').textContent = pendingN + ' pending';
+    toast('✅ ' + name + ' ka token accepted! Queue: ' + waitN, 'ok');
+    updateLimitWarningBanner();
+
+    // 🔔 Customer notification — accepted
+    showCustomerNotif('accepted', {
+      shop      : shopName,
+      token     : newTokenNum,
+      ahead     : waitN - 1,
+      wait      : '~' + (waitN * 5) + ' min',
+      statusText: 'Active Queue'
+    });
+
+    if (autoLimitOn && waitN >= limV) {
+      setTimeout(() => updateLimitWarningBanner(), 300);
+    }
+  }
+
+  setTimeout(() => {
+    row.style.opacity = '0';
+    row.style.transition = 'opacity 0.3s';
+    setTimeout(() => row.remove(), 300);
+  }, 1600);
+}
+
+function rejectRequest(btn) {
+  const row = btn.closest('div[style*="surf2"]');
+  const nameEl = row.querySelector('div[style*="font-weight:700"]');
+  const name = nameEl ? nameEl.textContent.split(' ').slice(0,2).join(' ') : 'Customer';
+  const shopName = DB.get('provProfile') ? DB.get('provProfile').shopName : 'Shop';
+
+  row.style.borderColor = 'rgba(239,68,68,0.4)';
+  row.style.background  = 'rgba(239,68,68,0.05)';
+  row.style.transition  = 'all 0.2s';
+  pendingN = Math.max(0, pendingN - 1);
+  document.getElementById('pendingCount').textContent = pendingN + ' pending';
+  toast('❌ Request rejected', 'err');
+
+  // 🔔 Customer notification — rejected
+  showCustomerNotif('rejected', {
+    shop      : shopName,
+    token     : '—',
+    ahead     : '—',
+    wait      : '—',
+    statusText: 'Rejected'
+  });
+
+  setTimeout(() => {
+    row.style.opacity = '0';
+    setTimeout(() => row.remove(), 300);
+  }, 800);
+}
+
+// Add customer to Waiting List section
+function addToWaitingList(name) {
+  const wl = document.getElementById('waitingListBox');
+  if (!wl) return;
+  wl.style.display = 'block';
+  const list = document.getElementById('waitingListItems');
+  const num = waitingListN;
+  const div = document.createElement('div');
+  div.style.cssText = 'background:var(--surf2);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;animation:fadeUp 0.3s ease;';
+  div.innerHTML = `
+    <div style="width:28px;height:28px;background:rgba(245,158,11,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:0.78rem;font-weight:700;color:var(--yellow);flex-shrink:0;">${num}</div>
+    <div style="flex:1;font-size:0.85rem;font-weight:600;">${name}</div>
+    <div style="font-size:0.65rem;color:var(--dim);font-family:'Space Mono',monospace;">Limit पार</div>
+    <button onclick="promoteFromWaiting(this,'${name}')" style="padding:5px 12px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);color:var(--accent);border-radius:7px;font-family:'Rajdhani',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;">Move to Queue</button>
+  `;
+  list.appendChild(div);
+  document.getElementById('waitingListCount').textContent = waitingListN + ' waiting';
+}
+
+// Promote from waiting list to active queue
+function promoteFromWaiting(btn, name) {
+  waitN++;
+  waitingListN = Math.max(0, waitingListN - 1);
+  const newTokenNum = curTok + waitN;
+  const shopName = DB.get('provProfile') ? DB.get('provProfile').shopName : 'Shop';
+
+  document.getElementById('pWait').textContent = waitN;
+  document.getElementById('tvWait').textContent = waitN;
+  document.getElementById('waitingListCount').textContent = waitingListN + ' waiting';
+
+  const row = btn.closest('div');
+  row.style.opacity = '0';
+  row.style.transition = 'opacity 0.3s';
+  setTimeout(() => row.remove(), 300);
+
+  toast('🚀 ' + name + ' → Active Queue mein move!', 'ok');
+  updateLimitWarningBanner();
+
+  // 🔔 Customer notification — promoted from waiting list
+  showCustomerNotif('promoted', {
+    shop      : shopName,
+    token     : newTokenNum,
+    ahead     : waitN - 1,
+    wait      : '~' + (waitN * 5) + ' min',
+    statusText: 'Active Queue ✅'
+  });
+}
+
+// ══════════════════════════════════════════
+// CUSTOMER NOTIFICATION SYSTEM
+// ══════════════════════════════════════════
+
+let lastNotifData = null;
+let unreadNotifs = 0;
+
+/*
+  showCustomerNotif(type, data)
+  type: 'accepted' | 'waitlisted' | 'rejected' | 'promoted'
+  data: { shop, token, ahead, wait, statusText, statusColor }
+*/
+function showCustomerNotif(type, data) {
+  lastNotifData = { type, data };
+  unreadNotifs++;
+
+  const modal    = document.getElementById('notifModal');
+  const backdrop = document.getElementById('notifBackdrop');
+  const iconWrap = document.getElementById('notifIconWrap');
+
+  // Reset classes
+  modal.className = 'notif-modal ' + type;
+
+  const configs = {
+    accepted: {
+      typeLabel : '✅ TOKEN ACCEPTED',
+      icon      : '🎫',
+      title     : 'Request Accept हो गई!',
+      msg       : 'आपकी token request provider ने accept कर ली है। अब आप queue में हैं!',
+      btnText   : 'देख लिया — Queue Track करें 👍',
+      statusColor: 'var(--green)',
+    },
+    waitlisted: {
+      typeLabel : '📋 WAITING LIST',
+      icon      : '⏳',
+      title     : 'Waiting List में Add!',
+      msg       : 'Queue अभी भरी है। आप Waiting List में हैं — जैसे ही जगह मिलेगी, आपको move किया जाएगा।',
+      btnText   : 'ठीक है, इंतज़ार करूँगा 🙏',
+      statusColor: 'var(--yellow)',
+    },
+    rejected: {
+      typeLabel : '❌ REQUEST REJECTED',
+      icon      : '😔',
+      title     : 'Request Reject हो गई',
+      msg       : 'Provider ने अभी request accept नहीं की। कृपया बाद में दोबारा try करें।',
+      btnText   : 'ठीक है 👌',
+      statusColor: 'var(--red)',
+    },
+    promoted: {
+      typeLabel : '🚀 QUEUE में MOVE!',
+      icon      : '🎉',
+      title     : 'Waiting List से Queue में!',
+      msg       : 'आपको Waiting List से Active Queue में move कर दिया गया है! आपकी बारी जल्द आएगी।',
+      btnText   : 'शानदार! — Track करें 🎉',
+      statusColor: 'var(--accent)',
+    },
+  };
+
+  const cfg = configs[type];
+
+  document.getElementById('notifType').textContent     = cfg.typeLabel;
+  document.getElementById('notifIcon').textContent     = cfg.icon;
+  document.getElementById('notifTitle').textContent    = cfg.title;
+  document.getElementById('notifMsg').textContent      = cfg.msg;
+  document.getElementById('notifCloseBtn').textContent = cfg.btnText;
+
+  // Detail rows
+  document.getElementById('nd-shop').textContent  = data.shop  || '—';
+  document.getElementById('nd-token').textContent = data.token ? '#' + data.token : '—';
+  document.getElementById('nd-ahead').textContent = data.ahead !== undefined ? data.ahead + ' लोग' : '—';
+  document.getElementById('nd-wait').textContent  = data.wait  || '—';
+  document.getElementById('nd-status').textContent = data.statusText || '—';
+  document.getElementById('nd-status').style.color = cfg.statusColor;
+
+  // Show
+  backdrop.classList.add('show');
+
+  // Browser push notification (if permission granted)
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    try {
+      new Notification('NextTurnAI – ' + cfg.title, {
+        body: cfg.msg,
+        icon: '🔢'
+      });
+    } catch(e) {}
+  }
+}
+
+function closeNotifModal(e) {
+  if (e && e.target !== document.getElementById('notifBackdrop') && !e.target.classList.contains('notif-modal-close')) return;
+  document.getElementById('notifBackdrop').classList.remove('show');
+  // Show bell button so user can reopen
+  const bell = document.getElementById('notifBellBtn');
+  bell.style.display = 'flex';
+  document.getElementById('notifBadge').textContent = unreadNotifs;
+  unreadNotifs = 0;
+}
+
+function reopenNotif() {
+  if (!lastNotifData) return;
+  document.getElementById('notifBellBtn').style.display = 'none';
+  document.getElementById('notifBackdrop').classList.add('show');
+}
+
+// Request notification permission on load
+function requestNotifPermission() {
+  if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    try { Notification.requestPermission(); } catch(e) {}
+  }
+}
+
+// ── TV Clock ──
+function tick() { const n=new Date(),h=n.getHours(),m=String(n.getMinutes()).padStart(2,'0'),ap=h>=12?'PM':'AM'; document.getElementById('tvClk').textContent=(h%12||12)+':'+m+' '+ap; }
+tick(); setInterval(tick,1000);
+
+// ══════════════════════════════════════════
+// ROLE SELECTION
+// ══════════════════════════════════════════
+function selectRole(role) {
+  const roleScreen = document.getElementById('roleScreen');
+
+  if (role === 'customer') {
+    roleScreen.classList.add('hidden');
+    if (!DB.has('custProfile')) {
+      // Fresh customer — show onboarding
+      document.getElementById('custOnboard').classList.remove('hidden');
+    } else {
+      // Already registered — go straight to app
+      loadCustProfile();
+      switchToMainView('customer');
+      toast('👋 Welcome back!', 'ok');
+    }
+  } else {
+    roleScreen.classList.add('hidden');
+    if (!DB.has('provProfile')) {
+      // Fresh provider — show onboarding
+      document.getElementById('provOnboard').classList.remove('hidden');
+    } else {
+      // Already registered — go straight to dashboard
+      loadProvDash();
+      switchToMainView('provider');
+      toast('👋 Welcome back, Provider!', 'ok');
+    }
+  }
+}
+
+function skipToApp() {
+  document.getElementById('roleScreen').classList.add('hidden');
+  loadCustProfile();
+  loadProvDash();
+  switchToMainView('customer');
+}
+
+function switchToMainView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs.forEach(t => { if(t.textContent.toLowerCase().includes(name.substring(0,4))) t.classList.add('active'); });
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('load', () => {
+  const hasCust = DB.has('custProfile');
+  const hasProv = DB.has('provProfile');
+
+  if (!hasCust && !hasProv) {
+    // Brand new user — show role selection
+    document.getElementById('roleScreen').classList.remove('hidden');
+  } else if (hasCust || hasProv) {
+    // Returning user — show role selection with "already have account" option
+    document.getElementById('roleScreen').classList.remove('hidden');
+    document.getElementById('roleAlreadyText').style.display = 'block';
+  }
+
+  // Preload saved data
+  if (hasCust) loadCustProfile();
+  if (hasProv) loadProvDash();
+
+  document.getElementById('appLocName').textContent = 'Connaught Place, New Delhi';
+  requestNotifPermission();
+});
+</script>
+
+<!-- ═══════════════════════════════════════════════════
+     NEXTURNAI AI CHATBOT  (Claude API + Voice)
+═══════════════════════════════════════════════════ -->
+<style>
+/* FAB */
+.chat-fab{position:fixed;bottom:28px;right:22px;width:58px;height:58px;background:linear-gradient(135deg,var(--accent3),var(--accent));border-radius:18px;border:none;display:flex;align-items:center;justify-content:center;font-size:1.55rem;cursor:pointer;z-index:700;box-shadow:0 8px 28px rgba(0,212,255,0.4);transition:all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);}
+.chat-fab:hover{transform:scale(1.12) rotate(-6deg);}
+.chat-fab-badge{position:absolute;top:-5px;right:-5px;width:18px;height:18px;background:var(--red);border-radius:50%;font-size:0.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;border:2px solid var(--bg);animation:pulse 1.5s infinite;}
+
+/* Window */
+.chat-win{position:fixed;bottom:100px;right:14px;width:calc(100vw - 28px);max-width:400px;height:600px;max-height:82vh;background:var(--surf);border:1px solid var(--border);border-radius:22px;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.65);z-index:700;transform:scale(0.88) translateY(40px);opacity:0;pointer-events:none;transition:all 0.32s cubic-bezier(0.175,0.885,0.32,1.275);transform-origin:bottom right;overflow:hidden;}
+.chat-win.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
+
+/* Header */
+.ch-head{background:linear-gradient(135deg,#0c0e18,#141824);padding:13px 15px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ch-av{width:42px;height:42px;background:linear-gradient(135deg,var(--accent3),var(--accent));border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;position:relative;transition:box-shadow 0.3s;}
+.ch-av.speaking{box-shadow:0 0 0 4px rgba(0,212,255,0.3),0 0 16px rgba(0,212,255,0.2);animation:avSpeak 0.6s ease-in-out infinite alternate;}
+@keyframes avSpeak{from{box-shadow:0 0 0 2px rgba(0,212,255,0.3);}to{box-shadow:0 0 0 8px rgba(0,212,255,0.1);}}
+.ch-av-dot{position:absolute;bottom:-2px;right:-2px;width:11px;height:11px;background:var(--green);border-radius:50%;border:2px solid var(--bg);}
+.ch-info{flex:1;}
+.ch-name{font-size:0.95rem;font-weight:700;}
+.ch-status{font-size:0.63rem;color:var(--green);font-family:'Space Mono',monospace;margin-top:1px;}
+.lang-tog{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.ltb{padding:4px 10px;font-size:0.68rem;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;background:none;border:none;color:var(--dim);transition:all 0.2s;color:var(--text);}
+.ltb.on{background:var(--accent3);color:#fff;}
+.ch-close{width:30px;height:30px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.85rem;flex-shrink:0;transition:all 0.2s;}
+.ch-close:hover{background:var(--border);}
+
+/* Messages */
+.ch-msgs{flex:1;overflow-y:auto;padding:13px 11px;display:flex;flex-direction:column;gap:9px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.ch-msgs::-webkit-scrollbar{width:3px;}
+.ch-msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+.cm{display:flex;gap:7px;max-width:90%;animation:fadeUp 0.25s ease;}
+.cm.bot{align-self:flex-start;}
+.cm.user{align-self:flex-end;flex-direction:row-reverse;}
+.cm-av{width:27px;height:27px;flex-shrink:0;margin-top:2px;background:linear-gradient(135deg,var(--accent3),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.82rem;}
+.cm.user .cm-av{background:linear-gradient(135deg,#1e2940,#2d3d5c);}
+.cm-bub{padding:9px 13px;border-radius:15px;font-size:0.84rem;line-height:1.55;}
+.cm.bot .cm-bub{background:var(--surf2);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--text);}
+.cm.user .cm-bub{background:linear-gradient(135deg,var(--accent3),#5b21b6);color:#fff;border-bottom-right-radius:4px;}
+.cm-time{font-size:0.57rem;color:var(--dim);font-family:'Space Mono',monospace;margin-top:3px;text-align:right;}
+
+/* Typing dots */
+.tdots{display:flex;gap:4px;align-items:center;padding:9px 13px;}
+.td{width:7px;height:7px;background:var(--dim);border-radius:50%;animation:tdBounce 1.1s infinite;}
+.td:nth-child(2){animation-delay:.2s;}
+.td:nth-child(3){animation-delay:.4s;}
+@keyframes tdBounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-7px);}}
+
+/* Chips */
+.ch-chips{display:flex;flex-wrap:wrap;gap:5px;padding:8px 11px;border-top:1px solid var(--border);flex-shrink:0;}
+.chip{padding:5px 11px;background:var(--surf2);border:1px solid var(--border);border-radius:20px;font-size:0.73rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.2s;color:var(--text);}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Input */
+.ch-bar{display:flex;align-items:center;gap:7px;padding:9px 11px;border-top:1px solid var(--border);background:var(--surf);flex-shrink:0;}
+.ch-inp{flex:1;background:var(--surf2);border:1px solid var(--border);border-radius:12px;padding:9px 13px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.9rem;outline:none;transition:border-color 0.2s;}
+.ch-inp:focus{border-color:var(--accent);}
+.ch-inp::placeholder{color:var(--dim);}
+.ch-send{width:38px;height:38px;background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s;flex-shrink:0;}
+.ch-send:hover{transform:scale(1.08);}
+.ch-mic{width:38px;height:38px;background:var(--surf2);border:1px solid var(--border);border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s;flex-shrink:0;}
+.ch-mic:hover{border-color:var(--red);}
+.ch-mic.on{background:rgba(239,68,68,0.12);border-color:var(--red);animation:micPulse 1s infinite;}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
+</style>
+
+<!-- FAB Button -->
+<button class="chat-fab" id="chatFab" onclick="chatToggle()">
+  🤖
+  <div class="chat-fab-badge" id="chatBadge">!</div>
+</button>
+
+<!-- Chat Window -->
+<div class="chat-win" id="chatWin">
+  <div class="ch-head">
+    <div class="ch-av" id="botAv">🤖<div class="ch-av-dot"></div></div>
+    <div class="ch-info">
+      <div class="ch-name">NextTurnAI Assistant</div>
+      <div class="ch-status" id="botStat">● Online — मदद के लिए तैयार</div>
+    </div>
+    <div class="lang-tog">
+      <button class="ltb on" id="lHi" onclick="switchLang('hi')">हि</button>
+      <button class="ltb" id="lEn" onclick="switchLang('en')">EN</button>
+    </div>
+    <div class="ch-close" onclick="chatToggle()">✕</div>
+  </div>
+
+  <div class="ch-msgs" id="chMsgs"></div>
+  <div class="ch-chips" id="chChips"></div>
+
+  <div class="ch-bar">
+    <button class="ch-mic" id="micBtn" onclick="micToggle()" title="Voice">🎙️</button>
+    <input class="ch-inp" id="chInp" placeholder="कुछ भी पूछें..." onkeydown="if(event.key==='Enter')chatSend()">
+    <button class="ch-send" onclick="chatSend()">➤</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// NEXTURNAI AI CHATBOT — Claude API Powered
+// ═══════════════════════════════════════════
+let chatIsOpen = false;
+let botLang    = 'hi';
+let chatMsgs   = [];   // conversation history for Claude API
+let isListening = false;
+let recognition = null;
+const synth = window.speechSynthesis;
+
+const SYSTEM_PROMPT = `You are NextTurnAI Assistant — a friendly, helpful AI chatbot embedded inside the NextTurnAI app (nextturnai.in), India's smart digital queue management system.
+
+YOUR JOB:
+- Help users understand and use the NextTurnAI app
+- Answer in the language the user writes in (Hindi or English or Hinglish)
+- Be warm, concise, and use emojis naturally
+- Format with line breaks for readability
+
+APP KNOWLEDGE:
+NextTurnAI is a digital queue token system for India. Key features:
+1. CUSTOMER FEATURES: Browse nearby shops by category (Barber, Salon, Clinic, Service, Pharmacy, Bank, Eye Care). Join queue digitally and get a token number. Live tracking — see how many people are ahead. Notifications when turn is near. Cancel token anytime.
+2. PROVIDER FEATURES: Register shop with name, category, address, GPS location. Dashboard shows: Current Token, Waiting count, Served Today, Auto Limit. "Next Token" button advances the queue. Pause/Resume queue. Accept or Reject incoming token requests. Auto Accept Limit — set max tokens (1-50). When limit is crossed, customers go to Waiting List (NOT blocked). Provider can "Move to Queue" any waiting-list customer. TV Display mode for shop screen showing NOW SERVING and NEXT numbers.
+3. NOTIFICATION SYSTEM: Customers get beautiful pop-up notifications for: Request Accepted (with token number, people ahead, wait time), Added to Waiting List, Promoted from Waiting to Active Queue, Request Rejected.
+4. ONBOARDING: Role selection screen (Customer or Provider) on first open. Customer: mobile OTP → name/email → done. Provider: mobile OTP → shop details → category → GPS location → done.
+5. PRICING: Customer app free. Basic Provider ₹199/mo. Pro ₹499/mo. Featured listing ₹999/mo.
+6. TECH: Built with HTML/JS. Backend will use Firebase. Domain: nextturnai.in.
+
+LANGUAGE RULES:
+- If user writes in Hindi or Hinglish → reply in Hindi/Hinglish
+- If user writes in English → reply in English
+- Always be conversational and friendly
+- Keep replies under 200 words
+- Use bullet points and emojis for clarity`;
+
+// ── Quick chips per language ──
+const CHIPS = {
+  hi: ['Token कैसे लें?','Queue कैसे track करें?','App के क्या फायदे हैं?','Provider कैसे बनें?','Waiting List क्या है?','Notification कैसे मिलेगी?'],
+  en: ['How to get token?','Track my queue position','App benefits','Become a provider','What is Waiting List?','How do notifications work?']
+};
+
+function nowTime() {
+  const d=new Date(); const h=d.getHours()%12||12; const m=String(d.getMinutes()).padStart(2,'0'); return h+':'+m+(d.getHours()>=12?' PM':' AM');
+}
+
+function addBubble(text, who='bot') {
+  const box = document.getElementById('chMsgs');
+  const d = document.createElement('div');
+  d.className = 'cm ' + who;
+  const html = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  d.innerHTML = `<div class="cm-av">${who==='bot'?'🤖':'👤'}</div><div><div class="cm-bub">${html}</div><div class="cm-time">${nowTime()}</div></div>`;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+
+function showTypingDots() {
+  const box = document.getElementById('chMsgs');
+  const d = document.createElement('div');
+  d.className = 'cm bot'; d.id = 'typDots';
+  d.innerHTML = `<div class="cm-av">🤖</div><div class="cm-bub"><div class="tdots"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>`;
+  box.appendChild(d); box.scrollTop = box.scrollHeight;
+}
+
+function hideTypingDots() {
+  const d = document.getElementById('typDots'); if(d) d.remove();
+}
+
+function renderChips() {
+  const box = document.getElementById('chChips');
+  box.innerHTML = '';
+  (CHIPS[botLang]||CHIPS.hi).forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = c;
+    b.onclick = () => { document.getElementById('chInp').value = c; chatSend(); };
+    box.appendChild(b);
+  });
+}
+
+// ── Open / Close ──
+function chatToggle() {
+  chatIsOpen = !chatIsOpen;
+  document.getElementById('chatWin').classList.toggle('open', chatIsOpen);
+  document.getElementById('chatBadge').style.display = chatIsOpen ? 'none' : 'flex';
+  if (chatIsOpen && document.getElementById('chMsgs').children.length === 0) {
+    renderChips();
+    startChatGreeting();
+  }
+}
+
+function startChatGreeting() {
+  showTypingDots();
+  setTimeout(() => {
+    hideTypingDots();
+    const greet = botLang === 'hi'
+      ? `नमस्ते! 🙏 मैं **NextTurnAI का AI Assistant** हूँ।\n\nमैं आपको इस app के बारे में सब कुछ बता सकता हूँ:\n• Token कैसे लें 🎫\n• Queue track कैसे करें 📍\n• Provider कैसे बनें 🏪\n• और भी बहुत कुछ!\n\nआप **हिंदी** या **English** में पूछ सकते हैं। बोलकर भी बात कर सकते हैं! 🎙️`
+      : `Hello! 👋 I'm the **NextTurnAI AI Assistant**.\n\nI can help you with everything about this app:\n• How to get tokens 🎫\n• Track your queue 📍\n• Become a provider 🏪\n• And much more!\n\nAsk me in **Hindi or English** — or use the mic to speak! 🎙️`;
+    addBubble(greet);
+    speak(botLang === 'hi' ? 'नमस्ते! मैं NextTurnAI का AI assistant हूँ। आपकी मदद के लिए तैयार हूँ।' : 'Hello! I am the NextTurnAI AI assistant, ready to help you!');
+    chatMsgs = [];
+  }, 900);
+}
+
+// ── Language switch ──
+function switchLang(lang) {
+  botLang = lang;
+  document.getElementById('lHi').classList.toggle('on', lang==='hi');
+  document.getElementById('lEn').classList.toggle('on', lang==='en');
+  document.getElementById('chInp').placeholder = lang==='hi' ? 'कुछ भी पूछें...' : 'Ask anything...';
+  document.getElementById('botStat').textContent = lang==='hi' ? '● Online — मदद के लिए तैयार' : '● Online — Ready to help';
+  renderChips();
+}
+
+// ── Send via Claude API ──
+async function chatSend() {
+  const inp = document.getElementById('chInp');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+
+  addBubble(text, 'user');
+  chatMsgs.push({ role:'user', content: text });
+
+  // Hide chips while thinking
+  document.getElementById('chChips').style.display = 'none';
+  showTypingDots();
+  document.getElementById('botStat').textContent = botLang==='hi' ? '💭 सोच रहा हूँ...' : '💭 Thinking...';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: chatMsgs.slice(-10) // last 10 turns for context
+      })
+    });
+
+    const data = await res.json();
+    hideTypingDots();
+
+    const reply = data.content?.[0]?.text || (botLang==='hi' ? 'माफ़ करें, कुछ गड़बड़ हुई। दोबारा try करें।' : 'Sorry, something went wrong. Please try again.');
+
+    chatMsgs.push({ role:'assistant', content: reply });
+    addBubble(reply);
+    speak(reply.replace(/\*\*(.*?)\*\*/g,'$1').replace(/[•\n]/g,' ').substring(0, 220));
+
+  } catch(err) {
+    hideTypingDots();
+    const errMsg = botLang==='hi'
+      ? '⚠️ Internet connection check करें और दोबारा try करें।'
+      : '⚠️ Please check your internet connection and try again.';
+    addBubble(errMsg);
+  }
+
+  document.getElementById('botStat').textContent = botLang==='hi' ? '● Online — मदद के लिए तैयार' : '● Online — Ready to help';
+  document.getElementById('chChips').style.display = 'flex';
+}
+
+// ── Text to Speech ──
+function speak(text) {
+  if (!synth) return;
+  synth.cancel();
+  const utt = new SpeechSynthesisUtterance(text.substring(0,250));
+  utt.lang = botLang==='hi' ? 'hi-IN' : 'en-IN';
+  utt.rate = 0.9; utt.pitch = 1.05; utt.volume = 0.9;
+  const av = document.getElementById('botAv');
+  utt.onstart = () => av.classList.add('speaking');
+  utt.onend   = () => av.classList.remove('speaking');
+  synth.speak(utt);
+}
+
+// ── Mic / Voice Input ──
+function micToggle() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    addBubble(botLang==='hi' ? '❌ Voice के लिए Chrome browser use करें।' : '❌ Please use Chrome browser for voice input.');
+    return;
+  }
+  isListening ? stopMic() : startMic();
+}
+
+function startMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = botLang==='hi' ? 'hi-IN' : 'en-IN';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  isListening = true;
+  document.getElementById('micBtn').classList.add('on');
+  document.getElementById('micBtn').textContent = '🔴';
+  document.getElementById('chInp').placeholder = botLang==='hi' ? '🎙️ बोलिए...' : '🎙️ Speak now...';
+  document.getElementById('botStat').textContent = botLang==='hi' ? '🎙️ सुन रहा हूँ...' : '🎙️ Listening...';
+
+  recognition.onresult = (e) => {
+    document.getElementById('chInp').value = e.results[0][0].transcript;
+    stopMic();
+    chatSend();
+  };
+  recognition.onerror = stopMic;
+  recognition.onend   = stopMic;
+  recognition.start();
+}
+
+function stopMic() {
+  isListening = false;
+  recognition && recognition.stop();
+  document.getElementById('micBtn').classList.remove('on');
+  document.getElementById('micBtn').textContent = '🎙️';
+  document.getElementById('chInp').placeholder = botLang==='hi' ? 'कुछ भी पूछें...' : 'Ask anything...';
+  document.getElementById('botStat').textContent = botLang==='hi' ? '● Online — मदद के लिए तैयार' : '● Online — Ready to help';
+}
+</script>
+</body>
+</html>
