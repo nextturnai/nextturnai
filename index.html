@@ -2,8 +2,18 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>NextTurnAI – Smart Queue System</title>
+<meta name="theme-color" content="#070910">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NextTurnAI">
+<meta name="description" content="India का Smart Queue Management System — Digital Token, No More Lines!">
+<meta property="og:title" content="NextTurnAI – Smart Queue System">
+<meta property="og:description" content="Queue join karo ghar se — Digital Token lo, Line mein mat khado!">
+<meta property="og:url" content="https://nextturnai.in">
+<meta property="og:type" content="website">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1345,7 +1355,7 @@ body {
           <div class="weather-icon" id="wIcon">🌡️</div>
           <div>
             <div class="weather-temp" id="wTemp">--<span class="weather-unit">°C</span></div>
-            <div class="weather-desc" id="wDesc">Tap location to load weather</div>
+            <div class="weather-desc" id="wDesc">Loading weather...</div>
           </div>
         </div>
         <div class="weather-right">
@@ -2197,6 +2207,30 @@ function clearAppCat() {
 }
 
 async function reverseGeocode(lat, lon) {
+
+  // ── QUICK CHECK: Known Indian city sectors by coordinate range ──
+  // Noida sectors are well-mapped — use coordinate bbox lookup
+  const NOIDA_SECTORS = [
+    {s:'Sector 62', lat1:28.615, lat2:28.625, lon1:77.365, lon2:77.380},
+    {s:'Sector 63', lat1:28.608, lat2:28.618, lon1:77.370, lon2:77.390},
+    {s:'Sector 64', lat1:28.600, lat2:28.612, lon1:77.370, lon2:77.388},
+    {s:'Sector 18', lat1:28.568, lat2:28.578, lon1:77.320, lon2:77.335},
+    {s:'Sector 15', lat1:28.583, lat2:28.593, lon1:77.310, lon2:77.325},
+    {s:'Sector 16', lat1:28.575, lat2:28.585, lon1:77.315, lon2:77.330},
+    {s:'Sector 50', lat1:28.590, lat2:28.600, lon1:77.350, lon2:77.365},
+    {s:'Sector 51', lat1:28.595, lat2:28.605, lon1:77.355, lon2:77.370},
+  ];
+  // Check if coordinates fall in a known sector
+  const knownSector = NOIDA_SECTORS.find(s =>
+    lat >= s.lat1 && lat <= s.lat2 && lon >= s.lon1 && lon <= s.lon2
+  );
+  if (knownSector) {
+    window._fullAddress = knownSector.s + ', Noida';
+    return knownSector.s + ', Noida';
+  }
+
+
+  // ── STEP 1: BigDataCloud FIRST
 
   // ── STEP 1: BigDataCloud FIRST — best for Noida/NCR sectors ──
   try {
@@ -3061,10 +3095,17 @@ window.addEventListener('load', () => {
 
   // Auto location: show cached instantly, refresh in background
   const _savedLoc = (()=>{ try{ return localStorage.getItem('ntai_lastLoc'); }catch(e){return null;} })();
+  const _savedLat = (()=>{ try{ return parseFloat(localStorage.getItem('ntai_lastLat')); }catch(e){return null;} })();
+  const _savedLon = (()=>{ try{ return parseFloat(localStorage.getItem('ntai_lastLon')); }catch(e){return null;} })();
+
   if (_savedLoc) {
     document.getElementById('appLocName').textContent = _savedLoc;
     _cachedLocation = _savedLoc;
-    // Silent background refresh every 5 minutes
+    // Auto-load weather from cached coordinates
+    if (_savedLat && _savedLon && !isNaN(_savedLat)) {
+      loadWeather(_savedLat, _savedLon, _savedLoc);
+    }
+    // Silent background GPS refresh every 5 minutes
     setTimeout(() => refreshAppLoc(true), 300000);
   } else {
     // First time — ask for location
