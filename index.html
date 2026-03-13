@@ -565,6 +565,289 @@ body {
 .qd-shop-name{font-size:0.95rem;font-weight:700;}
 .qd-shop-meta{font-size:0.68rem;color:var(--mid);font-family:'Space Mono',monospace;margin-top:2px;}
 
+
+/* ── PROFILE DROPDOWN ── */
+.profile-wrap{position:relative;display:flex;align-items:center;gap:8px;}
+.logout-btn{
+  padding:6px 12px;
+  background:rgba(239,68,68,0.12);
+  border:1px solid rgba(239,68,68,0.3);
+  border-radius:10px;
+  color:#f87171;
+  font-family:'Rajdhani',sans-serif;
+  font-size:0.78rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:all 0.2s;
+  letter-spacing:0.5px;
+}
+.logout-btn:hover{background:rgba(239,68,68,0.22);border-color:rgba(239,68,68,0.6);}
+.signup-btn{
+  padding:6px 12px;
+  background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(0,212,255,0.15));
+  border:1px solid rgba(0,212,255,0.3);
+  border-radius:10px;
+  color:#67e8f9;
+  font-family:'Rajdhani',sans-serif;
+  font-size:0.78rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:all 0.2s;
+  letter-spacing:0.5px;
+}
+.signup-btn:hover{background:linear-gradient(135deg,rgba(124,58,237,0.35),rgba(0,212,255,0.25));}
+.user-avatar-sm{
+  width:38px;height:38px;
+  background:linear-gradient(135deg,var(--accent3),var(--accent));
+  border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;cursor:pointer;
+  transition:transform 0.2s;
+  flex-shrink:0;
+}
+.user-avatar-sm:hover{transform:scale(1.08);}
+
+
+/* ── CUSTOM CONFIRM MODAL ── */
+.confirm-backdrop{
+  position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);
+  z-index:1200;display:flex;align-items:center;justify-content:center;
+  padding:24px;opacity:0;pointer-events:none;transition:opacity 0.25s;
+}
+.confirm-backdrop.show{opacity:1;pointer-events:all;}
+.confirm-box{
+  background:#0f1117;border:1px solid #1e2230;border-radius:20px;
+  padding:28px 24px;width:100%;max-width:320px;
+  box-shadow:0 24px 60px rgba(0,0,0,0.8);
+  transform:scale(0.9);transition:transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.confirm-backdrop.show .confirm-box{transform:scale(1);}
+.confirm-icon{font-size:2.8rem;text-align:center;margin-bottom:12px;}
+.confirm-title{font-size:1.15rem;font-weight:700;text-align:center;margin-bottom:8px;color:#f1f5f9;}
+.confirm-msg{font-size:0.85rem;color:#64748b;text-align:center;
+  font-family:'Noto Sans Devanagari',sans-serif;line-height:1.6;margin-bottom:22px;}
+.confirm-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.confirm-cancel{
+  padding:12px;border-radius:12px;border:1px solid #1e2230;
+  background:#1a1d2e;color:#94a3b8;font-family:'Rajdhani',sans-serif;
+  font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s;
+}
+.confirm-cancel:hover{background:#252836;color:#f1f5f9;}
+.confirm-ok{
+  padding:12px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#dc2626,#ef4444);
+  color:#fff;font-family:'Rajdhani',sans-serif;
+  font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;
+  letter-spacing:0.5px;
+}
+.confirm-ok:hover{filter:brightness(1.15);}
+
+
+/* ── TOKEN LIVE ANIMATIONS ── */
+@keyframes tokPulse{0%,100%{transform:scale(1);text-shadow:0 0 30px rgba(0,212,255,0.6);}50%{transform:scale(1.04);text-shadow:0 0 60px rgba(0,212,255,0.9),0 0 80px rgba(0,212,255,0.4);}}
+@keyframes countDown{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes progressShimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+.tok-num{animation:tokPulse 2.5s ease-in-out infinite;}
+
+/* Live activity bar */
+.tok-live-bar{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.12);
+  border-radius:12px;padding:10px 14px;margin:0 16px 10px;
+}
+.tok-live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1s infinite;flex-shrink:0;}
+.tok-live-txt{font-size:0.78rem;color:var(--mid);font-family:'Space Mono',monospace;flex:1;}
+.tok-timer{font-size:0.85rem;color:var(--accent);font-family:'Space Mono',monospace;font-weight:700;}
+
+/* Countdown shimmer progress */
+.prog-fill{
+  background:linear-gradient(90deg,var(--accent3),var(--accent),var(--accent3));
+  background-size:200% 100%;
+  animation:progressShimmer 2s linear infinite;
+  transition:width 1s ease;
+}
+
+/* ── TIME PASS SECTION ── */
+.timepass-section{
+  margin:10px 16px 16px;
+  animation:slideUp 0.5s ease;
+}
+.timepass-title{
+  font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--dim);font-family:'Space Mono',monospace;
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.timepass-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Mini news/tips cards */
+.tp-cards{display:flex;flex-direction:column;gap:8px;}
+.tp-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:14px;
+  padding:12px 14px;cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:flex-start;gap:12px;
+}
+.tp-card:hover{border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.03);}
+.tp-card-icon{font-size:1.5rem;flex-shrink:0;margin-top:2px;}
+.tp-card-body{flex:1;}
+.tp-card-tag{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:var(--accent);font-family:'Space Mono',monospace;margin-bottom:3px;}
+.tp-card-title{font-size:0.88rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:3px;}
+.tp-card-sub{font-size:0.75rem;color:var(--dim);line-height:1.4;}
+.tp-card-arrow{color:var(--dim);font-size:0.75rem;align-self:center;flex-shrink:0;}
+
+/* Web shortcut buttons */
+.tp-shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;}
+.tp-shortcut{
+  background:var(--surf);border:1px solid var(--border);border-radius:12px;
+  padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  cursor:pointer;transition:all 0.2s;text-decoration:none;
+}
+.tp-shortcut:hover{border-color:rgba(0,212,255,0.3);transform:scale(1.04);}
+.tp-shortcut-icon{font-size:1.4rem;}
+.tp-shortcut-lbl{font-size:0.62rem;color:var(--mid);font-family:'Rajdhani',sans-serif;font-weight:600;text-align:center;}
+
+/* Fun fact ticker */
+.tp-fact{
+  background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(0,212,255,0.08));
+  border:1px solid rgba(124,58,237,0.2);border-radius:12px;
+  padding:12px 14px;display:flex;align-items:center;gap:10px;margin-top:8px;
+}
+.tp-fact-icon{font-size:1.2rem;flex-shrink:0;}
+.tp-fact-txt{font-size:0.8rem;color:var(--mid);line-height:1.5;font-family:'Noto Sans Devanagari',sans-serif;}
+
+
+/* ── IN-APP BROWSER ── */
+.inapp-browser{
+  position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  background:#000;z-index:2000;
+  display:flex;flex-direction:column;
+  transform:translateX(-50%) translateY(100%);
+  transition:transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.inapp-browser.open{transform:translateX(-50%) translateY(0);}
+.iab-topbar{
+  background:#0f1117;border-bottom:1px solid #1e2230;
+  padding:10px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.iab-close{
+  width:34px;height:34px;background:#1a1d2e;border:1px solid #1e2230;
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:1rem;cursor:pointer;flex-shrink:0;color:#94a3b8;
+}
+.iab-url{
+  flex:1;background:#1a1d2e;border:1px solid #1e2230;border-radius:10px;
+  padding:7px 12px;font-size:0.72rem;color:#64748b;
+  font-family:'Space Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.iab-frame{flex:1;width:100%;border:none;}
+.iab-bottombar{
+  background:#0f1117;border-top:1px solid #1e2230;
+  padding:8px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
+}
+.iab-nav-btn{
+  padding:8px 16px;background:#1a1d2e;border:1px solid #1e2230;
+  border-radius:10px;color:#94a3b8;font-size:0.8rem;cursor:pointer;
+  font-family:'Rajdhani',sans-serif;font-weight:600;
+}
+.iab-back-to-token{
+  padding:8px 18px;
+  background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(0,212,255,0.2));
+  border:1px solid rgba(0,212,255,0.3);
+  border-radius:10px;color:#67e8f9;font-size:0.8rem;cursor:pointer;
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  display:flex;align-items:center;gap:6px;
+}
+.iab-token-badge{
+  background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.3);
+  border-radius:8px;padding:4px 10px;
+  font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--accent);
+  display:flex;align-items:center;gap:5px;
+}
+
+
+/* ── TIMEPASS TABS ── */
+.tp-tabs{display:flex;gap:6px;margin-bottom:12px;background:var(--bg);padding:4px;border-radius:12px;border:1px solid var(--border);}
+.tp-tab{flex:1;padding:8px 4px;border:none;background:none;border-radius:9px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.78rem;color:var(--dim);cursor:pointer;transition:all 0.2s;}
+.tp-tab.active{background:var(--surf2);color:var(--accent);border:1px solid var(--border);}
+.tp-panel{display:none;}
+.tp-panel.active{display:block;}
+
+/* ── GAME CARDS ── */
+.game-card{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:14px 16px;}
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.game-tag{font-size:0.62rem;font-weight:700;letter-spacing:1.2px;color:var(--accent3);font-family:'Space Mono',monospace;}
+.game-score{font-size:0.75rem;color:var(--mid);font-family:'Space Mono',monospace;}
+.game-title{font-size:0.95rem;color:var(--text);font-weight:600;line-height:1.5;margin-bottom:10px;}
+.game-result{font-size:0.85rem;min-height:22px;font-weight:600;margin-top:8px;text-align:center;}
+
+/* Word Game options */
+.wg-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.wg-opt{padding:10px 8px;background:var(--surf2);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-family:'Noto Sans Devanagari',sans-serif;font-size:0.82rem;
+  cursor:pointer;transition:all 0.2s;text-align:center;font-weight:600;}
+.wg-opt:hover{border-color:var(--accent);background:rgba(0,212,255,0.06);}
+.wg-opt.correct{background:rgba(16,185,129,0.15);border-color:var(--green);color:var(--green);}
+.wg-opt.wrong{background:rgba(239,68,68,0.12);border-color:var(--red);color:#f87171;}
+
+/* Memory game */
+.mem-display{font-size:2.2rem;font-weight:700;text-align:center;padding:14px;
+  background:var(--surf2);border-radius:12px;letter-spacing:6px;color:var(--accent);
+  font-family:'Space Mono',monospace;margin-bottom:10px;min-height:60px;line-height:1.2;}
+.mem-input{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;color:var(--text);font-size:1.1rem;text-align:center;
+  font-family:'Space Mono',monospace;margin-bottom:8px;outline:none;}
+.mem-input:focus{border-color:var(--accent);}
+.mem-btn{width:100%;padding:11px;background:linear-gradient(135deg,var(--accent3),var(--accent));
+  border:none;border-radius:11px;color:#fff;font-family:'Rajdhani',sans-serif;
+  font-size:0.95rem;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:all 0.2s;}
+.mem-btn:hover{filter:brightness(1.1);}
+
+/* Reaction game */
+.react-box{width:100%;height:90px;border-radius:14px;background:var(--surf2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;
+  color:var(--dim);cursor:pointer;transition:all 0.3s;font-family:'Space Mono',monospace;}
+.react-box.ready{background:rgba(239,68,68,0.15);border-color:var(--red);color:#f87171;}
+.react-box.go{background:rgba(16,185,129,0.2);border-color:var(--green);color:var(--green);font-size:1.4rem;}
+
+
+/* ── WEATHER WIDGET ── */
+.weather-bar{
+  margin:0 16px 12px;
+  background:linear-gradient(135deg,rgba(14,165,233,0.12),rgba(99,102,241,0.08));
+  border:1px solid rgba(14,165,233,0.2);
+  border-radius:16px;padding:12px 16px;
+  cursor:pointer;transition:all 0.2s;
+}
+.weather-bar:hover{border-color:rgba(14,165,233,0.4);}
+.weather-top{display:flex;align-items:center;justify-content:space-between;}
+.weather-left{display:flex;align-items:center;gap:10px;}
+.weather-icon{font-size:2rem;line-height:1;}
+.weather-temp{font-size:1.8rem;font-weight:700;color:#7dd3fc;font-family:'Space Mono',monospace;line-height:1;}
+.weather-unit{font-size:0.7rem;color:#64748b;font-family:'Space Mono',monospace;}
+.weather-desc{font-size:0.75rem;color:#94a3b8;margin-top:2px;text-transform:capitalize;}
+.weather-right{text-align:right;}
+.weather-loc{font-size:0.72rem;color:#94a3b8;max-width:130px;text-align:right;line-height:1.4;}
+.weather-time{font-size:0.62rem;color:#475569;font-family:'Space Mono',monospace;margin-top:2px;}
+.weather-details{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(14,165,233,0.1);}
+.wd-item{text-align:center;}
+.wd-val{font-size:0.88rem;font-weight:700;color:#e2e8f0;font-family:'Space Mono',monospace;}
+.wd-lbl{font-size:0.58rem;color:#475569;text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;}
+.weather-loading{text-align:center;color:#475569;font-size:0.8rem;padding:8px 0;}
+.weather-forecast{display:flex;gap:6px;margin-top:10px;overflow-x:auto;padding-bottom:2px;}
+.wf-day{
+  flex-shrink:0;background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.12);
+  border-radius:10px;padding:7px 8px;text-align:center;min-width:50px;
+}
+.wf-day-name{font-size:0.6rem;color:#64748b;font-family:'Space Mono',monospace;font-weight:700;}
+.wf-icon{font-size:1.1rem;margin:3px 0;}
+.wf-temp{font-size:0.75rem;font-weight:700;color:#7dd3fc;}
+.wf-rain{font-size:0.58rem;color:#94a3b8;}
+
 /* ══ CUSTOMER NOTIFICATION MODAL ══ */
 .notif-modal-backdrop{
   position:fixed;inset:0;background:rgba(0,0,0,0.7);
@@ -1037,7 +1320,9 @@ body {
           <div class="greeting-name">नमस्ते, <span id="appUserName">User</span> 👋</div>
           <div class="greeting-sub">Queue छोड़ो, Token लो!</div>
         </div>
-        <div class="user-avatar-sm" onclick="showProfile()" title="Profile">👤</div>
+        <div class="profile-wrap" id="profileWrap">
+          <!-- Filled dynamically by JS based on login state -->
+        </div>
       </div>
     </div>
 
@@ -1048,6 +1333,39 @@ body {
         <div class="lb-name" id="appLocName">Location detect हो रही है...</div>
       </div>
       <div class="lb-update" id="appLocBtn">🔄</div>
+    </div>
+
+    <!-- Nearby areas bar -->
+    <div id="nearbyAreasBar" style="display:none;margin:4px 16px 0;font-size:0.68rem;color:var(--dim);font-family:'Space Mono',monospace;padding:5px 10px;background:rgba(0,212,255,0.04);border-radius:8px;border:1px solid rgba(0,212,255,0.08);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+
+    <!-- ── WEATHER WIDGET ── -->
+    <div class="weather-bar" id="weatherBar" onclick="toggleWeatherDetails()">
+      <div class="weather-top">
+        <div class="weather-left">
+          <div class="weather-icon" id="wIcon">🌡️</div>
+          <div>
+            <div class="weather-temp" id="wTemp">--<span class="weather-unit">°C</span></div>
+            <div class="weather-desc" id="wDesc">Tap location to load weather</div>
+          </div>
+        </div>
+        <div class="weather-right">
+          <div class="weather-loc" id="wLoc">Detecting...</div>
+          <div class="weather-time" id="wTime"></div>
+        </div>
+      </div>
+      <div id="weatherDetails" style="display:block;">
+        <div class="weather-details">
+          <div class="wd-item"><div class="wd-val" id="wHumid">--%</div><div class="wd-lbl">Humidity</div></div>
+          <div class="wd-item"><div class="wd-val" id="wWind">-- km/h</div><div class="wd-lbl">Wind</div></div>
+          <div class="wd-item"><div class="wd-val" id="wFeels">--°</div><div class="wd-lbl">Feels Like</div></div>
+        </div>
+        <div class="weather-details" style="margin-top:4px;">
+          <div class="wd-item"><div class="wd-val" id="wHigh">--°</div><div class="wd-lbl">High</div></div>
+          <div class="wd-item"><div class="wd-val" id="wLow">--°</div><div class="wd-lbl">Low</div></div>
+          <div class="wd-item"><div class="wd-val" id="wRain">--%</div><div class="wd-lbl">Rain</div></div>
+        </div>
+        <div class="weather-forecast" id="wForecast"></div>
+      </div>
     </div>
 
     <div class="sec-head"><h2>Category चुनें</h2><span onclick="clearAppCat()">All</span></div>
@@ -1131,11 +1449,152 @@ body {
         <div class="prog-lbls"><span>Token 1</span><span id="tProgLbl">—</span></div>
       </div>
     </div>
+    <!-- Live activity bar with timer -->
+    <div class="tok-live-bar">
+      <div class="tok-live-dot"></div>
+      <div class="tok-live-txt" id="tokLiveTxt">Queue में हैं · अपडेट हो रहा है...</div>
+      <div class="tok-timer" id="tokTimer">00:00</div>
+    </div>
+
+    <!-- Live countdown to your turn -->
+    <div style="margin:0 16px 10px;background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(245,158,11,0.08));border:1px solid rgba(245,158,11,0.2);border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#f59e0b;font-family:'Space Mono',monospace;">आपकी बारी में</div>
+        <div style="font-size:1.4rem;font-weight:700;color:#fbbf24;font-family:'Space Mono',monospace;margin-top:2px;" id="yourTurnIn">~20 min</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:0.65rem;color:#64748b;font-family:'Space Mono',monospace;">आपसे आगे</div>
+        <div style="font-size:1.8rem;font-weight:700;color:#f87171;font-family:'Space Mono',monospace;line-height:1;" id="liveAhead">8</div>
+        <div style="font-size:0.6rem;color:#64748b;font-family:'Space Mono',monospace;">लोग</div>
+      </div>
+    </div>
+
     <div class="notif-bar">
       <div class="notif-bar-icon">🔔</div>
       <div class="notif-text">Notification ON<small>2 token पहले alert मिलेगा</small></div>
     </div>
     <button class="cancel-tok-btn" onclick="cancelTok()">❌ Token Cancel करें</button>
+
+    <!-- ── TIME PASS SECTION ── -->
+    <div class="timepass-section">
+
+      <!-- Tab Bar -->
+      <div class="tp-tabs">
+        <button class="tp-tab active" onclick="tpSwitch('games',this)">🎮 Games</button>
+        <button class="tp-tab" onclick="tpSwitch('explore',this)">🌐 Explore</button>
+        <button class="tp-tab" onclick="tpSwitch('learn',this)">📚 सीखें</button>
+      </div>
+
+      <!-- ── GAMES TAB ── -->
+      <div class="tp-panel active" id="tp-games">
+        <!-- Word Guess Game -->
+        <div class="game-card">
+          <div class="game-header">
+            <span class="game-tag">🔤 WORD GAME</span>
+            <span class="game-score">Score: <b id="wgScore">0</b></span>
+          </div>
+          <div class="game-title" id="wgQuestion">Loading...</div>
+          <div class="wg-options" id="wgOptions"></div>
+          <div class="game-result" id="wgResult"></div>
+        </div>
+
+        <!-- Number Memory Game -->
+        <div class="game-card" style="margin-top:10px;">
+          <div class="game-header">
+            <span class="game-tag">🧠 MEMORY</span>
+            <span class="game-score">Best: <b id="memBest">0</b></span>
+          </div>
+          <div class="game-title" id="memPrompt">नीचे दिए number याद करें!</div>
+          <div class="mem-display" id="memDisplay">▶ Start</div>
+          <input class="mem-input" id="memInput" type="number" placeholder="Number type करें..." style="display:none">
+          <button class="mem-btn" id="memBtn" onclick="memAction()">🧠 Start Game</button>
+          <div class="game-result" id="memResult"></div>
+        </div>
+
+        <!-- Reaction Game -->
+        <div class="game-card" style="margin-top:10px;">
+          <div class="game-header">
+            <span class="game-tag">⚡ REACTION</span>
+            <span class="game-score">Best: <b id="reactBest">—</b>ms</span>
+          </div>
+          <div class="game-title">Screen हरी होने पर TAP करें!</div>
+          <div class="react-box" id="reactBox" onclick="reactTap()">TAP TO START</div>
+          <div class="game-result" id="reactResult"></div>
+        </div>
+      </div>
+
+      <!-- ── EXPLORE TAB ── -->
+      <div class="tp-panel" id="tp-explore">
+        <div class="tp-shortcuts" style="grid-template-columns:repeat(4,1fr);">
+          <a class="tp-shortcut" href="#" onclick="openInApp('https://m.youtube.com/shorts','YouTube Shorts');return false;">
+            <div class="tp-shortcut-icon">▶️</div><div class="tp-shortcut-lbl">Shorts</div>
+          </a>
+          <a class="tp-shortcut" href="#" onclick="openInApp('https://news.google.com/topstories?hl=hi&gl=IN','News हिंदी');return false;">
+            <div class="tp-shortcut-icon">📰</div><div class="tp-shortcut-lbl">News</div>
+          </a>
+          <a class="tp-shortcut" href="#" onclick="openInApp('https://m.cricbuzz.com','Cricket Live');return false;">
+            <div class="tp-shortcut-icon">🏏</div><div class="tp-shortcut-lbl">Cricket</div>
+          </a>
+          <a class="tp-shortcut" href="#" onclick="openInApp('https://www.flipkart.com','Flipkart');return false;">
+            <div class="tp-shortcut-icon">🛍️</div><div class="tp-shortcut-lbl">Shopping</div>
+          </a>
+          <a class="tp-shortcut" href="#" onclick="openInApp('https://www.google.com/maps/search/restaurants+near+me','Restaurants Nearby');return false;">
+            <div class="tp-shortcut-icon">🍽️</div><div class="tp-shortcut-lbl">Food</div>
+          </a>
+          <a class="tp-shortcut" href="#" onclick="openInApp('https://www.bbc.com/hindi','BBC Hindi');return false;">
+            <div class="tp-shortcut-icon">🌍</div><div class="tp-shortcut-lbl">BBC Hindi</div>
+          </a>
+          <a class="tp-shortcut" href="#" onclick="openInApp('https://m.timesofindia.com','Times of India');return false;">
+            <div class="tp-shortcut-icon">📖</div><div class="tp-shortcut-lbl">TOI</div>
+          </a>
+          <a class="tp-shortcut" href="#" onclick="openInApp('https://www.google.com/maps/search/shops+near+me','Nearby Shops');return false;">
+            <div class="tp-shortcut-icon">📍</div><div class="tp-shortcut-lbl">Nearby</div>
+          </a>
+        </div>
+        <!-- Promo card -->
+        <div class="tp-card" onclick="openInApp('https://nextturnai.in','NextTurnAI Pro')" style="margin-top:10px;">
+          <div class="tp-card-icon">🏪</div>
+          <div class="tp-card-body">
+            <div class="tp-card-tag">NextTurnAI Pro</div>
+            <div class="tp-card-title">अपनी दुकान पर Digital Queue लगाएं</div>
+            <div class="tp-card-sub">₹199/mo से शुरू · Free 30-day trial</div>
+          </div>
+          <div class="tp-card-arrow">›</div>
+        </div>
+      </div>
+
+      <!-- ── LEARN TAB ── -->
+      <div class="tp-panel" id="tp-learn">
+        <!-- Rotating Fact card -->
+        <div class="tp-card" id="tpFactCard" style="margin-bottom:8px;">
+          <div class="tp-card-icon" id="tpFactIcon">💡</div>
+          <div class="tp-card-body">
+            <div class="tp-card-tag">Did You Know?</div>
+            <div class="tp-card-title" id="tpFactTitle">Loading...</div>
+            <div class="tp-card-sub" id="tpFactSub">Tap to see next</div>
+          </div>
+          <div class="tp-card-arrow">›</div>
+        </div>
+        <!-- Tongue twisters / jokes -->
+        <div class="game-card">
+          <div class="game-header"><span class="game-tag">😄 JOKE / PAHELI</span><span id="jokeLang" style="font-size:0.7rem;color:var(--dim);cursor:pointer;" onclick="toggleJokeLang()">हि / EN</span></div>
+          <div class="game-title" id="jokeText" style="font-size:0.95rem;line-height:1.6;">Loading...</div>
+          <button class="mem-btn" onclick="nextJoke()" style="margin-top:8px;">अगली 😄</button>
+        </div>
+        <!-- Vocab builder -->
+        <div class="game-card" style="margin-top:10px;">
+          <div class="game-header"><span class="game-tag">📝 WORD OF THE WAIT</span></div>
+          <div style="text-align:center;padding:8px 0;">
+            <div style="font-size:1.5rem;font-weight:700;color:var(--accent);" id="wotdWord">Loading...</div>
+            <div style="font-size:0.8rem;color:var(--mid);margin-top:4px;" id="wotdMeaning"></div>
+            <div style="font-size:0.72rem;color:var(--dim);margin-top:2px;font-style:italic;" id="wotdExample"></div>
+          </div>
+          <button class="mem-btn" onclick="nextWotd()">Next Word ›</button>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 
 </div>
@@ -1385,6 +1844,38 @@ body {
   </div>
 </div>
 
+
+
+<!-- ── IN-APP BROWSER ── -->
+<div class="inapp-browser" id="inappBrowser">
+  <div class="iab-topbar">
+    <div class="iab-close" onclick="closeInAppBrowser()">✕</div>
+    <div class="iab-url" id="iabUrl">Loading...</div>
+  </div>
+  <iframe class="iab-frame" id="iabFrame" src="about:blank" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"></iframe>
+  <div class="iab-bottombar">
+    <div class="iab-token-badge">
+      🎫 Token <span id="iabTokenNum">—</span> · <span id="iabAhead">—</span> ahead
+    </div>
+    <button class="iab-back-to-token" onclick="closeInAppBrowser()">
+      ← Token देखें
+    </button>
+  </div>
+</div>
+
+<!-- ── CUSTOM CONFIRM MODAL ── -->
+<div class="confirm-backdrop" id="confirmBackdrop">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirmIcon">🚪</div>
+    <div class="confirm-title" id="confirmTitle">Logout करें?</div>
+    <div class="confirm-msg" id="confirmMsg">आपकी profile delete हो जाएगी। क्या आप sure हैं?</div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-ok" id="confirmOkBtn" onclick="confirmOk()">Logout</button>
+    </div>
+  </div>
+</div>
+
 <!-- Bell button -->
 <button class="notif-bell-btn" id="notifBellBtn" onclick="reopenNotif()">
   🔔
@@ -1400,7 +1891,8 @@ body {
 const DB = {
   get: (k) => { try { return JSON.parse(localStorage.getItem('ntai_'+k)); } catch(e){ return null; } },
   set: (k,v) => { localStorage.setItem('ntai_'+k, JSON.stringify(v)); },
-  has: (k) => localStorage.getItem('ntai_'+k) !== null
+  has: (k) => localStorage.getItem('ntai_'+k) !== null,
+  remove: (k) => { try { localStorage.removeItem('ntai_'+k); } catch(e) {} }
 };
 
 // ── Toast ──
@@ -1511,10 +2003,14 @@ function finishCustOnboard() {
   // Activate customer view
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-customer').classList.add('active');
-  // Show customer tab only
-  document.getElementById('tabCustomer').style.display = '';
+  // Customer tab only — hide all others
+  ['tabProvider','tabTV','tabAdmin'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.style.display = 'none';
+  });
+  const custTab = document.getElementById('tabCustomer');
+  if(custTab) { custTab.style.display = ''; }
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tabCustomer').classList.add('active');
+  if(custTab) custTab.classList.add('active');
   toast('🎉 Welcome to NextTurnAI!', 'ok');
   // Trigger location detect
   refreshAppLoc();
@@ -1525,6 +2021,7 @@ function loadCustProfile() {
   if (d) {
     document.getElementById('appUserName').textContent = d.name.split(' ')[0];
   }
+  renderProfileArea();
 }
 
 // OTP auto-move
@@ -1698,67 +2195,96 @@ function clearAppCat() {
 }
 
 async function reverseGeocode(lat, lon) {
-  // ── Method 1: BigDataCloud (best for India, locality level, free, no key) ──
+  // ── STEP 1: Nominatim zoom=18 — most detailed Indian address ──
   try {
     const res = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=hi`
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+      { headers: { 'Accept-Language': 'en', 'User-Agent': 'NextTurnAI/1.0' } }
     );
     const d = await res.json();
-    // Returns: locality (colony/sector), localityInfo, city, principalSubdivision
-    const parts = [
-      d.locality,                    // e.g. "Sector 12" / "Sarvodaya Nagar"
-      d.city || d.principalSubdivision  // e.g. "Ghaziabad"
-    ].filter(p => p && p.trim());
+    const a = d.address || {};
 
-    if (parts.length >= 1 && parts[0] && parts[0] !== d.countryName) {
-      return parts.join(', ');
+    // Build: "House No, Road/Gali, Colony/Sector, Pincode, City"
+    const houseNo   = a.house_number || '';
+    const road      = a.road || a.pedestrian || a.path || a.footway || '';
+    const colony    = a.neighbourhood || a.quarter || a.suburb || a.residential || a.village || a.hamlet || '';
+    const sector    = colony.toLowerCase().includes('sector') ? colony : (a.city_district || '');
+    const pincode   = a.postcode || '';
+    const city      = a.city || a.town || a.county || a.state_district || '';
+
+    // Smart display — most specific first
+    const parts = [];
+    if (houseNo && road)     parts.push(houseNo + ', ' + road);
+    else if (road)           parts.push(road);
+    if (colony && colony !== city) parts.push(colony);
+    else if (sector && sector !== city) parts.push(sector);
+    if (pincode)             parts.push(pincode);
+    if (city)                parts.push(city);
+
+    // Location bar: short version (2 parts)
+    // Full address stored separately
+    if (parts.length >= 2) {
+      window._fullAddress = parts.join(', ');
+      return parts.slice(0, 3).join(', ');
+    }
+    if (parts.length === 1) {
+      window._fullAddress = parts[0];
+      return parts[0];
     }
   } catch(e) {}
 
-  // ── Method 2: Nominatim with display_name smart parse ──
+  // ── STEP 2: BigDataCloud — locality + inform tiers ──
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1&namedetails=1`,
-      { headers: { 'Accept-Language': 'hi' } }
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`
     );
-    const data = await res.json();
-    const a = data.address || {};
+    const d = await res.json();
+    const tiers = (d.localityInfo && d.localityInfo.administrative) || [];
 
-    // Priority order for Indian addresses
-    const locality =
-      a.neighbourhood || a.quarter ||
-      a.suburb        || a.residential ||
-      a.village       || a.hamlet ||
-      a.allotments    || a.industrial ||
-      a.road          || a.pedestrian;
+    // Find most specific name (order 7=block, 6=neighbourhood, 5=suburb, 4=city)
+    const block  = tiers.find(t => t.order >= 7 && t.name);
+    const colony = tiers.find(t => t.order === 6 && t.name);
+    const suburb = tiers.find(t => t.order === 5 && t.name);
+    const city   = tiers.find(t => t.order === 4 && t.name);
 
-    const area =
-      a.city || a.town || a.municipality ||
-      a.city_district  || a.state_district;
+    const localPart = (block || colony || suburb || {}).name || d.locality;
+    const cityPart  = (city || {}).name || d.city || '';
+    const postcode  = d.postcode || '';
 
-    const parts = [locality, area].filter(Boolean);
-
-    if (parts.length >= 1) return parts.join(', ');
-
-    // Smart parse display_name — skip pincode, country, state
-    const skip = ['india','uttar pradesh','haryana','delhi','maharashtra',
-                  'rajasthan','karnataka','tamil','telangana','gujarat'];
-    const cleaned = data.display_name.split(',')
-      .map(s => s.trim())
-      .filter(s => s && !/^\d{6}$/.test(s) && !skip.some(k => s.toLowerCase().includes(k)))
-      .slice(0, 3);
-    if (cleaned.length) return cleaned.join(', ');
-
+    const parts = [localPart, postcode, cityPart].filter(Boolean);
+    if (parts.length >= 2) {
+      window._fullAddress = parts.join(', ');
+      return parts.slice(0, 3).join(', ');
+    }
+    if (cityPart) return cityPart;
   } catch(e) {}
 
-  // ── Method 3: ipapi city fallback ──
+  // ── STEP 3: IP fallback ──
   try {
     const r = await fetch('https://ipapi.co/json/');
     const d = await r.json();
-    if (d.city) return d.city + (d.region ? ', ' + d.region : '');
+    if (d.city) return d.city + (d.postal ? ' - ' + d.postal : '');
   } catch(e) {}
 
   return null;
+}
+
+// ── Nearby areas within ~1km using Nominatim search ──
+async function getNearbyAreas(lat, lon) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=5&bounded=1` +
+      `&viewbox=${lon-0.009},${lat+0.009},${lon+0.009},${lat-0.009}` +
+      `&addressdetails=1&extratags=1&q=neighbourhood`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    const results = await res.json();
+    const names = results
+      .map(r => r.display_name.split(',')[0].trim())
+      .filter((v, i, a) => v && a.indexOf(v) === i)
+      .slice(0, 4);
+    return names;
+  } catch(e) { return []; }
 }
 
 // Save location in memory to avoid repeated asks
@@ -1768,8 +2294,38 @@ async function setLocationDisplay(lat, lon) {
   const address = await reverseGeocode(lat, lon);
   const display = address || (lat.toFixed(4) + '° N, ' + lon.toFixed(4) + '° E');
   _cachedLocation = display;
-  document.getElementById('appLocName').textContent = display;
-  try { localStorage.setItem('ntai_lastLoc', display); } catch(e){}
+
+  // Show in location bar
+  const locEl = document.getElementById('appLocName');
+  if (locEl) locEl.textContent = display;
+
+  // Show full address if available
+  const fullAddr = window._fullAddress || display;
+  try { localStorage.setItem('ntai_lastLoc', display);
+        localStorage.setItem('ntai_fullAddr', fullAddr); } catch(e){}
+
+  // Update location bar label to show full address
+  const locLabel = document.querySelector('.lb-label');
+  if (locLabel && fullAddr !== display) {
+    locLabel.textContent = fullAddr;
+    locLabel.style.color = 'var(--mid)';
+    locLabel.style.fontSize = '0.65rem';
+  }
+
+  // Load weather
+  loadWeather(lat, lon, display);
+
+  // Load nearby areas (async, non-blocking)
+  getNearbyAreas(lat, lon).then(areas => {
+    if (areas.length > 0) {
+      const nearbyEl = document.getElementById('nearbyAreasBar');
+      if (nearbyEl) {
+        nearbyEl.textContent = '📍 Near: ' + areas.join(' · ');
+        nearbyEl.style.display = 'block';
+      }
+    }
+  });
+
   return display;
 }
 
@@ -1814,6 +2370,12 @@ function refreshAppLoc(forceRefresh) {
       try { localStorage.setItem('ntai_lastLoc', ipLoc); } catch(e){}
       btn.textContent = '📍';
       toast('📍 ' + ipLoc, 'ok');
+      // Try weather with IP location coords
+      try {
+        const ipr = await fetch('https://ipapi.co/json/');
+        const ipd = await ipr.json();
+        if (ipd.latitude) loadWeather(ipd.latitude, ipd.longitude, ipLoc);
+      } catch(e) {}
     } else {
       document.getElementById('appLocName').textContent = saved || 'New Delhi';
       btn.textContent = '🔄';
@@ -1934,25 +2496,110 @@ function _doOpenToken(name, icon, cat, dist, waiting, serving, est, addr) {
   document.getElementById('cscreen-home').classList.remove('active');
   document.getElementById('cscreen-token').classList.add('active');
   toast('🎫 Token #'+tokenNum+' issued!', 'ok');
+  startTokenTimer();
+  setTimeout(initGames, 100);
 }
 
 function goBackHome() {
+  stopTokenTimer();
   document.getElementById('cscreen-token').classList.remove('active');
   document.getElementById('cscreen-home').classList.add('active');
 }
 
 function cancelTok() {
-  if (confirm('Token cancel करें?')) {
+  showConfirm('❌','Token Cancel?','क्या आप अपना token cancel करना चाहते हैं?','हाँ, Cancel करें','linear-gradient(135deg,#f59e0b,#d97706)', () => {
     toast('🗑 Token cancelled', 'warn');
     setTimeout(goBackHome, 1000);
+  });
+}
+
+
+function renderProfileArea() {
+  const wrap = document.getElementById('profileWrap');
+  if (!wrap) return;
+  const d = DB.get('custProfile');
+  if (d && d.name && d.name !== 'User') {
+    // Logged in — show avatar + logout
+    wrap.innerHTML = `
+      <button class="logout-btn" onclick="logoutCustomer()">🚪 Logout</button>
+      <div class="user-avatar-sm" onclick="showProfile()" title="${d.name}">
+        ${d.name.charAt(0).toUpperCase()}
+      </div>`;
+  } else {
+    // Not registered — show signup button
+    wrap.innerHTML = `
+      <button class="signup-btn" onclick="showCustOnboardFresh()">✨ Sign Up</button>
+      <div class="user-avatar-sm" style="opacity:0.5;">👤</div>`;
   }
+}
+
+function showCustOnboardFresh() {
+  document.getElementById('roleScreen').classList.add('hidden');
+  document.getElementById('custOnboard').classList.remove('hidden');
+  document.querySelectorAll('#custOnboard .screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('cs1').classList.add('active');
+}
+
+let _confirmCallback = null;
+
+function showConfirm(icon, title, msg, okLabel, okColor, callback) {
+  document.getElementById('confirmIcon').textContent = icon;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  const okBtn = document.getElementById('confirmOkBtn');
+  okBtn.textContent = okLabel;
+  okBtn.style.background = okColor || 'linear-gradient(135deg,#dc2626,#ef4444)';
+  _confirmCallback = callback;
+  document.getElementById('confirmBackdrop').classList.add('show');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmBackdrop').classList.remove('show');
+  _confirmCallback = null;
+}
+
+function confirmOk() {
+  document.getElementById('confirmBackdrop').classList.remove('show');
+  if (typeof _confirmCallback === 'function') _confirmCallback();
+  _confirmCallback = null;
+}
+
+function logoutCustomer() {
+  showConfirm(
+    '🚪', 'Logout करें?',
+    'आपकी profile delete हो जाएगी। क्या आप sure हैं?',
+    'हाँ, Logout करें',
+    'linear-gradient(135deg,#dc2626,#ef4444)',
+    () => {
+      // Properly delete all customer data
+      try {
+        localStorage.removeItem('ntai_custProfile');
+        localStorage.removeItem('ntai_lastLoc');
+        localStorage.removeItem('ntai_lastNotif');
+      } catch(e) {}
+      DB.remove('custProfile');
+      _cachedLocation = null;
+      // Reset UI
+      document.getElementById('appUserName').textContent = 'User';
+      renderProfileArea();
+      // Back to role screen
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('roleScreen').classList.remove('hidden');
+      toast('👋 Successfully logged out!', 'ok');
+    }
+  );
 }
 
 function showProfile() {
   const d = DB.get('custProfile');
-  if (d) toast('👤 ' + d.name + ' · +91 ' + d.mobile);
-  else toast('Profile not set', 'warn');
+  if (d && d.name) {
+    toast('👤 ' + d.name + (d.mobile ? ' · +91 ' + d.mobile : ''), 'ok');
+  } else {
+    toast('Profile not set', 'warn');
+  }
 }
+
+
 
 // ── Provider Logic ──
 function nxtTok() {
@@ -2324,12 +2971,25 @@ function switchToMainView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const targetView = document.getElementById('view-'+name);
   if (targetView) targetView.classList.add('active');
-  // Manage tabs
-  const tabMap = {customer:'tabCustomer', provider:'tabProvider', tv:'tabTV', admin:'tabAdmin'};
-  if(tabMap[name]) { const el=document.getElementById(tabMap[name]); if(el) el.style.display=''; }
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  const activeTab = document.getElementById(tabMap[name]);
-  if (activeTab) activeTab.classList.add('active');
+  // Tab visibility rules:
+  // Customer view → hide Provider/TV/Admin tabs always
+  // Provider view → show all tabs
+  if (name === 'customer') {
+    ['tabProvider','tabTV','tabAdmin'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.style.display = 'none';
+    });
+    const custTab = document.getElementById('tabCustomer');
+    if(custTab) { custTab.style.display = ''; custTab.classList.add('active'); }
+  } else {
+    // Provider/TV/Admin — show all tabs
+    ['tabCustomer','tabProvider','tabTV','tabAdmin'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.style.display = '';
+    });
+    const tabMap = {customer:'tabCustomer', provider:'tabProvider', tv:'tabTV', admin:'tabAdmin'};
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    const activeTab = document.getElementById(tabMap[name]);
+    if (activeTab) activeTab.classList.add('active');
+  }
 }
 
 // ══════════════════════════════════════════
@@ -2343,8 +3003,11 @@ window.addEventListener('load', () => {
     // Brand new user — show role selection
     document.getElementById('roleScreen').classList.remove('hidden');
   } else if (hasCust && !hasProv) {
-    // Returning customer — go directly to customer app
+    // Returning customer — go directly to customer app, hide all extra tabs
     document.getElementById('roleScreen').classList.add('hidden');
+    ['tabProvider','tabTV','tabAdmin'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.style.display = 'none';
+    });
     switchToMainView('customer');
   } else if (hasProv && !hasCust) {
     // Returning provider — go directly to provider dashboard
@@ -2379,6 +3042,8 @@ window.addEventListener('load', () => {
   }
 
   requestNotifPermission();
+  // Render profile area (logout/signup button)
+  setTimeout(renderProfileArea, 100);
 });
 </script>
 
@@ -2387,13 +3052,13 @@ window.addEventListener('load', () => {
 ═══════════════════════════════════════════════════ -->
 <style>
 /* FAB */
-.chat-fab{position:fixed;bottom:28px;right:22px;width:58px;height:58px;background:linear-gradient(135deg,var(--accent3),var(--accent));border-radius:18px;border:none;display:flex;align-items:center;justify-content:center;font-size:1.55rem;cursor:pointer;z-index:700;box-shadow:0 8px 28px rgba(0,212,255,0.4);transition:all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);}
+.chat-fab{position:fixed;bottom:28px;right:max(14px, calc(50% - 240px + 14px));width:58px;height:58px;background:linear-gradient(135deg,var(--accent3),var(--accent));border-radius:18px;border:none;display:flex;align-items:center;justify-content:center;font-size:1.55rem;cursor:pointer;z-index:1500;box-shadow:0 8px 28px rgba(0,212,255,0.4);transition:all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);}
 .chat-fab:hover{transform:scale(1.12) rotate(-6deg);}
 .chat-fab-badge{position:absolute;top:-5px;right:-5px;width:18px;height:18px;background:var(--red);border-radius:50%;font-size:0.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;border:2px solid var(--bg);animation:pulse 1.5s infinite;}
 
 /* Window */
-.chat-win{position:fixed;bottom:100px;right:max(14px, calc(50% - 480px/2 + 14px));width:calc(100vw - 28px);max-width:400px;height:600px;max-height:82vh;background:var(--surf);border:1px solid var(--border);border-radius:22px;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.65);z-index:700;transform:scale(0.88) translateY(40px);opacity:0;pointer-events:none;transition:all 0.32s cubic-bezier(0.175,0.885,0.32,1.275);transform-origin:bottom right;overflow:hidden;}
-.chat-win.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
+.chat-win{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) scale(0.88) translateY(40px);width:calc(100% - 28px);max-width:440px;height:600px;max-height:82vh;background:var(--surf);border:1px solid var(--border);border-radius:22px;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.65);z-index:1500;transform:scale(0.88) translateY(40px);opacity:0;pointer-events:none;transition:all 0.32s cubic-bezier(0.175,0.885,0.32,1.275);transform-origin:bottom right;overflow:hidden;}
+.chat-win.open{transform:translateX(-50%) scale(1) translateY(0);opacity:1;pointer-events:all;}
 
 /* Header */
 .ch-head{background:linear-gradient(135deg,#0c0e18,#141824);padding:13px 15px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border);flex-shrink:0;}
@@ -2597,335 +3262,558 @@ function switchLang(lang) {
 // ════════════════════════════════════════════
 // SMART REPLY ENGINE — offline, no API needed
 // ════════════════════════════════════════════
-function smartReply(input) {
-  const q = input.toLowerCase().trim();
-  const hi = botLang === 'hi';
-
-  // ── Token / Queue join ──
-  if (/token|join|queue|number|नंबर|टोकन|कैसे लें|join kaise/.test(q)) {
-    return hi
-      ? '🎫 **Token लेना बहुत आसान है!**
-
-1️⃣ Home screen पर अपनी category चुनें (Barber, Clinic etc.)
-2️⃣ पास की दुकान ढूंढें
-3️⃣ **"Token लो – Join Queue"** button दबाएं
-4️⃣ अपना नाम और mobile दें
-
-Bs! Token मिल गया 🎉 आप घर से wait कर सकते हैं!'
-      : '🎫 **Getting a token is super easy!**
-
-1️⃣ Choose your category (Barber, Clinic etc.)
-2️⃣ Find a nearby shop
-3️⃣ Tap **"Token लो – Join Queue"**
-4️⃣ Enter your name & mobile
-
-Done! Your token is issued 🎉 Wait from home!';
-  }
-
-  // ── Track position ──
-  if (/track|position|ahead|kitne|कितने|wait|कहाँ|status|pata|पता/.test(q)) {
-    return hi
-      ? '📍 **Queue position track करें:**
-
-✅ Token लेने के बाद आपको screen पर दिखेगा:
-• आपका Token Number
-• कितने लोग आपसे पहले हैं
-• अनुमानित wait time (~20m)
-
-🔔 Notification भी आएगी जब आपकी बारी नज़दीक होगी!'
-      : '📍 **Track your queue position:**
-
-✅ After getting a token, you'll see:
-• Your Token Number
-• People ahead of you
-• Estimated wait time (~20m)
-
-🔔 You'll get a notification when your turn is near!';
-  }
-
-  // ── Notification ──
-  if (/notif|alert|bell|बताएगा|inform|सूचना/.test(q)) {
-    return hi
-      ? '🔔 **Notification कैसे काम करती है:**
-
-• Token accept होने पर — तुरंत notification
-• Waiting list से promote होने पर — alert
-• 2 लोग बचें तो — advance warning
-• Reject होने पर — भी बताएगा
-
-Bell 🔔 button दबाकर कभी भी last notification देख सकते हैं!'
-      : '🔔 **How notifications work:**
-
-• Token accepted — instant notification
-• Promoted from waiting list — alert
-• 2 people left ahead — advance warning
-• If rejected — you're notified too
-
-Tap the 🔔 bell button to reopen your last notification!';
-  }
-
-  // ── Waiting list ──
-  if (/waiting list|waitlist|wait list|वेटिंग|limit|लिमिट/.test(q)) {
-    return hi
-      ? '📋 **Waiting List क्या है?**
-
-जब Provider का Auto Limit पूरा हो जाता है, नए customers automatically **Waiting List** में चले जाते हैं।
-
-• आपको reject नहीं किया जाता
-• Provider जब चाहे आपको Queue में Move कर सकते हैं
-• तब आपको notification मिलेगी 🔔
-
-यह system आपकी जगह safe रखता है!'
-      : '📋 **What is Waiting List?**
-
-When a Provider's Auto Limit is full, new customers go to the **Waiting List** instead of being rejected.
-
-• You're not turned away
-• Provider can move you to the active queue anytime
-• You'll get a notification when promoted 🔔
-
-Your spot is saved!';
-  }
-
-  // ── Provider / become provider ──
-  if (/provider|dukaan|दुकान|shop|register|business|clinic|salon|appoint/.test(q)) {
-    return hi
-      ? '🏪 **Provider कैसे बनें?**
-
-1️⃣ Home screen पर **"Service Provider हूँ"** चुनें
-2️⃣ Mobile OTP से verify करें
-3️⃣ दुकान का नाम, address fill करें
-4️⃣ Category चुनें (Barber/Salon/Clinic etc.)
-5️⃣ Location set करें
-
-✅ बस! Dashboard मिल जाएगा जहाँ से queue manage होगी।
-
-💰 Plans: Basic ₹199/mo | Pro ₹499/mo'
-      : '🏪 **How to become a Provider?**
-
-1️⃣ Choose **"Service Provider हूँ"** on home screen
-2️⃣ Verify with mobile OTP
-3️⃣ Fill shop name & address
-4️⃣ Select category (Barber/Salon/Clinic etc.)
-5️⃣ Set your location
-
-✅ Done! You'll get a dashboard to manage your queue.
-
-💰 Plans: Basic ₹199/mo | Pro ₹499/mo';
-  }
-
-  // ── Pricing ──
-  if (/price|pricing|cost|kitna|₹|rupee|plan|free|paid|payment/.test(q)) {
-    return hi
-      ? '💰 **NextTurnAI Pricing:**
-
-👤 **Customer App** — बिल्कुल FREE!
-
-🏪 **Provider Plans:**
-• Basic — ₹199/month (queue management)
-• Pro — ₹499/month (analytics + priority support)
-• Featured — ₹999/month (map mein top listing)
-
-कोई hidden charges नहीं! 😊'
-      : '💰 **NextTurnAI Pricing:**
-
-👤 **Customer App** — Completely FREE!
-
-🏪 **Provider Plans:**
-• Basic — ₹199/month (queue management)
-• Pro — ₹499/month (analytics + priority support)
-• Featured — ₹999/month (top listing on map)
-
-No hidden charges! 😊';
-  }
-
-  // ── Cancel token ──
-  if (/cancel|रद्द|band|close|छोड़|nahi jana/.test(q)) {
-    return hi
-      ? '❌ **Token cancel करना:**
-
-Token screen पर नीचे **"Token Cancel करें"** button है।
-
-• Cancel करने पर आपकी जगह free हो जाती है
-• दूसरे दुकान पर जा सकते हैं
-• कोई penalty नहीं!
-
-Note: Cancel के बाद उसी queue में वापस नहीं आ सकते।'
-      : '❌ **Cancelling your token:**
-
-On the token screen, tap **"Token Cancel करें"** button at the bottom.
-
-• Your spot is freed up for others
-• You can join another shop's queue
-• No penalty!
-
-Note: You cannot rejoin the same queue after cancelling.';
-  }
-
-  // ── App benefits / features ──
-  if (/benefit|fayda|फायदा|feature|kya hai|क्या है|about|intro|help|kaam/.test(q)) {
-    return hi
-      ? '✨ **NextTurnAI के फायदे:**
-
-🏠 **घर से join करें** — line में खड़े न रहें
-📍 **GPS से पास की दुकानें** — आसानी से ढूंढें
-🔔 **Smart notifications** — सही समय पर पहुंचें
-📊 **Live queue status** — कितना wait है पता रहे
-🌐 **Hindi + English** — अपनी भाषा में use करें
-
-*India का पहला smart digital queue system!* 🇮🇳'
-      : '✨ **NextTurnAI Benefits:**
-
-🏠 **Join from home** — no standing in line
-📍 **GPS-based nearby shops** — easy to find
-🔔 **Smart notifications** — arrive at the right time
-📊 **Live queue status** — know your wait time
-🌐 **Hindi + English** — use in your language
-
-*India's first smart digital queue system!* 🇮🇳';
-  }
-
-  // ── Dashboard for providers ──
-  if (/dashboard|manage|next token|accept|reject|pending/.test(q)) {
-    return hi
-      ? '📊 **Provider Dashboard features:**
-
-• **Current Token** — अभी कौन serve हो रहा है
-• **Pending Requests** — Accept ✓ या Reject ✕ करें
-• **Auto Limit** — 1-50 का limit set करें
-• **Waiting List** — limit के बाद वाले customers
-• **Next Token** ▶ button — queue आगे बढ़ाएं
-• **Pause/Resume** — queue temporarily रोकें
-
-Sab एक ही screen पर! 🎯'
-      : '📊 **Provider Dashboard features:**
-
-• **Current Token** — who is being served now
-• **Pending Requests** — Accept ✓ or Reject ✕
-• **Auto Limit** — set limit from 1-50
-• **Waiting List** — customers beyond limit
-• **Next Token** ▶ button — advance the queue
-• **Pause/Resume** — temporarily stop queue
-
-All on one screen! 🎯';
-  }
-
-  // ── Location / GPS ──
-  if (/location|gps|map|near|पास|कहाँ|ढूंढ|find|detect/.test(q)) {
-    return hi
-      ? '📍 **Location कैसे काम करती है:**
-
-• App आपका GPS location detect करती है
-• पास की सभी open दुकानें map पर दिखती हैं
-• Distance (km), waiting count, est. time सब दिखता है
-• Category filter से specific shop ढूंढें
-
-Location permission allow करना जरूरी है 😊'
-      : '📍 **How location works:**
-
-• App detects your GPS location
-• All nearby open shops appear on map
-• Shows distance (km), waiting count, est. time
-• Use category filter to find specific shop
-
-Make sure to allow location permission 😊';
-  }
-
-  // ── Greeting ──
-  if (/^(hi|hello|hii|hey|नमस्ते|हाय|हेलो|namaste|kya|क्या|help|मदद)/.test(q)) {
-    return hi
-      ? '👋 **नमस्ते! मैं NextTurnAI Assistant हूँ।**
-
-मैं इन topics में help कर सकता हूँ:
-
-🎫 Token कैसे लें
-📍 Queue track करें
-🏪 Provider बनें
-💰 Pricing plans
-🔔 Notifications
-📋 Waiting List
-
-कोई भी सवाल पूछें! 😊'
-      : '👋 **Hello! I'm the NextTurnAI Assistant.**
-
-I can help you with:
-
-🎫 How to get a token
-📍 Track your queue
-🏪 Become a provider
-💰 Pricing plans
-🔔 Notifications
-📋 Waiting List
-
-Ask me anything! 😊';
-  }
-
-  // ── Thanks ──
-  if (/thanks|thank|shukriya|dhanyavaad|धन्यवाद|शुक्रिया|ok|theek|ठीक|great|acha|अच्छा/.test(q)) {
-    return hi
-      ? '😊 खुशी हुई मदद करके! कोई और सवाल हो तो पूछें।
-
-NextTurnAI use करने का शुक्रिया! 🙏'
-      : '😊 Happy to help! Feel free to ask anything else.
-
-Thanks for using NextTurnAI! 🙏';
-  }
-
-  // ── Default fallback ──
-  const fallbacks_hi = [
-    '🤔 मुझे पूरी तरह समझ नहीं आया। क्या आप इनमें से कुछ पूछना चाहते हैं?
-
-• Token कैसे लें?
-• Queue track कैसे करें?
-• Provider कैसे बनें?
-• Pricing क्या है?',
-    '😊 अच्छा सवाल! थोड़ा और detail में बताएं — मैं better help करूंगा।
-
-या नीचे दिए chips में से choose करें 👇',
-  ];
-  const fallbacks_en = [
-    '🤔 I'm not sure I understood. Would you like to know about:
-
-• How to get a token?
-• Track your queue position?
-• Become a provider?
-• Pricing plans?',
-    '😊 Good question! Can you share a bit more detail? I'll help better.
-
-Or choose from the quick options below 👇',
-  ];
-  const arr = hi ? fallbacks_hi : fallbacks_en;
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
 async function chatSend() {
   const inp = document.getElementById('chInp');
+  if (!inp) return;
   const text = inp.value.trim();
   if (!text) return;
   inp.value = '';
+  inp.focus();
 
   addBubble(text, 'user');
   chatMsgs.push({ role:'user', content: text });
 
-  // Hide chips while thinking
-  document.getElementById('chChips').style.display = 'none';
+  const chips = document.getElementById('chChips');
+  const stat  = document.getElementById('botStat');
+  if (chips) chips.style.display = 'none';
+  if (stat)  stat.textContent = botLang==='hi' ? '💭 सोच रहा हूँ...' : '💭 Thinking...';
   showTypingDots();
-  document.getElementById('botStat').textContent = botLang==='hi' ? '💭 सोच रहा हूँ...' : '💭 Thinking...';
 
-  // Smart offline AI chatbot — works without any API
-  await new Promise(r => setTimeout(r, 600 + Math.random()*700));
+  await new Promise(r => setTimeout(r, 400 + Math.random()*500));
   hideTypingDots();
+
+  let reply = '';
   try {
-    const reply = smartReply(text);
-    chatMsgs.push({ role:'assistant', content: reply });
-    addBubble(reply);
-    speak(reply.replace(/\*\*(.*?)\*\*/g,'$1').replace(/[•\n]/g,' ').substring(0,220));
-  } catch(err) {
-    addBubble(botLang==='hi' ? '😊 एक second, फिर try करें!' : '😊 One sec, please try again!');
+    reply = smartReply(text);
+    if (!reply || reply.length < 2) throw new Error('empty');
+  } catch(e) {
+    reply = botLang==='hi'
+      ? '😊 माफ करें, दूसरे शब्दों में पूछें!'
+      : '😊 Sorry, please try asking differently!';
   }
 
-  document.getElementById('botStat').textContent = botLang==='hi' ? '● Online — मदद के लिए तैयार' : '● Online — Ready to help';
-  document.getElementById('chChips').style.display = 'flex';
+  chatMsgs.push({ role:'assistant', content: reply });
+  addBubble(reply);
+  try {
+    if (typeof speak === 'function' && reply) {
+      const spokenText = reply.split('**').join('').split('\n').join(' ').substring(0,200);
+      speak(spokenText);
+    }
+  } catch(e){}
+
+  if (stat)  stat.textContent = botLang==='hi' ? '● Online — मदद के लिए तैयार' : '● Online — Ready to help';
+  if (chips) chips.style.display = 'flex';
+}
+
+function smartReply(input) {
+  const q = input.toLowerCase().trim();
+  const hi = botLang === 'hi';
+
+  if (/token|join|queue|number|नंबर|टोकन|कैसे लें|join kaise/.test(q)) {
+    return hi
+      ? '🎫 **Token लेना बहुत आसान है!**\n\n1️⃣ Home screen पर category चुनें\n2️⃣ पास की दुकान ढूंढें\n3️⃣ **"Token लो – Join Queue"** दबाएं\n4️⃣ नाम और mobile दें\n\nBs! Token मिल गया 🎉'
+      : '🎫 **Getting a token is super easy!**\n\n1️⃣ Choose your category\n2️⃣ Find a nearby shop\n3️⃣ Tap **"Token लो – Join Queue"**\n4️⃣ Enter name & mobile\n\nDone! Your token is issued 🎉';
+  }
+
+  if (/track|position|ahead|kitne|कितने|wait|कहाँ|status|pata|पता/.test(q)) {
+    return hi
+      ? '📍 **Queue position track करें:**\n\n✅ Token लेने के बाद screen पर दिखेगा:\n• आपका Token Number\n• कितने लोग आगे हैं\n• Est. wait time\n\n🔔 बारी नज़दीक होने पर notification आएगी!'
+      : '📍 **Track your queue position:**\n\n✅ After getting a token:\n• Your Token Number\n• People ahead of you\n• Estimated wait time\n\n🔔 You get a notification when your turn is near!';
+  }
+
+  if (/notif|alert|bell|बताएगा|inform|सूचना/.test(q)) {
+    return hi
+      ? '🔔 **Notification कैसे काम करती है:**\n\n• Token accept — तुरंत notification\n• Waiting list से promote — alert\n• 2 लोग बचें — advance warning\n• Reject होने पर — भी बताएगा\n\n🔔 Bell button से last notification देखें!'
+      : '🔔 **How notifications work:**\n\n• Token accepted — instant notification\n• Promoted from waiting list — alert\n• 2 people left ahead — advance warning\n• If rejected — you are notified\n\nTap the 🔔 bell button to see last notification!';
+  }
+
+  if (/waiting list|waitlist|वेटिंग|wait list/.test(q)) {
+    return hi
+      ? '⏳ **Waiting List क्या है?**\n\nजब queue full हो जाती है तो आप waiting list में जाते हैं।\n\n• Provider accept करे → Queue में आ जाएंगे\n• Notification मिलेगी जब move हो\n• Token screen पर status दिखेगा'
+      : '⏳ **What is the Waiting List?**\n\nWhen the queue is full, you are added to the waiting list.\n\n• Provider accepts → you move to queue\n• You get a notification when moved\n• Status shows on token screen';
+  }
+
+  if (/provider|shop|dukan|दुकान|business|register|sign.?up|provid/.test(q)) {
+    return hi
+      ? '🏪 **Provider कैसे बनें:**\n\n1️⃣ Role screen पर "Service Provider हूँ" चुनें\n2️⃣ दुकान का नाम, category, address डालें\n3️⃣ Plan चुनें (Basic ₹199/mo)\n\n✅ Dashboard मिलेगा — tokens manage करें!'
+      : '🏪 **How to become a Provider:**\n\n1️⃣ Select "Service Provider" on role screen\n2️⃣ Enter shop name, category, address\n3️⃣ Choose a plan (Basic ₹199/mo)\n\n✅ Get your dashboard — manage tokens!';
+  }
+
+  if (/price|pricing|cost|plan|₹|rupee|kitna|कितना|fee|charge/.test(q)) {
+    return hi
+      ? '💰 **NextTurnAI Plans:**\n\n• **Basic** — ₹199/mo (50 tokens/day)\n• **Pro** — ₹499/mo (unlimited + analytics)\n• **Featured** — ₹999/mo (top listing)\n\n🆓 30-day free trial available!'
+      : '💰 **NextTurnAI Plans:**\n\n• **Basic** — ₹199/mo (50 tokens/day)\n• **Pro** — ₹499/mo (unlimited + analytics)\n• **Featured** — ₹999/mo (top listing)\n\n🆓 30-day free trial available!';
+  }
+
+  if (/cancel|cancell|रद्द|band|close/.test(q)) {
+    return hi
+      ? '❌ **Token cancel कैसे करें:**\n\nToken screen पर नीचे **"Token Cancel करें"** button है।\n\nCancel करने पर आपकी जगह अगले customer को मिल जाएगी।'
+      : '❌ **How to cancel your token:**\n\nOn the token screen, scroll down and tap **"Token Cancel करें"**.\n\nYour spot will be given to the next customer.';
+  }
+
+  if (/dashboard|provider screen|manage|admin|control/.test(q)) {
+    return hi
+      ? '📊 **Provider Dashboard features:**\n\n• Current token (Now Serving)\n• Waiting count\n• Accept / Reject requests\n• Waiting list management\n• Auto-limit slider\n• Pause / Resume queue'
+      : '📊 **Provider Dashboard features:**\n\n• Current token (Now Serving)\n• Waiting count\n• Accept / Reject requests\n• Waiting list management\n• Auto-limit slider\n• Pause / Resume queue';
+  }
+
+  if (/location|gps|near|पास|locate|address|detect/.test(q)) {
+    return hi
+      ? '📍 **Location कैसे काम करती है:**\n\nApp आपकी GPS location से पास के open shops दिखाती है।\n\n• Location allow करें → colony/sector level address\n• Deny करें → IP से city detect होगी\n• 🔄 button से refresh करें'
+      : '📍 **How location works:**\n\nThe app uses your GPS to show nearby open shops.\n\n• Allow location → colony/sector level\n• Deny → city detected via IP\n• Tap 🔄 to refresh';
+  }
+
+  if (/hello|hi |नमस्ते|helo|hey|namaste|hii/.test(q)) {
+    return hi
+      ? '👋 नमस्ते! मैं NextTurnAI Assistant हूँ।\n\nआप मुझसे पूछ सकते हैं:\n• Token कैसे लें?\n• Queue track करें\n• Provider बनें\n• Pricing क्या है?\n\nबोलकर भी बात कर सकते हैं! 🎙️'
+      : '👋 Hello! I am the NextTurnAI Assistant.\n\nYou can ask me:\n• How to get a token?\n• Track your queue\n• Become a provider\n• What is the pricing?\n\nYou can also speak to me! 🎙️';
+  }
+
+  if (/thanks|thank|shukriya|dhanyavad|धन्यवाद|शुक्रिया/.test(q)) {
+    return hi ? '😊 खुशी हुई मदद करके! कोई और सवाल हो तो पूछें 🙏' : '😊 Happy to help! Feel free to ask anything else 🙏';
+  }
+
+  // Default fallback
+  return hi
+    ? '😊 मुझे पूरी तरह समझ नहीं आया। आप पूछ सकते हैं:\n\n• **Token** कैसे लें?\n• **Queue** track करें\n• **Provider** कैसे बनें?\n• **Pricing** क्या है?\n\nऊपर के chips पर tap करें! 👆'
+    : '😊 I am not sure I understood. You can ask:\n\n• How to get a **token**?\n• Track my **queue**\n• Become a **provider**?\n• What is the **pricing**?\n\nOr tap the chips above! 👆';
+}
+
+
+
+
+// ══════════════════════════════════════
+// WEATHER ENGINE — OpenMeteo (no API key)
+// ══════════════════════════════════════
+let _weatherLat = null;
+let _weatherLon = null;
+let _weatherDetailsOpen = false;
+
+const WMO_ICONS = {
+  0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
+  45:'🌫️', 48:'🌫️',
+  51:'🌦️', 53:'🌧️', 55:'🌧️',
+  61:'🌧️', 63:'🌧️', 65:'🌧️',
+  71:'❄️', 73:'❄️', 75:'❄️',
+  80:'🌦️', 81:'🌧️', 82:'⛈️',
+  95:'⛈️', 96:'⛈️', 99:'⛈️'
+};
+const WMO_DESC = {
+  0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
+  45:'Foggy', 48:'Freezing fog',
+  51:'Light drizzle', 53:'Drizzle', 55:'Heavy drizzle',
+  61:'Slight rain', 63:'Moderate rain', 65:'Heavy rain',
+  71:'Slight snow', 73:'Moderate snow', 75:'Heavy snow',
+  80:'Slight showers', 81:'Rain showers', 82:'Violent showers',
+  95:'Thunderstorm', 96:'Thunderstorm + hail', 99:'Heavy thunderstorm'
+};
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function toggleWeatherDetails() {
+  _weatherDetailsOpen = !_weatherDetailsOpen;
+  document.getElementById('weatherDetails').style.display = _weatherDetailsOpen ? 'block' : 'none';
+}
+
+async function fetchWeather(lat, lon, locName) {
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat +
+      '&longitude=' + lon +
+      '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation_probability' +
+      '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
+      '&timezone=Asia%2FKolkata&forecast_days=6';
+
+    const res = await fetch(url);
+    const d = await res.json();
+    const c = d.current;
+    const daily = d.daily;
+
+    // Current weather
+    const code = c.weather_code;
+    document.getElementById('wIcon').textContent = WMO_ICONS[code] || '🌡️';
+    document.getElementById('wTemp').innerHTML = Math.round(c.temperature_2m) + '<span class="weather-unit">°C</span>';
+    document.getElementById('wDesc').textContent = WMO_DESC[code] || 'Clear';
+    document.getElementById('wLoc').textContent = locName || 'Your location';
+    document.getElementById('wTime').textContent = 'Updated ' + new Date().toLocaleTimeString('hi-IN',{hour:'2-digit',minute:'2-digit'});
+
+    // Details
+    document.getElementById('wHumid').textContent = c.relative_humidity_2m + '%';
+    document.getElementById('wWind').textContent = Math.round(c.wind_speed_10m) + ' km/h';
+    document.getElementById('wFeels').textContent = Math.round(c.apparent_temperature) + '°';
+    document.getElementById('wHigh').textContent = Math.round(daily.temperature_2m_max[0]) + '°';
+    document.getElementById('wLow').textContent = Math.round(daily.temperature_2m_min[0]) + '°';
+    document.getElementById('wRain').textContent = (c.precipitation_probability || 0) + '%';
+
+    // 5-day forecast
+    const fBox = document.getElementById('wForecast');
+    fBox.innerHTML = '';
+    for (let i = 1; i < 6; i++) {
+      const date = new Date(daily.time[i]);
+      const fc = document.createElement('div');
+      fc.className = 'wf-day';
+      fc.innerHTML = '<div class="wf-day-name">' + DAYS[date.getDay()] + '</div>' +
+        '<div class="wf-icon">' + (WMO_ICONS[daily.weather_code[i]] || '🌡️') + '</div>' +
+        '<div class="wf-temp">' + Math.round(daily.temperature_2m_max[i]) + '°/' + Math.round(daily.temperature_2m_min[i]) + '°</div>' +
+        '<div class="wf-rain">💧' + daily.precipitation_probability_max[i] + '%</div>';
+      fBox.appendChild(fc);
+    }
+
+  } catch(e) {
+    document.getElementById('wDesc').textContent = 'Weather unavailable';
+  }
+}
+
+async function loadWeather(lat, lon, locName) {
+  _weatherLat = lat;
+  _weatherLon = lon;
+  document.getElementById('wDesc').textContent = 'Loading...';
+  await fetchWeather(lat, lon, locName);
+}
+
+// ══════════════════════════════════════
+// TIMEPASS GAMES ENGINE
+// ══════════════════════════════════════
+
+// ── Tab switcher ──
+function tpSwitch(tab, btn) {
+  document.querySelectorAll('.tp-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tp-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tp-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ══ WORD GAME (Hindi/English vocab) ══
+let wgScore = 0;
+let wgAnswered = false;
+const WG_QUESTIONS = [
+  { q:'Barber का Hindi मतलब?', opts:['नाई','डॉक्टर','दर्जी','रसोइया'], ans:0 },
+  { q:'"Queue" का मतलब?', opts:['लाइन','घर','खाना','पानी'], ans:0 },
+  { q:'Token का अर्थ?', opts:['पर्ची / नंबर','खाना','पैसा','दरवाजा'], ans:0 },
+  { q:'"Waiting" का Hindi?', opts:['प्रतीक्षा','खुशी','गुस्सा','थकान'], ans:0 },
+  { q:'Clinic का मतलब?', opts:['अस्पताल / दवाखाना','बाज़ार','स्कूल','बैंक'], ans:0 },
+  { q:'"Notification" को Hindi में?', opts:['सूचना','संगीत','खाना','खेल'], ans:0 },
+  { q:'Pharmacy = ?', opts:['दवा की दुकान','कपड़े की दुकान','किराना','स्कूल'], ans:0 },
+  { q:'"Accept" का मतलब?', opts:['स्वीकार करना','अस्वीकार','भागना','सोना'], ans:0 },
+  { q:'Salon = ?', opts:['सौंदर्य केंद्र','बाज़ार','मंदिर','अस्पताल'], ans:0 },
+  { q:'"Cancel" का अर्थ?', opts:['रद्द करना','शुरू करना','पूरा करना','चलना'], ans:0 },
+  { q:'What is "नमस्ते" in English?', opts:['Hello / Greetings','Goodbye','Thank you','Sorry'], ans:0 },
+  { q:'"Digital" means?', opts:['Electronic / Online','Physical','Slow','Broken'], ans:0 },
+];
+let wgIdx = 0;
+
+function wgLoad() {
+  if (wgIdx >= WG_QUESTIONS.length) wgIdx = 0;
+  wgAnswered = false;
+  const q = WG_QUESTIONS[wgIdx];
+  document.getElementById('wgQuestion').textContent = q.q;
+  const optBox = document.getElementById('wgOptions');
+  optBox.innerHTML = '';
+  // Shuffle options display
+  const shuffled = q.opts.map((o,i) => ({text:o, origIdx:i})).sort(() => Math.random()-0.5);
+  shuffled.forEach(({text, origIdx}) => {
+    const btn = document.createElement('button');
+    btn.className = 'wg-opt';
+    btn.textContent = text;
+    btn.onclick = () => wgAnswer(origIdx === q.ans, btn, shuffled.find(x=>x.origIdx===q.ans));
+    optBox.appendChild(btn);
+  });
+  document.getElementById('wgResult').textContent = '';
+}
+
+function wgAnswer(correct, btn, correctItem) {
+  if (wgAnswered) return;
+  wgAnswered = true;
+  if (correct) {
+    btn.classList.add('correct');
+    wgScore++;
+    document.getElementById('wgScore').textContent = wgScore;
+    document.getElementById('wgResult').textContent = '✅ सही! +1';
+    document.getElementById('wgResult').style.color = 'var(--green)';
+  } else {
+    btn.classList.add('wrong');
+    // Show correct answer
+    document.querySelectorAll('.wg-opt').forEach(b => {
+      if (b.textContent === correctItem.text) b.classList.add('correct');
+    });
+    document.getElementById('wgResult').textContent = '❌ गलत! सही था: ' + correctItem.text;
+    document.getElementById('wgResult').style.color = '#f87171';
+  }
+  wgIdx++;
+  setTimeout(wgLoad, 1800);
+}
+
+// ══ MEMORY GAME ══
+let memState = 'idle'; // idle, show, input
+let memNumber = '';
+let memBestScore = 0;
+let memLevel = 3;
+
+function memAction() {
+  const btn = document.getElementById('memBtn');
+  const disp = document.getElementById('memDisplay');
+  const inp = document.getElementById('memInput');
+  const res = document.getElementById('memResult');
+
+  if (memState === 'idle') {
+    memState = 'show';
+    memNumber = Array.from({length: memLevel}, () => Math.floor(Math.random()*10)).join('');
+    disp.textContent = memNumber;
+    disp.style.color = 'var(--accent)';
+    btn.textContent = '👁 याद किया? Hide करें';
+    res.textContent = '';
+    document.getElementById('memPrompt').textContent = memLevel + ' अंक याद करें!';
+  } else if (memState === 'show') {
+    memState = 'input';
+    disp.textContent = '? ? ?';
+    disp.style.color = 'var(--dim)';
+    inp.style.display = 'block';
+    inp.value = '';
+    inp.focus();
+    btn.textContent = '✅ Submit करें';
+  } else if (memState === 'input') {
+    const ans = inp.value.trim();
+    if (ans === memNumber) {
+      res.textContent = '🎉 सही! Level ' + memLevel + ' clear!';
+      res.style.color = 'var(--green)';
+      memLevel = Math.min(8, memLevel + 1);
+      if (memLevel-1 > memBestScore) {
+        memBestScore = memLevel-1;
+        document.getElementById('memBest').textContent = memBestScore;
+      }
+    } else {
+      res.textContent = '❌ गलत! था: ' + memNumber;
+      res.style.color = '#f87171';
+      memLevel = Math.max(3, memLevel - 1);
+    }
+    inp.style.display = 'none';
+    memState = 'idle';
+    btn.textContent = '🧠 फिर खेलें';
+    disp.textContent = '▶ Ready';
+    document.getElementById('memPrompt').textContent = 'नीचे दिए number याद करें!';
+  }
+}
+
+// ══ REACTION GAME ══
+let reactState = 'idle';
+let reactTimeout = null;
+let reactStartTime = null;
+let reactBest = Infinity;
+
+function reactTap() {
+  const box = document.getElementById('reactBox');
+  const res = document.getElementById('reactResult');
+
+  if (reactState === 'idle') {
+    reactState = 'waiting';
+    box.className = 'react-box ready';
+    box.textContent = '🔴 Wait...';
+    res.textContent = '';
+    const delay = 1500 + Math.random() * 3000;
+    reactTimeout = setTimeout(() => {
+      reactState = 'go';
+      box.className = 'react-box go';
+      box.textContent = '🟢 TAP NOW!';
+      reactStartTime = Date.now();
+    }, delay);
+  } else if (reactState === 'waiting') {
+    clearTimeout(reactTimeout);
+    reactState = 'idle';
+    box.className = 'react-box';
+    box.textContent = 'जल्दी TAP किया! फिर try करें';
+    res.textContent = '😅 Too early!';
+    res.style.color = '#f87171';
+  } else if (reactState === 'go') {
+    const rt = Date.now() - reactStartTime;
+    reactState = 'idle';
+    box.className = 'react-box';
+    box.textContent = 'TAP TO START';
+    if (rt < reactBest) {
+      reactBest = rt;
+      document.getElementById('reactBest').textContent = rt;
+    }
+    let grade = rt < 200 ? '⚡ Excellent!' : rt < 350 ? '✅ Good!' : rt < 500 ? '👍 Average' : '🐢 Slow';
+    res.textContent = grade + ' — ' + rt + 'ms';
+    res.style.color = rt < 350 ? 'var(--green)' : rt < 500 ? '#fbbf24' : '#f87171';
+  }
+}
+
+// ══ JOKES / PAHELI ══
+let jokeIdx = 0;
+let jokeLangHi = true;
+const JOKES_HI = [
+  'Teacher: "2+2 kitna?" Student: "4" Teacher: "Sahi!" Student: "Shukriya, mujhe pata tha!" 😄',
+  'Paheli: Jitna nikaalo utna bhadhe? → Gadha (Kuaan) 🤔',
+  'Doctor: "Roz sone se pehle 1 glass paani piyo" Patient: "Lekin mai toh swimming nahi jaanta!" 😂',
+  'Paheli: Andar se kacha, bahar se pakka? → Aam 🥭',
+  'Ek aadmi ne dentist se pucha: "Dant nikalwane mein kitna time lagega?" Dentist: "2 min" Aadmi: "Itne time ka kitna paise?" 😄',
+  'Paheli: Raat ko aata hai, subah jaata hai, koi pakad nahi sakta? → Neend 💤',
+];
+const JOKES_EN = [
+  'Why do doctors make the best detectives? Because they follow all the signs! 😄',
+  'Riddle: What has keys but no locks? → A piano 🎹',
+  'Patient: "Doc, I feel like a bridge!" Doctor: "What has come over you?" Patient: "3 trucks and a bus!" 😂',
+  'Riddle: Forward I am heavy, backward I am not. → Ton / Not 🤔',
+  'Why did the barber win the race? Because he knew all the shortcuts! ✂️',
+  'Riddle: The more you take, the more you leave behind. → Footsteps 👣',
+];
+
+function nextJoke() {
+  jokeIdx++;
+  const jokes = jokeLangHi ? JOKES_HI : JOKES_EN;
+  document.getElementById('jokeText').textContent = jokes[jokeIdx % jokes.length];
+}
+function toggleJokeLang() {
+  jokeLangHi = !jokeLangHi;
+  jokeIdx = 0;
+  nextJoke();
+}
+
+// ══ WORD OF THE WAIT ══
+let wotdIdx = 0;
+const WOTD = [
+  { word:'Queue / कतार', meaning:'लोगों की लाइन जहाँ बारी का इंतज़ार होता है', example:'"Please join the queue" = कतार में लग जाएं' },
+  { word:'Token / पर्ची', meaning:'एक नंबर जो आपकी बारी दर्शाता है', example:'"Your token is 25" = आपकी पर्ची नंबर 25 है' },
+  { word:'Digital / डिजिटल', meaning:'इलेक्ट्रॉनिक, internet या phone के ज़रिए', example:'"Digital queue" = phone से queue management' },
+  { word:'Notification / सूचना', meaning:'Phone पर आने वाला alert या message', example:'"You got a notification" = आपको सूचना आई' },
+  { word:'Provider / सेवा-दाता', meaning:'वह व्यक्ति या दुकान जो service देती है', example:'"Service provider" = दुकानदार / doctor' },
+  { word:'Estimated / अनुमानित', meaning:'एक अंदाज़, पक्की जानकारी नहीं', example:'"Est. wait: 20 min" = लगभग 20 मिनट' },
+];
+function nextWotd() {
+  wotdIdx = (wotdIdx + 1) % WOTD.length;
+  const w = WOTD[wotdIdx];
+  document.getElementById('wotdWord').textContent = w.word;
+  document.getElementById('wotdMeaning').textContent = w.meaning;
+  document.getElementById('wotdExample').textContent = w.example;
+}
+
+// ── Init games when token screen opens ──
+function initGames() {
+  wgLoad();
+  nextJoke();
+  const w = WOTD[0];
+  document.getElementById('wotdWord').textContent = w.word;
+  document.getElementById('wotdMeaning').textContent = w.meaning;
+  document.getElementById('wotdExample').textContent = w.example;
+}
+
+// ── Token Timer Variables (global scope) ──
+let _tokTimerInterval = null;
+let _tokStartTime     = null;
+let _tokWaiting       = 8;
+let _tokServing       = 19;
+let _tokFactIdx       = 0;
+
+const TOK_FACTS = [
+  { icon:'💈', title:'Barber की average wait 15-25 min होती है', sub:'Peak hours: 10am-12pm, 5pm-8pm' },
+  { icon:'🧘', title:'Deep breathing करें — stress कम होता है', sub:'4-7-8 technique try करें' },
+  { icon:'📱', title:'NextTurnAI से queue remotely join करें', sub:'Ghar se token lo, aate aate ready' },
+  { icon:'💰', title:'Digital queue से 40% time बचता है', sub:'Average customer saves 18 minutes' },
+  { icon:'🌟', title:'5-star review छोड़ें — provider की मदद होगी', sub:'Good reviews = better service' },
+  { icon:'📲', title:'Friends को NextTurnAI refer करें', sub:'Line में खड़े होने की झंझट खत्म!' },
+  { icon:'🎯', title:'Token number याद रखें — alert आएगा', sub:'2 token पहले notification मिलेगी' },
+  { icon:'☕', title:'पास में chai पीने जा सकते हैं', sub:'App पर नज़र रखें — alert आएगा' },
+];
+
+function startTokenTimer() {
+  // Clear any previous timer
+  if (_tokTimerInterval) clearInterval(_tokTimerInterval);
+  _tokStartTime = Date.now();
+  _tokWaiting = parseInt(document.getElementById('tAhead').textContent) || 8;
+  _tokServing = parseInt(document.getElementById('tServ').textContent) || 19;
+
+  // Show first fact
+  showNextFact();
+
+  _tokTimerInterval = setInterval(() => {
+    // ── Update timer ──
+    const elapsed = Math.floor((Date.now() - _tokStartTime) / 1000);
+    const m = String(Math.floor(elapsed/60)).padStart(2,'0');
+    const s = String(elapsed%60).padStart(2,'0');
+    const timerEl = document.getElementById('tokTimer');
+    if (timerEl) timerEl.textContent = m + ':' + s;
+
+    // ── Simulate queue moving every 45 sec ──
+    if (elapsed > 0 && elapsed % 45 === 0 && _tokWaiting > 0) {
+      _tokWaiting = Math.max(0, _tokWaiting - 1);
+      _tokServing++;
+      const aheadEl = document.getElementById('tAhead');
+      const servEl  = document.getElementById('tServ');
+      if (aheadEl) aheadEl.textContent = _tokWaiting;
+      const liveAheadEl = document.getElementById('liveAhead');
+      if (liveAheadEl) liveAheadEl.textContent = _tokWaiting;
+      const yourTurnEl = document.getElementById('yourTurnIn');
+      if (yourTurnEl) yourTurnEl.textContent = _tokWaiting === 0 ? '🎉 अभी!' : '~' + Math.max(1,Math.round(_tokWaiting*2.5)) + ' min';
+      if (servEl)  servEl.textContent  = _tokServing;
+      // Update est wait
+      const estEl = document.getElementById('tEst');
+      if (estEl) {
+        const newEst = Math.max(1, _tokWaiting * 2.5);
+        estEl.textContent = '~' + Math.round(newEst) + 'm';
+      }
+      // Update progress bar
+      const prog = Math.min(95, (_tokServing / (_tokServing + _tokWaiting + 2)) * 100);
+      const progEl = document.getElementById('tProg');
+      if (progEl) progEl.style.width = prog + '%';
+      // Update live text
+      const liveEl = document.getElementById('tokLiveTxt');
+      if (liveEl) liveEl.textContent = _tokWaiting === 0
+        ? '🎉 आपकी बारी अब है!'
+        : _tokWaiting + ' लोग आपसे आगे हैं';
+    }
+
+    // ── Rotate live status messages ──
+    const msgs = [
+      'Queue में हैं · Live update',
+      _tokWaiting + ' लोग आगे · Est. ~' + Math.max(1,Math.round(_tokWaiting*2.5)) + 'm',
+      '📡 Provider connected · Active',
+      'Token valid है · Wait करें',
+    ];
+    const liveEl = document.getElementById('tokLiveTxt');
+    if (liveEl && elapsed % 8 === 0 && _tokWaiting > 0) {
+      liveEl.textContent = msgs[Math.floor(elapsed/8) % msgs.length];
+    }
+
+    // ── Rotate facts every 12 sec ──
+    if (elapsed > 0 && elapsed % 12 === 0) showNextFact();
+
+  }, 1000);
+}
+
+function showNextFact() {
+  const f = TOK_FACTS[_tokFactIdx % TOK_FACTS.length];
+  _tokFactIdx++;
+  const iconEl  = document.getElementById('tpFactIcon');
+  const titleEl = document.getElementById('tpFactTitle');
+  const subEl   = document.getElementById('tpFactSub');
+  if (iconEl)  iconEl.textContent  = f.icon;
+  if (titleEl) titleEl.textContent = f.title;
+  if (subEl)   subEl.textContent   = f.sub;
+  // Click to next
+  const card = document.getElementById('tpFactCard');
+  if (card) card.onclick = showNextFact;
+}
+
+function stopTokenTimer() {
+  if (_tokTimerInterval) { clearInterval(_tokTimerInterval); _tokTimerInterval = null; }
+}
+
+
+// ── IN-APP BROWSER ──
+function openInApp(url, label) {
+  // For YouTube/external, use iframe
+  document.getElementById('iabUrl').textContent = label || url;
+  document.getElementById('iabFrame').src = url;
+  // Update token badge
+  const tNum = document.getElementById('tNum');
+  const tAhead = document.getElementById('tAhead');
+  if (tNum) document.getElementById('iabTokenNum').textContent = tNum.textContent;
+  if (tAhead) document.getElementById('iabAhead').textContent = tAhead.textContent;
+  document.getElementById('inappBrowser').classList.add('open');
+}
+
+function closeInAppBrowser() {
+  document.getElementById('inappBrowser').classList.remove('open');
+  document.getElementById('iabFrame').src = 'about:blank';
 }
 
 // ── Text to Speech ──
