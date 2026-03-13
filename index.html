@@ -16,14 +16,14 @@
 body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 
 /* ── HEADER ── */
-header{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:var(--surf);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:300;}
-.logo{display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-size:1.05rem;font-weight:700;}
+header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:11px 14px;background:var(--surf);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:300;}
+.logo{display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-size:1.05rem;font-weight:700;justify-content:flex-start;}
 .logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
 .logo span{color:var(--accent);}
-.nav-tabs{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:10px;border:1px solid var(--border);}
+.nav-tabs{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:10px;border:1px solid var(--border);justify-self:center;}
 .nav-tab{padding:6px 13px;border-radius:7px;cursor:pointer;font-weight:600;font-size:0.8rem;letter-spacing:0.5px;transition:all 0.2s;color:var(--dim);border:none;background:none;font-family:'Rajdhani',sans-serif;}
 .nav-tab.active{background:var(--surf2);color:var(--accent);border:1px solid var(--border);}
-.live-dot{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--green);font-family:'Space Mono',monospace;}
+.live-dot{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--green);font-family:'Space Mono',monospace;justify-self:flex-end;}
 .pulse{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
 
@@ -38,7 +38,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:13p
    ROLE SELECTION SCREEN
 ══════════════════════════════════════ */
 .role-overlay{
-  position:fixed;inset:0;z-index:600;
+  position:fixed;z-index:600;
+  top:0;bottom:0;
+  left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
   background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:24px;
@@ -115,7 +118,11 @@ header{display:flex;align-items:center;justify-content:space-between;padding:13p
    ONBOARDING OVERLAY
 ══════════════════════════════════════ */
 .onboard-overlay{
-  position:fixed;inset:0;background:#070910;z-index:500;
+  position:fixed;z-index:500;
+  top:0;bottom:0;
+  left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  background:#070910;
   display:flex;flex-direction:column;overflow-y:auto;
 }
 .onboard-overlay.hidden{display:none;}
@@ -471,6 +478,61 @@ header{display:flex;align-items:center;justify-content:space-between;padding:13p
 .toast.warn{border-left-color:var(--yellow);}
 .toast.err{border-left-color:var(--red);}
 
+
+/* ══════════════════════════════════════
+   DESKTOP: Mobile-centered phone frame
+══════════════════════════════════════ */
+html {
+  background: #02030a;
+}
+body {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  box-shadow: 0 0 80px rgba(0,0,0,0.9);
+}
+/* Desktop: show side panels */
+@media(min-width: 481px) {
+  html {
+    background: #02030a;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(0,212,255,0.05) 0%, transparent 60%);
+  }
+  body {
+    border-left: 1px solid #1a1d2e;
+    border-right: 1px solid #1a1d2e;
+  }
+  /* Fix fixed/absolute overlays to stay within phone frame */
+  .role-overlay,
+  .onboard-overlay {
+    max-width: 480px;
+    left: 50% !important;
+    transform: translateX(-50%);
+    right: auto !important;
+  }
+  .notif-backdrop,
+  .qd-backdrop {
+    max-width: 480px;
+    left: 50% !important;
+    transform: translateX(-50%);
+    right: auto !important;
+  }
+  .chat-fab {
+    position: fixed;
+  }
+  .chat-win {
+    right: calc(50% - 480px/2 + 14px) !important;
+  }
+  .notif-bell-btn {
+    right: calc(50% - 480px/2 + 14px) !important;
+  }
+  .toast {
+    max-width: 440px;
+  }
+}
+
 @media(max-width:420px){
   .cat-grid{grid-template-columns:repeat(4,1fr);}
   .nav-tab{padding:5px 8px;font-size:0.72rem;}
@@ -479,7 +541,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:13p
 }
 
 /* ══ QUICK DETAILS MODAL ══ */
-.qd-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:800;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.qd-backdrop{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:800;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .qd-backdrop.show{opacity:1;pointer-events:all;}
 .qd-sheet{width:100%;max-width:480px;background:var(--surf);border-radius:24px 24px 0 0;border:1px solid var(--border);border-bottom:none;padding-bottom:28px;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);}
 .qd-backdrop.show .qd-sheet{transform:translateY(0);}
@@ -955,17 +1017,17 @@ header{display:flex;align-items:center;justify-content:space-between;padding:13p
 ══════════════════════════════════════════════ -->
 <header>
   <div class="logo"><div class="logo-icon">🔢</div>Next<span>Turn</span>AI</div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchView('customer',event)">Customer</button>
-    <button class="nav-tab" onclick="switchView('provider',event)">Provider</button>
-    <button class="nav-tab" onclick="switchView('tv',event)">TV</button>
-    <button class="nav-tab" onclick="switchView('admin',event)">Admin</button>
+  <div class="nav-tabs" id="mainNavTabs">
+    <button class="nav-tab active" id="tabCustomer" onclick="switchView('customer',event)">Customer</button>
+    <button class="nav-tab" id="tabProvider" onclick="switchView('provider',event)" style="display:none">Provider</button>
+    <button class="nav-tab" id="tabTV" onclick="switchView('tv',event)" style="display:none">TV</button>
+    <button class="nav-tab" id="tabAdmin" onclick="switchView('admin',event)" style="display:none">Admin</button>
   </div>
   <div class="live-dot"><div class="pulse"></div>LIVE</div>
 </header>
 
 <!-- ════ CUSTOMER VIEW ════ -->
-<div id="view-customer" class="view active">
+<div id="view-customer" class="view">
 
   <!-- HOME SCREEN -->
   <div id="cscreen-home" class="screen active">
@@ -1357,6 +1419,9 @@ function switchView(name, e) {
     return;
   }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  // Show the relevant tab if hidden
+  const tabMap = {customer:'tabCustomer', provider:'tabProvider', tv:'tabTV', admin:'tabAdmin'};
+  if(tabMap[name]) { const el=document.getElementById(tabMap[name]); if(el) el.style.display=''; }
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
   if (e && e.target) e.target.classList.add('active');
@@ -1438,10 +1503,21 @@ function custStep3Next() {
 }
 
 function finishCustOnboard() {
+  // Hide all overlays
   document.getElementById('custOnboard').classList.add('hidden');
+  document.getElementById('roleScreen').classList.add('hidden');
+  // Load profile data
   loadCustProfile();
-  switchToMainView('customer');
+  // Activate customer view
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-customer').classList.add('active');
+  // Show customer tab only
+  document.getElementById('tabCustomer').style.display = '';
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tabCustomer').classList.add('active');
   toast('🎉 Welcome to NextTurnAI!', 'ok');
+  // Trigger location detect
+  refreshAppLoc();
 }
 
 function loadCustProfile() {
@@ -1580,6 +1656,10 @@ function provStep5Next() {
 
 function finishProvOnboard() {
   document.getElementById('provOnboard').classList.add('hidden');
+  // Show Provider, TV, Admin tabs for provider users
+  ['tabProvider','tabTV','tabAdmin'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.style.display='';
+  });
   loadProvDash();
   switchToMainView('provider');
   toast('🏪 Welcome, Provider!', 'ok');
@@ -1617,22 +1697,119 @@ function clearAppCat() {
   filterAppCat(document.querySelector('.ccat'), 'all');
 }
 
-function refreshAppLoc() {
-  const btn = document.getElementById('appLocBtn');
-  btn.textContent = '⏳';
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      const lat = pos.coords.latitude.toFixed(4);
-      const lon = pos.coords.longitude.toFixed(4);
-      document.getElementById('appLocName').textContent = lat + '° N, ' + lon + '° E';
-      btn.textContent = '✅';
-      setTimeout(() => btn.textContent = '🔄', 2000);
-      toast('📍 Location updated!', 'ok');
-    }, () => {
-      btn.textContent = '🔄';
-      toast('⚠ Location permission denied', 'warn');
-    });
+async function reverseGeocode(lat, lon) {
+  try {
+    // zoom=18 = building level, zoom=16 = street level
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+      { headers: { 'Accept-Language': 'hi,en', 'User-Agent': 'NextTurnAI/1.0' } }
+    );
+    const data = await res.json();
+    const a = data.address || {};
+
+    // Build Ola/Uber style: "House No, Road, Colony, City"
+    const lineParts = [
+      a.house_number,                                          // plot/door number
+      a.road || a.pedestrian || a.path || a.footway,          // road/gali name
+      a.neighbourhood || a.quarter || a.allotments,           // colony/mohalla
+      a.suburb || a.residential || a.village || a.town        // area
+        || a.city_district || a.county,
+    ].filter(Boolean);
+
+    // City for context
+    const city = a.city || a.state_district || a.county || '';
+
+    if (lineParts.length >= 2) {
+      // Show max 3 parts + city if different
+      const addr = lineParts.slice(0, 3).join(', ');
+      return city && !addr.toLowerCase().includes(city.toLowerCase())
+        ? addr + ', ' + city
+        : addr;
+    }
+    // Fallback: first 4 parts of display_name
+    return data.display_name.split(',').slice(0, 4).join(',').trim();
+  } catch(e) {
+    return null;
   }
+}
+
+// Save location in memory to avoid repeated asks
+let _cachedLocation = null;
+
+async function setLocationDisplay(lat, lon) {
+  const address = await reverseGeocode(lat, lon);
+  const display = address || (lat.toFixed(4) + '° N, ' + lon.toFixed(4) + '° E');
+  _cachedLocation = display;
+  document.getElementById('appLocName').textContent = display;
+  try { localStorage.setItem('ntai_lastLoc', display); } catch(e){}
+  return display;
+}
+
+// IP-based location fallback (no permission needed, city level)
+async function getLocationByIP() {
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const d = await res.json();
+    if (d && d.city) {
+      const parts = [d.city, d.region].filter(Boolean);
+      return parts.join(', ');
+    }
+  } catch(e) {}
+  try {
+    const res2 = await fetch('https://ip-api.com/json/?fields=city,regionName');
+    const d2 = await res2.json();
+    if (d2 && d2.city) return [d2.city, d2.regionName].filter(Boolean).join(', ');
+  } catch(e) {}
+  return null;
+}
+
+function refreshAppLoc(forceRefresh) {
+  const btn = document.getElementById('appLocBtn');
+
+  // Show cached instantly
+  const saved = _cachedLocation || (()=>{ try{ return localStorage.getItem('ntai_lastLoc'); }catch(e){return null;} })();
+  if (saved && !forceRefresh) {
+    document.getElementById('appLocName').textContent = saved;
+    _cachedLocation = saved;
+    return;
+  }
+
+  btn.textContent = '⏳';
+  document.getElementById('appLocName').textContent = '📡 Locating...';
+
+  // Try GPS first, fallback to IP location
+  const tryIPLocation = async () => {
+    const ipLoc = await getLocationByIP();
+    if (ipLoc) {
+      _cachedLocation = ipLoc;
+      document.getElementById('appLocName').textContent = ipLoc;
+      try { localStorage.setItem('ntai_lastLoc', ipLoc); } catch(e){}
+      btn.textContent = '📍';
+      toast('📍 ' + ipLoc, 'ok');
+    } else {
+      document.getElementById('appLocName').textContent = saved || 'New Delhi';
+      btn.textContent = '🔄';
+    }
+  };
+
+  if (!navigator.geolocation) {
+    tryIPLocation();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async pos => {
+      await setLocationDisplay(pos.coords.latitude, pos.coords.longitude);
+      btn.textContent = '✅';
+      setTimeout(() => btn.textContent = '🔄', 2500);
+      toast('📍 Location detected!', 'ok');
+    },
+    async err => {
+      // GPS failed/denied — try IP location silently
+      await tryIPLocation();
+    },
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+  );
 }
 
 // Store pending token args when profile check interrupts
@@ -2105,17 +2282,26 @@ function selectRole(role) {
 
 function skipToApp() {
   document.getElementById('roleScreen').classList.add('hidden');
+  document.querySelectorAll('.onboard-overlay').forEach(o => o.classList.add('hidden'));
   loadCustProfile();
   loadProvDash();
   switchToMainView('customer');
 }
 
 function switchToMainView(name) {
+  // Hide all overlays first
+  document.getElementById('roleScreen').classList.add('hidden');
+  document.querySelectorAll('.onboard-overlay').forEach(o => o.classList.add('hidden'));
+  // Switch views
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const targetView = document.getElementById('view-'+name);
+  if (targetView) targetView.classList.add('active');
+  // Manage tabs
+  const tabMap = {customer:'tabCustomer', provider:'tabProvider', tv:'tabTV', admin:'tabAdmin'};
+  if(tabMap[name]) { const el=document.getElementById(tabMap[name]); if(el) el.style.display=''; }
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-'+name).classList.add('active');
-  const tabs = document.querySelectorAll('.nav-tab');
-  tabs.forEach(t => { if(t.textContent.toLowerCase().includes(name.substring(0,4))) t.classList.add('active'); });
+  const activeTab = document.getElementById(tabMap[name]);
+  if (activeTab) activeTab.classList.add('active');
 }
 
 // ══════════════════════════════════════════
@@ -2128,17 +2314,42 @@ window.addEventListener('load', () => {
   if (!hasCust && !hasProv) {
     // Brand new user — show role selection
     document.getElementById('roleScreen').classList.remove('hidden');
-  } else if (hasCust || hasProv) {
-    // Returning user — show role selection with "already have account" option
+  } else if (hasCust && !hasProv) {
+    // Returning customer — go directly to customer app
+    document.getElementById('roleScreen').classList.add('hidden');
+    switchToMainView('customer');
+  } else if (hasProv && !hasCust) {
+    // Returning provider — go directly to provider dashboard
+    document.getElementById('roleScreen').classList.add('hidden');
+    switchToMainView('provider');
+  } else if (hasCust && hasProv) {
+    // Both — show role selection so they can choose
     document.getElementById('roleScreen').classList.remove('hidden');
     document.getElementById('roleAlreadyText').style.display = 'block';
   }
 
   // Preload saved data
   if (hasCust) loadCustProfile();
-  if (hasProv) loadProvDash();
+  if (hasProv) {
+    loadProvDash();
+    // Returning provider — show all tabs
+    ['tabProvider','tabTV','tabAdmin'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.style.display='';
+    });
+  }
 
-  document.getElementById('appLocName').textContent = 'Connaught Place, New Delhi';
+  // Auto location: show cached instantly, refresh in background
+  const _savedLoc = (()=>{ try{ return localStorage.getItem('ntai_lastLoc'); }catch(e){return null;} })();
+  if (_savedLoc) {
+    document.getElementById('appLocName').textContent = _savedLoc;
+    _cachedLocation = _savedLoc;
+    // Silent background refresh every 5 minutes
+    setTimeout(() => refreshAppLoc(true), 300000);
+  } else {
+    // First time — ask for location
+    refreshAppLoc(true);
+  }
+
   requestNotifPermission();
 });
 </script>
@@ -2153,7 +2364,7 @@ window.addEventListener('load', () => {
 .chat-fab-badge{position:absolute;top:-5px;right:-5px;width:18px;height:18px;background:var(--red);border-radius:50%;font-size:0.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;border:2px solid var(--bg);animation:pulse 1.5s infinite;}
 
 /* Window */
-.chat-win{position:fixed;bottom:100px;right:14px;width:calc(100vw - 28px);max-width:400px;height:600px;max-height:82vh;background:var(--surf);border:1px solid var(--border);border-radius:22px;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.65);z-index:700;transform:scale(0.88) translateY(40px);opacity:0;pointer-events:none;transition:all 0.32s cubic-bezier(0.175,0.885,0.32,1.275);transform-origin:bottom right;overflow:hidden;}
+.chat-win{position:fixed;bottom:100px;right:max(14px, calc(50% - 480px/2 + 14px));width:calc(100vw - 28px);max-width:400px;height:600px;max-height:82vh;background:var(--surf);border:1px solid var(--border);border-radius:22px;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.65);z-index:700;transform:scale(0.88) translateY(40px);opacity:0;pointer-events:none;transition:all 0.32s cubic-bezier(0.175,0.885,0.32,1.275);transform-origin:bottom right;overflow:hidden;}
 .chat-win.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
 
 /* Header */
@@ -2355,6 +2566,310 @@ function switchLang(lang) {
 }
 
 // ── Send via Claude API ──
+// ════════════════════════════════════════════
+// SMART REPLY ENGINE — offline, no API needed
+// ════════════════════════════════════════════
+function smartReply(input) {
+  const q = input.toLowerCase().trim();
+  const hi = botLang === 'hi';
+
+  // ── Token / Queue join ──
+  if (/token|join|queue|number|नंबर|टोकन|कैसे लें|join kaise/.test(q)) {
+    return hi
+      ? '🎫 **Token लेना बहुत आसान है!**
+
+1️⃣ Home screen पर अपनी category चुनें (Barber, Clinic etc.)
+2️⃣ पास की दुकान ढूंढें
+3️⃣ **"Token लो – Join Queue"** button दबाएं
+4️⃣ अपना नाम और mobile दें
+
+Bs! Token मिल गया 🎉 आप घर से wait कर सकते हैं!'
+      : '🎫 **Getting a token is super easy!**
+
+1️⃣ Choose your category (Barber, Clinic etc.)
+2️⃣ Find a nearby shop
+3️⃣ Tap **"Token लो – Join Queue"**
+4️⃣ Enter your name & mobile
+
+Done! Your token is issued 🎉 Wait from home!';
+  }
+
+  // ── Track position ──
+  if (/track|position|ahead|kitne|कितने|wait|कहाँ|status|pata|पता/.test(q)) {
+    return hi
+      ? '📍 **Queue position track करें:**
+
+✅ Token लेने के बाद आपको screen पर दिखेगा:
+• आपका Token Number
+• कितने लोग आपसे पहले हैं
+• अनुमानित wait time (~20m)
+
+🔔 Notification भी आएगी जब आपकी बारी नज़दीक होगी!'
+      : '📍 **Track your queue position:**
+
+✅ After getting a token, you'll see:
+• Your Token Number
+• People ahead of you
+• Estimated wait time (~20m)
+
+🔔 You'll get a notification when your turn is near!';
+  }
+
+  // ── Notification ──
+  if (/notif|alert|bell|बताएगा|inform|सूचना/.test(q)) {
+    return hi
+      ? '🔔 **Notification कैसे काम करती है:**
+
+• Token accept होने पर — तुरंत notification
+• Waiting list से promote होने पर — alert
+• 2 लोग बचें तो — advance warning
+• Reject होने पर — भी बताएगा
+
+Bell 🔔 button दबाकर कभी भी last notification देख सकते हैं!'
+      : '🔔 **How notifications work:**
+
+• Token accepted — instant notification
+• Promoted from waiting list — alert
+• 2 people left ahead — advance warning
+• If rejected — you're notified too
+
+Tap the 🔔 bell button to reopen your last notification!';
+  }
+
+  // ── Waiting list ──
+  if (/waiting list|waitlist|wait list|वेटिंग|limit|लिमिट/.test(q)) {
+    return hi
+      ? '📋 **Waiting List क्या है?**
+
+जब Provider का Auto Limit पूरा हो जाता है, नए customers automatically **Waiting List** में चले जाते हैं।
+
+• आपको reject नहीं किया जाता
+• Provider जब चाहे आपको Queue में Move कर सकते हैं
+• तब आपको notification मिलेगी 🔔
+
+यह system आपकी जगह safe रखता है!'
+      : '📋 **What is Waiting List?**
+
+When a Provider's Auto Limit is full, new customers go to the **Waiting List** instead of being rejected.
+
+• You're not turned away
+• Provider can move you to the active queue anytime
+• You'll get a notification when promoted 🔔
+
+Your spot is saved!';
+  }
+
+  // ── Provider / become provider ──
+  if (/provider|dukaan|दुकान|shop|register|business|clinic|salon|appoint/.test(q)) {
+    return hi
+      ? '🏪 **Provider कैसे बनें?**
+
+1️⃣ Home screen पर **"Service Provider हूँ"** चुनें
+2️⃣ Mobile OTP से verify करें
+3️⃣ दुकान का नाम, address fill करें
+4️⃣ Category चुनें (Barber/Salon/Clinic etc.)
+5️⃣ Location set करें
+
+✅ बस! Dashboard मिल जाएगा जहाँ से queue manage होगी।
+
+💰 Plans: Basic ₹199/mo | Pro ₹499/mo'
+      : '🏪 **How to become a Provider?**
+
+1️⃣ Choose **"Service Provider हूँ"** on home screen
+2️⃣ Verify with mobile OTP
+3️⃣ Fill shop name & address
+4️⃣ Select category (Barber/Salon/Clinic etc.)
+5️⃣ Set your location
+
+✅ Done! You'll get a dashboard to manage your queue.
+
+💰 Plans: Basic ₹199/mo | Pro ₹499/mo';
+  }
+
+  // ── Pricing ──
+  if (/price|pricing|cost|kitna|₹|rupee|plan|free|paid|payment/.test(q)) {
+    return hi
+      ? '💰 **NextTurnAI Pricing:**
+
+👤 **Customer App** — बिल्कुल FREE!
+
+🏪 **Provider Plans:**
+• Basic — ₹199/month (queue management)
+• Pro — ₹499/month (analytics + priority support)
+• Featured — ₹999/month (map mein top listing)
+
+कोई hidden charges नहीं! 😊'
+      : '💰 **NextTurnAI Pricing:**
+
+👤 **Customer App** — Completely FREE!
+
+🏪 **Provider Plans:**
+• Basic — ₹199/month (queue management)
+• Pro — ₹499/month (analytics + priority support)
+• Featured — ₹999/month (top listing on map)
+
+No hidden charges! 😊';
+  }
+
+  // ── Cancel token ──
+  if (/cancel|रद्द|band|close|छोड़|nahi jana/.test(q)) {
+    return hi
+      ? '❌ **Token cancel करना:**
+
+Token screen पर नीचे **"Token Cancel करें"** button है।
+
+• Cancel करने पर आपकी जगह free हो जाती है
+• दूसरे दुकान पर जा सकते हैं
+• कोई penalty नहीं!
+
+Note: Cancel के बाद उसी queue में वापस नहीं आ सकते।'
+      : '❌ **Cancelling your token:**
+
+On the token screen, tap **"Token Cancel करें"** button at the bottom.
+
+• Your spot is freed up for others
+• You can join another shop's queue
+• No penalty!
+
+Note: You cannot rejoin the same queue after cancelling.';
+  }
+
+  // ── App benefits / features ──
+  if (/benefit|fayda|फायदा|feature|kya hai|क्या है|about|intro|help|kaam/.test(q)) {
+    return hi
+      ? '✨ **NextTurnAI के फायदे:**
+
+🏠 **घर से join करें** — line में खड़े न रहें
+📍 **GPS से पास की दुकानें** — आसानी से ढूंढें
+🔔 **Smart notifications** — सही समय पर पहुंचें
+📊 **Live queue status** — कितना wait है पता रहे
+🌐 **Hindi + English** — अपनी भाषा में use करें
+
+*India का पहला smart digital queue system!* 🇮🇳'
+      : '✨ **NextTurnAI Benefits:**
+
+🏠 **Join from home** — no standing in line
+📍 **GPS-based nearby shops** — easy to find
+🔔 **Smart notifications** — arrive at the right time
+📊 **Live queue status** — know your wait time
+🌐 **Hindi + English** — use in your language
+
+*India's first smart digital queue system!* 🇮🇳';
+  }
+
+  // ── Dashboard for providers ──
+  if (/dashboard|manage|next token|accept|reject|pending/.test(q)) {
+    return hi
+      ? '📊 **Provider Dashboard features:**
+
+• **Current Token** — अभी कौन serve हो रहा है
+• **Pending Requests** — Accept ✓ या Reject ✕ करें
+• **Auto Limit** — 1-50 का limit set करें
+• **Waiting List** — limit के बाद वाले customers
+• **Next Token** ▶ button — queue आगे बढ़ाएं
+• **Pause/Resume** — queue temporarily रोकें
+
+Sab एक ही screen पर! 🎯'
+      : '📊 **Provider Dashboard features:**
+
+• **Current Token** — who is being served now
+• **Pending Requests** — Accept ✓ or Reject ✕
+• **Auto Limit** — set limit from 1-50
+• **Waiting List** — customers beyond limit
+• **Next Token** ▶ button — advance the queue
+• **Pause/Resume** — temporarily stop queue
+
+All on one screen! 🎯';
+  }
+
+  // ── Location / GPS ──
+  if (/location|gps|map|near|पास|कहाँ|ढूंढ|find|detect/.test(q)) {
+    return hi
+      ? '📍 **Location कैसे काम करती है:**
+
+• App आपका GPS location detect करती है
+• पास की सभी open दुकानें map पर दिखती हैं
+• Distance (km), waiting count, est. time सब दिखता है
+• Category filter से specific shop ढूंढें
+
+Location permission allow करना जरूरी है 😊'
+      : '📍 **How location works:**
+
+• App detects your GPS location
+• All nearby open shops appear on map
+• Shows distance (km), waiting count, est. time
+• Use category filter to find specific shop
+
+Make sure to allow location permission 😊';
+  }
+
+  // ── Greeting ──
+  if (/^(hi|hello|hii|hey|नमस्ते|हाय|हेलो|namaste|kya|क्या|help|मदद)/.test(q)) {
+    return hi
+      ? '👋 **नमस्ते! मैं NextTurnAI Assistant हूँ।**
+
+मैं इन topics में help कर सकता हूँ:
+
+🎫 Token कैसे लें
+📍 Queue track करें
+🏪 Provider बनें
+💰 Pricing plans
+🔔 Notifications
+📋 Waiting List
+
+कोई भी सवाल पूछें! 😊'
+      : '👋 **Hello! I'm the NextTurnAI Assistant.**
+
+I can help you with:
+
+🎫 How to get a token
+📍 Track your queue
+🏪 Become a provider
+💰 Pricing plans
+🔔 Notifications
+📋 Waiting List
+
+Ask me anything! 😊';
+  }
+
+  // ── Thanks ──
+  if (/thanks|thank|shukriya|dhanyavaad|धन्यवाद|शुक्रिया|ok|theek|ठीक|great|acha|अच्छा/.test(q)) {
+    return hi
+      ? '😊 खुशी हुई मदद करके! कोई और सवाल हो तो पूछें।
+
+NextTurnAI use करने का शुक्रिया! 🙏'
+      : '😊 Happy to help! Feel free to ask anything else.
+
+Thanks for using NextTurnAI! 🙏';
+  }
+
+  // ── Default fallback ──
+  const fallbacks_hi = [
+    '🤔 मुझे पूरी तरह समझ नहीं आया। क्या आप इनमें से कुछ पूछना चाहते हैं?
+
+• Token कैसे लें?
+• Queue track कैसे करें?
+• Provider कैसे बनें?
+• Pricing क्या है?',
+    '😊 अच्छा सवाल! थोड़ा और detail में बताएं — मैं better help करूंगा।
+
+या नीचे दिए chips में से choose करें 👇',
+  ];
+  const fallbacks_en = [
+    '🤔 I'm not sure I understood. Would you like to know about:
+
+• How to get a token?
+• Track your queue position?
+• Become a provider?
+• Pricing plans?',
+    '😊 Good question! Can you share a bit more detail? I'll help better.
+
+Or choose from the quick options below 👇',
+  ];
+  const arr = hi ? fallbacks_hi : fallbacks_en;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 async function chatSend() {
   const inp = document.getElementById('chInp');
   const text = inp.value.trim();
@@ -2369,33 +2884,16 @@ async function chatSend() {
   showTypingDots();
   document.getElementById('botStat').textContent = botLang==='hi' ? '💭 सोच रहा हूँ...' : '💭 Thinking...';
 
+  // Smart offline AI chatbot — works without any API
+  await new Promise(r => setTimeout(r, 600 + Math.random()*700));
+  hideTypingDots();
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: chatMsgs.slice(-10) // last 10 turns for context
-      })
-    });
-
-    const data = await res.json();
-    hideTypingDots();
-
-    const reply = data.content?.[0]?.text || (botLang==='hi' ? 'माफ़ करें, कुछ गड़बड़ हुई। दोबारा try करें।' : 'Sorry, something went wrong. Please try again.');
-
+    const reply = smartReply(text);
     chatMsgs.push({ role:'assistant', content: reply });
     addBubble(reply);
-    speak(reply.replace(/\*\*(.*?)\*\*/g,'$1').replace(/[•\n]/g,' ').substring(0, 220));
-
+    speak(reply.replace(/\*\*(.*?)\*\*/g,'$1').replace(/[•\n]/g,' ').substring(0,220));
   } catch(err) {
-    hideTypingDots();
-    const errMsg = botLang==='hi'
-      ? '⚠️ Internet connection check करें और दोबारा try करें।'
-      : '⚠️ Please check your internet connection and try again.';
-    addBubble(errMsg);
+    addBubble(botLang==='hi' ? '😊 एक second, फिर try करें!' : '😊 One sec, please try again!');
   }
 
   document.getElementById('botStat').textContent = botLang==='hi' ? '● Online — मदद के लिए तैयार' : '● Online — Ready to help';
