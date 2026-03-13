@@ -2014,6 +2014,8 @@ function finishCustOnboard() {
   toast('🎉 Welcome to NextTurnAI!', 'ok');
   // Trigger location detect
   refreshAppLoc();
+  // Also immediately try weather from IP (fast, no GPS needed)
+  setTimeout(() => { if (!_weatherLat) _loadWeatherFromIP('Your Location'); }, 1500);
 }
 
 function loadCustProfile() {
@@ -2195,68 +2197,78 @@ function clearAppCat() {
 }
 
 async function reverseGeocode(lat, lon) {
-  // ── STEP 1: Nominatim zoom=18 — most detailed Indian address ──
+
+  // ── STEP 1: Nominatim zoom=16 — best balance for Indian sectors/colonies ──
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1`,
       { headers: { 'Accept-Language': 'en', 'User-Agent': 'NextTurnAI/1.0' } }
     );
     const d = await res.json();
     const a = d.address || {};
 
-    // Build: "House No, Road/Gali, Colony/Sector, Pincode, City"
-    const houseNo   = a.house_number || '';
-    const road      = a.road || a.pedestrian || a.path || a.footway || '';
-    const colony    = a.neighbourhood || a.quarter || a.suburb || a.residential || a.village || a.hamlet || '';
-    const sector    = colony.toLowerCase().includes('sector') ? colony : (a.city_district || '');
-    const pincode   = a.postcode || '';
-    const city      = a.city || a.town || a.county || a.state_district || '';
+    // Priority order for Indian address parts:
+    // 1. Sector (look in suburb, city_district, neighbourhood, quarter)
+    // 2. Colony/Locality name
+    // 3. Road (only if no better option)
 
-    // Smart display — most specific first
-    const parts = [];
-    if (houseNo && road)     parts.push(houseNo + ', ' + road);
-    else if (road)           parts.push(road);
-    if (colony && colony !== city) parts.push(colony);
-    else if (sector && sector !== city) parts.push(sector);
-    if (pincode)             parts.push(pincode);
-    if (city)                parts.push(city);
+    const rawParts = [
+      a.neighbourhood, a.quarter, a.suburb,
+      a.city_district, a.county, a.residential,
+      a.village, a.hamlet
+    ].filter(Boolean);
 
-    // Location bar: short version (2 parts)
-    // Full address stored separately
-    if (parts.length >= 2) {
-      window._fullAddress = parts.join(', ');
-      return parts.slice(0, 3).join(', ');
+    // Find sector — check all parts for "Sector" keyword
+    const sectorPart = rawParts.find(p =>
+      /sector\s*\d+/i.test(p) || /sec[\.\s]\d+/i.test(p)
+    );
+
+    // Find colony/mohalla (non-sector locality)
+    const colonyPart = rawParts.find(p =>
+      p && !(/sector\s*\d+/i.test(p)) && p !== a.city && p !== a.state
+    );
+
+    const pincode = a.postcode || '';
+    const city = a.city || a.town || a.county || '';
+
+    // Build display — Sector preferred over colony
+    const localName = sectorPart || colonyPart || rawParts[0] || '';
+    window._fullAddress = [localName, pincode, city].filter(Boolean).join(', ');
+
+    if (localName && city && localName !== city) {
+      return localName + (pincode ? ', ' + pincode : '') + ', ' + city;
     }
-    if (parts.length === 1) {
-      window._fullAddress = parts[0];
-      return parts[0];
-    }
+    if (localName) return localName + (pincode ? ', ' + pincode : '');
+    if (city) return city + (pincode ? ' - ' + pincode : '');
+
   } catch(e) {}
 
-  // ── STEP 2: BigDataCloud — locality + inform tiers ──
+  // ── STEP 2: BigDataCloud — best for Noida sectors ──
   try {
     const res = await fetch(
       `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`
     );
     const d = await res.json();
     const tiers = (d.localityInfo && d.localityInfo.administrative) || [];
+    const inform = (d.localityInfo && d.localityInfo.informative) || [];
 
-    // Find most specific name (order 7=block, 6=neighbourhood, 5=suburb, 4=city)
-    const block  = tiers.find(t => t.order >= 7 && t.name);
-    const colony = tiers.find(t => t.order === 6 && t.name);
-    const suburb = tiers.find(t => t.order === 5 && t.name);
-    const city   = tiers.find(t => t.order === 4 && t.name);
+    // BigDataCloud informative tiers often have "Sector 63" type names
+    const sectorTier = [...tiers, ...inform].find(t =>
+      t.name && /sector\s*\d+/i.test(t.name)
+    );
+    const localTier = tiers.find(t => t.order >= 6 && t.name);
+    const suburbTier = tiers.find(t => t.order === 5 && t.name);
+    const cityTier = tiers.find(t => t.order === 4 && t.name);
 
-    const localPart = (block || colony || suburb || {}).name || d.locality;
-    const cityPart  = (city || {}).name || d.city || '';
-    const postcode  = d.postcode || '';
+    const localName = (sectorTier || localTier || suburbTier || {}).name || d.locality;
+    const cityName = (cityTier || {}).name || d.city || '';
+    const postcode = d.postcode || '';
 
-    const parts = [localPart, postcode, cityPart].filter(Boolean);
-    if (parts.length >= 2) {
-      window._fullAddress = parts.join(', ');
-      return parts.slice(0, 3).join(', ');
+    if (localName && cityName && localName !== cityName) {
+      window._fullAddress = [localName, postcode, cityName].filter(Boolean).join(', ');
+      return localName + (postcode ? ', ' + postcode : '') + ', ' + cityName;
     }
-    if (cityPart) return cityPart;
+    if (cityName) return cityName + (postcode ? ' - ' + postcode : '');
   } catch(e) {}
 
   // ── STEP 3: IP fallback ──
@@ -2304,12 +2316,16 @@ async function setLocationDisplay(lat, lon) {
   try { localStorage.setItem('ntai_lastLoc', display);
         localStorage.setItem('ntai_fullAddr', fullAddr); } catch(e){}
 
-  // Update location bar label to show full address
+  // Update location bar to show full address on top, short below
   const locLabel = document.querySelector('.lb-label');
-  if (locLabel && fullAddr !== display) {
-    locLabel.textContent = fullAddr;
-    locLabel.style.color = 'var(--mid)';
-    locLabel.style.fontSize = '0.65rem';
+  if (locLabel) {
+    if (fullAddr && fullAddr !== display) {
+      // Show full address in label, short in name
+      locLabel.textContent = fullAddr;
+      locLabel.style.cssText = 'color:var(--mid);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;';
+    } else {
+      locLabel.textContent = 'CURRENT LOCATION';
+    }
   }
 
   // Load weather
@@ -2335,14 +2351,20 @@ async function getLocationByIP() {
     const res = await fetch('https://ipapi.co/json/');
     const d = await res.json();
     if (d && d.city) {
-      const parts = [d.city, d.region].filter(Boolean);
-      return parts.join(', ');
+      // Show: City - Pincode (skip long state names)
+      const parts = [];
+      if (d.city) parts.push(d.city);
+      if (d.postal) parts.push(d.postal);
+      return parts.join(' - ');
     }
   } catch(e) {}
   try {
-    const res2 = await fetch('https://ip-api.com/json/?fields=city,regionName');
+    const res2 = await fetch('https://ip-api.com/json/?fields=city,zip,district,lat,lon');
     const d2 = await res2.json();
-    if (d2 && d2.city) return [d2.city, d2.regionName].filter(Boolean).join(', ');
+    if (d2 && d2.city) {
+      const parts = [d2.city, d2.zip].filter(Boolean);
+      return parts.join(' - ');
+    }
   } catch(e) {}
   return null;
 }
@@ -2355,6 +2377,8 @@ function refreshAppLoc(forceRefresh) {
   if (saved && !forceRefresh) {
     document.getElementById('appLocName').textContent = saved;
     _cachedLocation = saved;
+    // Still load weather even from cache — use IP for coords
+    _loadWeatherFromIP(saved);
     return;
   }
 
@@ -3458,6 +3482,35 @@ async function fetchWeather(lat, lon, locName) {
       fBox.appendChild(fc);
     }
 
+  } catch(e) {
+    document.getElementById('wDesc').textContent = 'Weather unavailable';
+  }
+}
+
+
+// Load weather using IP-based coordinates (when GPS not available)
+async function _loadWeatherFromIP(locName) {
+  // Don't reload if already loaded
+  if (_weatherLat) return;
+  try {
+    document.getElementById('wDesc').textContent = 'Loading weather...';
+    document.getElementById('wLoc').textContent = locName || 'Your location';
+    const res = await fetch('https://ipapi.co/json/');
+    const d = await res.json();
+    if (d && d.latitude && d.longitude) {
+      await fetchWeather(d.latitude, d.longitude, locName || d.city);
+      _weatherLat = d.latitude;
+      _weatherLon = d.longitude;
+    } else {
+      // Try ip-api as backup
+      const res2 = await fetch('https://ip-api.com/json/?fields=lat,lon,city');
+      const d2 = await res2.json();
+      if (d2 && d2.lat) {
+        await fetchWeather(d2.lat, d2.lon, locName || d2.city);
+        _weatherLat = d2.lat;
+        _weatherLon = d2.lon;
+      }
+    }
   } catch(e) {
     document.getElementById('wDesc').textContent = 'Weather unavailable';
   }
