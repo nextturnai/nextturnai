@@ -4241,9 +4241,7 @@ function lmDetectGPS() {
 
       // Enable nearby search
       document.getElementById('lmNearbyBtn').disabled = false;
-
-      // Also update main app location bar
-      document.getElementById('appLocName').textContent = document.getElementById('lmCity').textContent || 'Location detected';
+      // appLocName is updated inside lmReverseGeocode() with sector-level name
     },
     (err) => {
       btn.disabled = false;
@@ -4259,35 +4257,48 @@ function lmDetectGPS() {
 
 // ── Reverse geocode via Nominatim (FREE) ──
 async function lmReverseGeocode(lat, lon) {
-  document.getElementById('lmStatus').textContent = '🌐 Fetching address from Nominatim...';
+  document.getElementById('lmStatus').textContent = '🌐 Sector/Area detect हो रही है...';
   try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
-    );
-    const data = await res.json();
-    const a = data.address || {};
-    const fullAddr = data.display_name || 'Address not found';
-    const city = a.city || a.town || a.village || a.county || '—';
-    const state = a.state || '—';
-    const country = a.country || '—';
-    const pin = a.postcode || '';
+    // ── USE MAIN APP's reverseGeocode() — has BigDataCloud + Noida sector bbox + Nominatim ──
+    // This gives "Sector 63, Noida" instead of just "Ghaziabad, Uttar Pradesh"
+    const display = await reverseGeocode(lat, lon);
+    const fullAddr = window._fullAddress || display || 'Address not found';
 
+    // For Nominatim full details (state, country, pin) — secondary fetch
+    let state = '', country = 'India', pin = '';
+    try {
+      const nr = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      const nd = await nr.json();
+      const a = nd.address || {};
+      state   = a.state || '';
+      country = a.country || 'India';
+      pin     = a.postcode || '';
+    } catch(e) {}
+
+    // Update map modal UI
     document.getElementById('lmAddr').textContent = fullAddr;
-    document.getElementById('lmCity').textContent = [city, state, country].filter(x=>x&&x!=='—').join(', ');
-    document.getElementById('lmSubtitle').textContent = city + ', ' + country;
+    document.getElementById('lmCity').textContent = display + (state ? ', ' + state : '') + ', ' + country;
+    document.getElementById('lmSubtitle').textContent = display + ', ' + country;
     document.getElementById('lmStatus').style.color = '#10b981';
-    document.getElementById('lmStatus').textContent = '✅ ' + city + ', ' + state + (pin ? ' — ' + pin : '');
+    document.getElementById('lmStatus').textContent = '✅ ' + display + (pin ? ' — ' + pin : '');
 
-    // Place/update marker
+    // Place/update map marker with accurate address
     _lmPlaceMarker(lat, lon, fullAddr);
 
-    // Also save to main app cache
+    // ── UPDATE MAIN APP LOCATION BAR with sector-level name ──
+    document.getElementById('appLocName').textContent = display;
+    const locLabel = document.querySelector('.lb-label');
+    if (locLabel) locLabel.textContent = 'CURRENT LOCATION';
+
+    // Save to localStorage & recent list
     try {
-      localStorage.setItem('ntai_lastLoc', city + (state !== '—' ? ', ' + state : ''));
+      localStorage.setItem('ntai_lastLoc', display);
       localStorage.setItem('ntai_lastLat', lat);
       localStorage.setItem('ntai_lastLon', lon);
-      if (typeof saveRecentLocation === 'function') saveRecentLocation(city + ', ' + state, lat, lon);
+      if (typeof saveRecentLocation === 'function') saveRecentLocation(display, lat, lon);
     } catch(e) {}
 
   } catch(e) {
