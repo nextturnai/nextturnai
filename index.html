@@ -2198,77 +2198,84 @@ function clearAppCat() {
 
 async function reverseGeocode(lat, lon) {
 
-  // ── STEP 1: Nominatim zoom=16 — best balance for Indian sectors/colonies ──
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en', 'User-Agent': 'NextTurnAI/1.0' } }
-    );
-    const d = await res.json();
-    const a = d.address || {};
-
-    // Priority order for Indian address parts:
-    // 1. Sector (look in suburb, city_district, neighbourhood, quarter)
-    // 2. Colony/Locality name
-    // 3. Road (only if no better option)
-
-    const rawParts = [
-      a.neighbourhood, a.quarter, a.suburb,
-      a.city_district, a.county, a.residential,
-      a.village, a.hamlet
-    ].filter(Boolean);
-
-    // Find sector — check all parts for "Sector" keyword
-    const sectorPart = rawParts.find(p =>
-      /sector\s*\d+/i.test(p) || /sec[\.\s]\d+/i.test(p)
-    );
-
-    // Find colony/mohalla (non-sector locality)
-    const colonyPart = rawParts.find(p =>
-      p && !(/sector\s*\d+/i.test(p)) && p !== a.city && p !== a.state
-    );
-
-    const pincode = a.postcode || '';
-    const city = a.city || a.town || a.county || '';
-
-    // Build display — Sector preferred over colony
-    const localName = sectorPart || colonyPart || rawParts[0] || '';
-    window._fullAddress = [localName, pincode, city].filter(Boolean).join(', ');
-
-    if (localName && city && localName !== city) {
-      return localName + (pincode ? ', ' + pincode : '') + ', ' + city;
-    }
-    if (localName) return localName + (pincode ? ', ' + pincode : '');
-    if (city) return city + (pincode ? ' - ' + pincode : '');
-
-  } catch(e) {}
-
-  // ── STEP 2: BigDataCloud — best for Noida sectors ──
+  // ── STEP 1: BigDataCloud FIRST — best for Noida/NCR sectors ──
   try {
     const res = await fetch(
       `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`
     );
     const d = await res.json();
-    const tiers = (d.localityInfo && d.localityInfo.administrative) || [];
-    const inform = (d.localityInfo && d.localityInfo.informative) || [];
 
-    // BigDataCloud informative tiers often have "Sector 63" type names
-    const sectorTier = [...tiers, ...inform].find(t =>
-      t.name && /sector\s*\d+/i.test(t.name)
-    );
-    const localTier = tiers.find(t => t.order >= 6 && t.name);
-    const suburbTier = tiers.find(t => t.order === 5 && t.name);
-    const cityTier = tiers.find(t => t.order === 4 && t.name);
+    const admin  = (d.localityInfo && d.localityInfo.administrative) || [];
+    const inform = (d.localityInfo && d.localityInfo.informative)    || [];
+    const allTiers = [...admin, ...inform];
 
-    const localName = (sectorTier || localTier || suburbTier || {}).name || d.locality;
-    const cityName = (cityTier || {}).name || d.city || '';
-    const postcode = d.postcode || '';
+    // Priority 1: Any tier with "Sector" keyword
+    const sectorTier = allTiers.find(t => t.name && /sector[\s\-]*\d+/i.test(t.name));
 
-    if (localName && cityName && localName !== cityName) {
+    // Priority 2: Block / Phase names
+    const blockTier  = allTiers.find(t => t.name && /block[\s\-]*[A-Z0-9]+/i.test(t.name));
+
+    // Priority 3: order=6 (neighbourhood), order=5 (suburb)
+    const neighTier  = admin.find(t => t.order >= 6 && t.name && t.name !== d.countryName);
+    const subTier    = admin.find(t => t.order === 5 && t.name && t.name !== d.countryName);
+
+    // City: order=4
+    const cityTier   = admin.find(t => t.order === 4 && t.name);
+    const cityName   = (cityTier || {}).name || d.city || d.locality || '';
+    const postcode   = d.postcode || '';
+
+    // Pick best local name — sector > block > neighbourhood > suburb > locality
+    const localName  = (sectorTier || blockTier || neighTier || subTier || {}).name || d.locality || '';
+
+    // Skip garbage — if localName is a village/hamlet AND sector exists nearby, prefer sector
+    const isVillage  = /mamura|village|gaon/i.test(localName);
+
+    if (localName && !isVillage && cityName && localName !== cityName) {
       window._fullAddress = [localName, postcode, cityName].filter(Boolean).join(', ');
       return localName + (postcode ? ', ' + postcode : '') + ', ' + cityName;
     }
-    if (cityName) return cityName + (postcode ? ' - ' + postcode : '');
+
+    // If village detected, try to use postcode + city only
+    if (isVillage && postcode && cityName) {
+      window._fullAddress = postcode + ', ' + cityName;
+      return postcode + ', ' + cityName;
+    }
+
+    if (!isVillage && localName) {
+      window._fullAddress = [localName, postcode].filter(Boolean).join(', ');
+      return localName + (postcode ? ', ' + postcode : '');
+    }
+
+    if (cityName) {
+      window._fullAddress = [postcode, cityName].filter(Boolean).join(', ');
+      return cityName + (postcode ? ' - ' + postcode : '');
+    }
+
+  } catch(e) {}
+
+  // ── STEP 2: Nominatim zoom=14 — city-district level (skip village names) ──
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`,
+      { headers: { 'Accept-Language': 'en', 'User-Agent': 'NextTurnAI/1.0' } }
+    );
+    const d   = await res.json();
+    const a   = d.address || {};
+
+    // At zoom=14, Nominatim gives suburb/city_district — more useful than village
+    const suburb   = a.suburb || a.city_district || a.county || '';
+    const pincode  = a.postcode || '';
+    const city     = a.city || a.town || '';
+
+    // Check for sector in suburb
+    const hasSector = /sector[\s\-]*\d+/i.test(suburb);
+
+    if (suburb && city && suburb !== city) {
+      window._fullAddress = [suburb, pincode, city].filter(Boolean).join(', ');
+      return suburb + (pincode ? ', ' + pincode : '') + ', ' + city;
+    }
+    if (city) return city + (pincode ? ' - ' + pincode : '');
+
   } catch(e) {}
 
   // ── STEP 3: IP fallback ──
@@ -2281,7 +2288,6 @@ async function reverseGeocode(lat, lon) {
   return null;
 }
 
-// ── Nearby areas within ~1km using Nominatim search ──
 async function getNearbyAreas(lat, lon) {
   try {
     const res = await fetch(
