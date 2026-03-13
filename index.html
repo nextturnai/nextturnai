@@ -1306,6 +1306,8 @@ body {
 
     <!-- ── LOCATION BAR ── -->
     <div id="locWrapper">
+      <!-- Invisible backdrop — tap outside to close -->
+      <div id="locBackdrop" onclick="closeLocDropdown()" style="display:none;position:fixed;inset:0;z-index:9998;background:transparent;"></div>
       <div class="loc-bar" id="locBar" onclick="toggleLocDropdown()">
         <div class="lb-icon">📍</div>
         <div class="lb-info">
@@ -3147,19 +3149,11 @@ window.addEventListener('load', () => {
 .chip:hover{border-color:var(--accent);color:var(--accent);}
 
 /* Input */
-.ch-bar{display:flex;align-items:center;gap:7px;padding:9px 11px;border-top:1px solid var(--border);background:var(--surf);flex-shrink:0;}
-.ch-inp{flex:1;background:var(--surf2);border:1px solid var(--border);border-radius:12px;padding:9px 13px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.9rem;outline:none;transition:border-color 0.2s;}
-.ch-inp:focus{border-color:var(--accent);}
-.ch-inp::placeholder{color:var(--dim);}
-.ch-send{width:38px;height:38px;background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s;flex-shrink:0;}
-.ch-send:hover{transform:scale(1.08);}
-.ch-mic{width:38px;height:38px;background:var(--surf2);border:1px solid var(--border);border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s;flex-shrink:0;}
-.ch-mic:hover{border-color:var(--red);}
-.ch-mic.on{background:rgba(239,68,68,0.12);border-color:var(--red);animation:micPulse 1s infinite;}
+/* ch-bar removed — chips only mode */
 @keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
 
 /* ── LOCATION WRAPPER + BAR ── */
-#locWrapper{position:relative;margin:12px 16px 0;}
+#locWrapper{position:relative;margin:12px 16px 0;-webkit-tap-highlight-color:transparent;}
 .loc-bar{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color 0.2s;}
 .loc-bar:hover{border-color:rgba(0,212,255,0.3);}
 .lb-icon{font-size:1rem;flex-shrink:0;}
@@ -3170,22 +3164,22 @@ window.addEventListener('load', () => {
 /* ── LOCATION DROPDOWN ── */
 #locDropdown{
   display:none;
-  position:absolute;
-  top:calc(100% + 6px);
-  left:0;right:0;
+  position:fixed;
   background:#0f1117;
-  border:1px solid rgba(0,212,255,0.2);
+  border:1px solid rgba(0,212,255,0.25);
   border-radius:14px;
-  box-shadow:0 16px 48px rgba(0,0,0,0.7);
+  box-shadow:0 16px 48px rgba(0,0,0,0.85);
   z-index:9999;
   overflow:hidden;
-  max-height:70vh;
+  max-height:55vh;
   overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  left:16px;right:16px;top:200px;
 }
 #locDropdown.open{display:block;animation:ddFade 0.18s ease;}
 @keyframes ddFade{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
 
-.loc-dd-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.15s;}
+.loc-dd-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.15s;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
 .loc-dd-item:hover,.loc-dd-item:active{background:rgba(255,255,255,0.04);}
 .loc-dd-gps{background:rgba(0,212,255,0.04);}
 .loc-dd-icon{font-size:1.15rem;flex-shrink:0;}
@@ -3228,11 +3222,7 @@ window.addEventListener('load', () => {
   <div class="ch-msgs" id="chMsgs"></div>
   <div class="ch-chips" id="chChips"></div>
 
-  <div class="ch-bar">
-    <button class="ch-mic" id="micBtn" onclick="micToggle()" title="Voice">🎙️</button>
-    <input class="ch-inp" id="chInp" placeholder="कुछ भी पूछें..." onkeydown="if(event.key==='Enter')chatSend()">
-    <button class="ch-send" onclick="chatSend()">➤</button>
-  </div>
+  <!-- Input removed — chips only -->
 </div>
 
 <script>
@@ -3308,7 +3298,7 @@ function renderChips() {
   (CHIPS[botLang]||CHIPS.hi).forEach(c => {
     const b = document.createElement('button');
     b.className = 'chip'; b.textContent = c;
-    b.onclick = () => { document.getElementById('chInp').value = c; chatSend(); };
+    b.onclick = () => { chipSend(c); };
     box.appendChild(b);
   });
 }
@@ -3342,7 +3332,6 @@ function switchLang(lang) {
   botLang = lang;
   document.getElementById('lHi').classList.toggle('on', lang==='hi');
   document.getElementById('lEn').classList.toggle('on', lang==='en');
-  document.getElementById('chInp').placeholder = lang==='hi' ? 'कुछ भी पूछें...' : 'Ask anything...';
   document.getElementById('botStat').textContent = lang==='hi' ? '● Online — मदद के लिए तैयार' : '● Online — Ready to help';
   renderChips();
 }
@@ -3352,20 +3341,22 @@ function switchLang(lang) {
 // SMART REPLY ENGINE — offline, no API needed
 // ════════════════════════════════════════════
 
-async function chatSend() {
-  const inp = document.getElementById('chInp');
-  if (!inp) return;
-  const text = inp.value.trim();
+// ── Chip click sends directly ──
+function chipSend(text) {
+  if (!text || !text.trim()) return;
+  chatSend(text.trim());
+}
+
+async function chatSend(directText) {
+  const text = directText || '';
   if (!text) return;
-  inp.value = '';
-  inp.focus();
 
   addBubble(text, 'user');
   chatMsgs.push({ role:'user', content: text });
 
   const chips = document.getElementById('chChips');
   const stat  = document.getElementById('botStat');
-  if (chips) chips.style.display = 'none';
+  if (chips) chips.innerHTML = '<div style="text-align:center;padding:8px;color:var(--dim);font-size:0.75rem;">💭 जवाब आ रहा है...</div>';
   if (stat)  stat.textContent = botLang==='hi' ? '💭 सोच रहा हूँ...' : '💭 Thinking...';
   showTypingDots();
 
@@ -3505,14 +3496,30 @@ function getRecentLocations() {
 function toggleLocDropdown() {
   const dd = document.getElementById('locDropdown');
   const arrow = document.getElementById('locArrow');
+  const backdrop = document.getElementById('locBackdrop');
   _locDropdownOpen = !_locDropdownOpen;
-  dd.classList.toggle('open', _locDropdownOpen);
-  arrow.style.transform = _locDropdownOpen ? 'rotate(180deg)' : '';
+
   if (_locDropdownOpen) {
+    const bar = document.getElementById('locBar');
+    const rect = bar.getBoundingClientRect();
+    const viewW = window.innerWidth;
+    const ddW = Math.min(viewW - 32, 448);
+    const leftPos = Math.max(16, (viewW - ddW) / 2);
+    dd.style.top = (rect.bottom + 6) + 'px';
+    dd.style.left = leftPos + 'px';
+    dd.style.right = (viewW - leftPos - ddW) + 'px';
+    dd.style.width = ddW + 'px';
+    dd.classList.add('open');
+    arrow.style.transform = 'rotate(180deg)';
+    if (backdrop) backdrop.style.display = 'block';
     renderRecentLocations();
-    // Show current GPS name in dropdown
     const gpsName = document.getElementById('appLocName').textContent;
-    document.getElementById('ddGPSName').textContent = gpsName || 'Tap to detect';
+    const ddGPS = document.getElementById('ddGPSName');
+    if (ddGPS) ddGPS.textContent = gpsName || 'Tap — GPS detect होगी';
+  } else {
+    dd.classList.remove('open');
+    arrow.style.transform = '';
+    if (backdrop) backdrop.style.display = 'none';
   }
 }
 
@@ -3521,16 +3528,22 @@ function closeLocDropdown() {
   _locDropdownOpen = false;
   const dd = document.getElementById('locDropdown');
   const arrow = document.getElementById('locArrow');
+  const backdrop = document.getElementById('locBackdrop');
   if (dd) dd.classList.remove('open');
   if (arrow) arrow.style.transform = '';
+  if (backdrop) backdrop.style.display = 'none';
 }
+window.addEventListener('scroll', function(){ if (_locDropdownOpen) closeLocDropdown(); }, {passive:true});
+window.addEventListener('resize', function(){ if (_locDropdownOpen) closeLocDropdown(); }, {passive:true});
 
-// ── Close on outside click ──
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('#locBar') && !e.target.closest('#locDropdown')) {
+// ── Close on outside click/touch (mobile needs touchstart) ──
+function _outsideLocClose(e) {
+  if (!e.target.closest('#locWrapper')) {
     closeLocDropdown();
   }
-});
+}
+document.addEventListener('click', _outsideLocClose, true);
+document.addEventListener('touchstart', _outsideLocClose, {passive:true, capture:true});
 
 // ── Pick GPS live location ──
 function pickLocGPS() {
@@ -4019,6 +4032,7 @@ function micToggle() {
 
 function startMic() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Voice not supported on this browser', 'err'); return; }
   recognition = new SR();
   recognition.lang = botLang==='hi' ? 'hi-IN' : 'en-IN';
   recognition.continuous = false;
@@ -4027,13 +4041,12 @@ function startMic() {
   isListening = true;
   document.getElementById('micBtn').classList.add('on');
   document.getElementById('micBtn').textContent = '🔴';
-  document.getElementById('chInp').placeholder = botLang==='hi' ? '🎙️ बोलिए...' : '🎙️ Speak now...';
   document.getElementById('botStat').textContent = botLang==='hi' ? '🎙️ सुन रहा हूँ...' : '🎙️ Listening...';
 
   recognition.onresult = (e) => {
-    document.getElementById('chInp').value = e.results[0][0].transcript;
+    const transcript = e.results[0][0].transcript;
     stopMic();
-    chatSend();
+    if (transcript) chipSend(transcript);
   };
   recognition.onerror = stopMic;
   recognition.onend   = stopMic;
@@ -4045,7 +4058,7 @@ function stopMic() {
   recognition && recognition.stop();
   document.getElementById('micBtn').classList.remove('on');
   document.getElementById('micBtn').textContent = '🎙️';
-  document.getElementById('chInp').placeholder = botLang==='hi' ? 'कुछ भी पूछें...' : 'Ask anything...';
+  
   document.getElementById('botStat').textContent = botLang==='hi' ? '● Online — मदद के लिए तैयार' : '● Online — Ready to help';
 }
 </script>
