@@ -1354,67 +1354,93 @@ body {
     </div>
 
     <!-- ══ LOCATION MAP MODAL ══ -->
-    <div id="locMapModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);flex-direction:column;">
-      <!-- Modal Header -->
-      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#0f1117;border-bottom:1px solid #1e2230;flex-shrink:0;">
-        <div style="font-size:1.1rem;">📡</div>
-        <div style="flex:1;">
-          <div style="font-family:'Space Mono',monospace;font-size:0.72rem;font-weight:700;color:#00d4ff;text-transform:uppercase;letter-spacing:1px;">LIVE LOCATION MAP</div>
-          <div style="font-size:0.78rem;color:#4b5563;margin-top:1px;" id="lmSubtitle">OpenStreetMap · Free · No API Key</div>
+    <div id="locMapModal" style="display:none;position:fixed;inset:0;z-index:10000;background:#070910;flex-direction:column;">
+
+      <!-- ── Header ── -->
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px 10px;background:#0c1018;border-bottom:1px solid #1a2540;flex-shrink:0;">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#00d4ff,#6366f1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 14px rgba(0,212,255,0.3);flex-shrink:0;">📡</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'Space Mono',monospace;font-size:0.68rem;font-weight:700;color:#00d4ff;text-transform:uppercase;letter-spacing:1.5px;">LIVE LOCATION MAP</div>
+          <div style="font-size:0.7rem;color:#3d5070;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="lmSubtitle">OpenStreetMap · Nominatim · BigDataCloud · ₹0</div>
         </div>
-        <button onclick="closeLocMap()" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:6px 12px;color:#ef4444;font-weight:700;cursor:pointer;font-size:0.8rem;">✕ Close</button>
+        <button onclick="closeLocMap()" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:6px 11px;color:#ef4444;font-weight:700;cursor:pointer;font-size:0.78rem;flex-shrink:0;-webkit-tap-highlight-color:transparent;">✕</button>
       </div>
 
-      <!-- Map -->
-      <div id="lmMap" style="flex:1;min-height:0;background:#0a1222;"></div>
-
-      <!-- Bottom Info Panel -->
-      <div style="background:#0f1117;border-top:1px solid #1e2230;padding:14px 16px;flex-shrink:0;max-height:38vh;overflow-y:auto;">
-
-        <!-- Detect button -->
-        <button id="lmDetectBtn" onclick="lmDetectGPS()" style="width:100%;padding:12px;background:linear-gradient(135deg,#00d4ff,#0099bb);border:none;border-radius:10px;color:#000;font-family:'Space Mono',monospace;font-weight:700;font-size:0.85rem;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;">
-          <span id="lmBtnIcon">📍</span> <span id="lmBtnText">Detect My Location</span>
+      <!-- ── MAP (takes most space) ── -->
+      <div id="lmMap" style="flex:1;min-height:0;background:#0a1222;position:relative;">
+        <!-- Floating detect button ON the map -->
+        <button id="lmDetectBtn" onclick="lmDetectGPS()" style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:500;display:flex;align-items:center;gap:8px;padding:11px 24px;background:linear-gradient(135deg,#00d4ff,#0099bb);border:none;border-radius:99px;color:#000;font-family:'Space Mono',monospace;font-weight:700;font-size:0.82rem;cursor:pointer;box-shadow:0 4px 24px rgba(0,212,255,0.4);white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:all 0.2s;">
+          <span id="lmBtnIcon">📍</span><span id="lmBtnText">Detect My Location</span>
         </button>
-
-        <!-- Status -->
-        <div id="lmStatus" style="font-family:'Space Mono',monospace;font-size:0.72rem;color:#4b5563;margin-bottom:10px;padding:8px 10px;background:#070910;border-radius:8px;border:1px solid #1e2230;">
-          📌 GPS location detect करें
-        </div>
-
-        <!-- Data grid -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-          <div style="background:#070910;border:1px solid #1e2230;border-radius:8px;padding:9px 11px;">
-            <div style="font-family:'Space Mono',monospace;font-size:0.55rem;color:#4b5563;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Latitude</div>
-            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;color:#00d4ff;" id="lmLat">—</div>
-          </div>
-          <div style="background:#070910;border:1px solid #1e2230;border-radius:8px;padding:9px 11px;">
-            <div style="font-family:'Space Mono',monospace;font-size:0.55rem;color:#4b5563;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Longitude</div>
-            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;color:#00d4ff;" id="lmLon">—</div>
-          </div>
-          <div style="background:#070910;border:1px solid #1e2230;border-radius:8px;padding:9px 11px;">
-            <div style="font-family:'Space Mono',monospace;font-size:0.55rem;color:#4b5563;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">City</div>
-            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;color:#e8eaf0;" id="lmCity">—</div>
-          </div>
-          <div style="background:#070910;border:1px solid #1e2230;border-radius:8px;padding:9px 11px;">
-            <div style="font-family:'Space Mono',monospace;font-size:0.55rem;color:#4b5563;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">GPS Accuracy</div>
-            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;color:#10b981;" id="lmAcc">—</div>
-          </div>
-        </div>
-
-        <!-- Full address -->
-        <div style="background:#070910;border:1px solid #1e2230;border-radius:8px;padding:9px 11px;margin-bottom:10px;">
-          <div style="font-family:'Space Mono',monospace;font-size:0.55rem;color:#4b5563;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Full Address</div>
-          <div style="font-size:0.78rem;color:#9ca3af;line-height:1.5;" id="lmAddr">GPS detect karne par address aayega...</div>
-        </div>
-
-        <!-- Nearby places -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:#4b5563;text-transform:uppercase;letter-spacing:1px;">📌 Nearby Places (1km)</div>
-          <button id="lmNearbyBtn" onclick="lmSearchNearby()" disabled style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:6px;padding:4px 10px;color:#a78bfa;font-size:0.7rem;cursor:pointer;font-family:'Space Mono',monospace;">Search</button>
-        </div>
-        <div id="lmNearbyList" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
       </div>
-    </div>
+
+      <!-- ── Bottom Info Panel ── -->
+      <div style="background:#0c1018;border-top:1px solid #1a2540;flex-shrink:0;max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+
+        <!-- Status bar -->
+        <div id="lmStatus" style="margin:10px 12px 0;font-family:'Space Mono',monospace;font-size:0.7rem;color:#3d5070;padding:8px 12px;background:#070910;border-radius:8px;border:1px solid #1a2540;transition:all 0.3s;">
+          📌 GPS detect करें — exact area/colony name मिलेगा
+        </div>
+
+        <!-- ── 6-cell data grid ── -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:10px 12px 0;">
+
+          <div style="background:#070910;border:1px solid #1a2540;border-radius:8px;padding:9px 11px;" id="lmCellLat">
+            <div style="font-family:'Space Mono',monospace;font-size:0.52rem;color:#3d5070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Latitude</div>
+            <div style="font-family:'Space Mono',monospace;font-size:0.78rem;color:#00d4ff;font-weight:500;" id="lmLat">—</div>
+          </div>
+
+          <div style="background:#070910;border:1px solid #1a2540;border-radius:8px;padding:9px 11px;" id="lmCellLon">
+            <div style="font-family:'Space Mono',monospace;font-size:0.52rem;color:#3d5070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Longitude</div>
+            <div style="font-family:'Space Mono',monospace;font-size:0.78rem;color:#00d4ff;font-weight:500;" id="lmLon">—</div>
+          </div>
+
+          <div style="background:#070910;border:1px solid #1a2540;border-radius:8px;padding:9px 11px;" id="lmCellAcc">
+            <div style="font-family:'Space Mono',monospace;font-size:0.52rem;color:#3d5070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">GPS Accuracy</div>
+            <div style="font-family:'Space Mono',monospace;font-size:0.78rem;color:#10b981;" id="lmAcc">—</div>
+          </div>
+
+          <div style="background:#070910;border:1px solid #1a2540;border-radius:8px;padding:9px 11px;" id="lmCellPin">
+            <div style="font-family:'Space Mono',monospace;font-size:0.52rem;color:#3d5070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Pincode</div>
+            <div style="font-family:'Space Mono',monospace;font-size:0.78rem;color:#e8eaf0;" id="lmPin">—</div>
+          </div>
+
+          <!-- Area/Colony — full width, highlighted -->
+          <div style="grid-column:1/-1;background:#070910;border:1px solid #1a2540;border-radius:8px;padding:9px 11px;position:relative;overflow:hidden;" id="lmCellArea">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,#00d4ff,#6366f1);border-radius:3px 0 0 3px;display:none;" id="lmAreaBar"></div>
+            <div style="font-family:'Space Mono',monospace;font-size:0.52rem;color:#3d5070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Area / Colony</div>
+            <div style="font-family:'Space Mono',monospace;font-size:0.82rem;color:#00d4ff;font-weight:600;" id="lmArea">—</div>
+          </div>
+
+          <!-- State -->
+          <div style="background:#070910;border:1px solid #1a2540;border-radius:8px;padding:9px 11px;">
+            <div style="font-family:'Space Mono',monospace;font-size:0.52rem;color:#3d5070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">State</div>
+            <div style="font-size:0.76rem;color:#b0c4e8;" id="lmState">—</div>
+          </div>
+
+          <!-- Country -->
+          <div style="background:#070910;border:1px solid #1a2540;border-radius:8px;padding:9px 11px;">
+            <div style="font-family:'Space Mono',monospace;font-size:0.52rem;color:#3d5070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Country</div>
+            <div style="font-size:0.76rem;color:#b0c4e8;" id="lmCountry">—</div>
+          </div>
+
+          <!-- Full address — full width -->
+          <div style="grid-column:1/-1;background:#070910;border:1px solid #1a2540;border-radius:8px;padding:9px 11px;">
+            <div style="font-family:'Space Mono',monospace;font-size:0.52rem;color:#3d5070;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Full Address</div>
+            <div style="font-size:0.75rem;color:#7a90b8;line-height:1.55;" id="lmAddr">GPS detect karne par poora address aayega...</div>
+          </div>
+
+        </div>
+
+        <!-- ── Nearby Places ── -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 12px 6px;">
+          <div style="font-family:'Space Mono',monospace;font-size:0.58rem;color:#3d5070;text-transform:uppercase;letter-spacing:1px;">📌 Nearby Places (1 km)</div>
+          <button id="lmNearbyBtn" onclick="lmSearchNearby()" disabled style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);border-radius:6px;padding:4px 11px;color:#818cf8;font-size:0.68rem;cursor:pointer;font-family:'Space Mono',monospace;-webkit-tap-highlight-color:transparent;transition:all 0.15s;">Search</button>
+        </div>
+        <div id="lmNearbyList" style="display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 16px;"></div>
+
+      </div><!-- /bottom panel -->
+    </div><!-- /locMapModal -->
 
     <div class="sec-head"><h2>Category चुनें</h2><span onclick="clearAppCat()">All</span></div>
     <div class="cats-row" id="appCatRow">
@@ -2290,13 +2316,19 @@ async function reverseGeocode(lat, lon) {
     const neighTier  = admin.find(t => t.order >= 6 && t.name && t.name !== d.countryName);
     const subTier    = admin.find(t => t.order === 5 && t.name && t.name !== d.countryName);
 
+    // Priority 4: informative tiers — colony/mohalla names (good for Ghaziabad, Delhi etc.)
+    const colonyTier = inform.find(t => t.order >= 8 && t.name &&
+      !/india|uttar pradesh|haryana|delhi|national capital/i.test(t.name));
+    const localityTier = inform.find(t => t.order >= 6 && t.name &&
+      !/india|uttar pradesh|haryana|delhi|national capital/i.test(t.name));
+
     // City: order=4
     const cityTier   = admin.find(t => t.order === 4 && t.name);
     const cityName   = (cityTier || {}).name || d.city || d.locality || '';
     const postcode   = d.postcode || '';
 
-    // Pick best local name — sector > block > neighbourhood > suburb > locality
-    const localName  = (sectorTier || blockTier || neighTier || subTier || {}).name || d.locality || '';
+    // Pick best local name — sector > block > colony > neighbourhood > suburb > locality
+    const localName  = (sectorTier || blockTier || colonyTier || neighTier || localityTier || subTier || {}).name || d.locality || '';
 
     // Skip garbage — if localName is a village/hamlet AND sector exists nearby, prefer sector
     const isVillage  = /mamura|village|gaon/i.test(localName);
@@ -2324,7 +2356,39 @@ async function reverseGeocode(lat, lon) {
 
   } catch(e) {}
 
-  // ── STEP 2: Nominatim zoom=14 — city-district level (skip village names) ──
+  // ── STEP 2: Nominatim zoom=18 — street/neighbourhood level ──
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+      { headers: { 'Accept-Language': 'en', 'User-Agent': 'NextTurnAI/1.0' } }
+    );
+    const d  = await res.json();
+    const a  = d.address || {};
+
+    // Priority: neighbourhood > suburb > quarter > city_district > county
+    const neighbourhood = a.neighbourhood || a.quarter || '';
+    const suburb        = a.suburb || a.city_district || '';
+    const pincode       = a.postcode || '';
+    const city          = a.city || a.town || a.county || '';
+
+    // Prefer neighbourhood (most specific area name — e.g. "Raj Nagar", "Kavi Nagar")
+    const localArea = neighbourhood || suburb;
+
+    if (localArea && city && localArea !== city) {
+      window._fullAddress = [localArea, pincode, city].filter(Boolean).join(', ');
+      return localArea + (pincode ? ', ' + pincode : '') + ', ' + city;
+    }
+    if (localArea) {
+      window._fullAddress = [localArea, pincode].filter(Boolean).join(', ');
+      return localArea + (pincode ? ', ' + pincode : '');
+    }
+    if (city) {
+      window._fullAddress = [pincode, city].filter(Boolean).join(', ');
+      return city + (pincode ? ' - ' + pincode : '');
+    }
+  } catch(e) {}
+
+  // ── STEP 3: Nominatim zoom=14 — city-district level fallback ──
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`,
@@ -2333,13 +2397,9 @@ async function reverseGeocode(lat, lon) {
     const d   = await res.json();
     const a   = d.address || {};
 
-    // At zoom=14, Nominatim gives suburb/city_district — more useful than village
     const suburb   = a.suburb || a.city_district || a.county || '';
     const pincode  = a.postcode || '';
     const city     = a.city || a.town || '';
-
-    // Check for sector in suburb
-    const hasSector = /sector[\s\-]*\d+/i.test(suburb);
 
     if (suburb && city && suburb !== city) {
       window._fullAddress = [suburb, pincode, city].filter(Boolean).join(', ');
@@ -2347,13 +2407,6 @@ async function reverseGeocode(lat, lon) {
     }
     if (city) return city + (pincode ? ' - ' + pincode : '');
 
-  } catch(e) {}
-
-  // ── STEP 3: IP fallback ──
-  try {
-    const r = await fetch('https://ipapi.co/json/');
-    const d = await r.json();
-    if (d.city) return d.city + (d.postal ? ' - ' + d.postal : '');
   } catch(e) {}
 
   return null;
@@ -2464,26 +2517,14 @@ function refreshAppLoc(forceRefresh) {
   btn.textContent = '⏳';
   document.getElementById('appLocName').textContent = '📡 Locating...';
 
-  // GPS denied → use IP coords ONLY for weather, show GPS prompt
+  // GPS denied → use IP coords then run full reverseGeocode() for accurate area name
   const tryIPLocation = async () => {
     try {
       const ipr = await fetch('https://ipapi.co/json/');
       const ipd = await ipr.json();
       if (ipd && ipd.latitude) {
-        // Load weather silently with IP coords
-        // For location name — use BigDataCloud with IP coords (more accurate than ipapi city)
-        const bgRes = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${ipd.latitude}&longitude=${ipd.longitude}&localityLanguage=en`
-        );
-        const bgD = await bgRes.json();
-        const admin = (bgD.localityInfo && bgD.localityInfo.administrative) || [];
-        const inform = (bgD.localityInfo && bgD.localityInfo.informative) || [];
-        const sectorT = [...admin,...inform].find(t => t.name && /sector[\s\-]*\d+/i.test(t.name));
-        const cityT = admin.find(t => t.order === 4 && t.name);
-        const localT = admin.find(t => t.order >= 5 && t.name);
-        const locName = (sectorT || localT || {}).name
-          ? ((sectorT || localT).name + ', ' + ((cityT||{}).name || bgD.city || ''))
-          : (bgD.city || ipd.city || '');
+        // Use full reverseGeocode() — BigDataCloud + Nominatim — for accurate area name
+        const locName = await reverseGeocode(ipd.latitude, ipd.longitude);
         if (locName) {
           _cachedLocation = locName;
           document.getElementById('appLocName').textContent = locName;
@@ -3274,10 +3315,11 @@ window.addEventListener('load', () => {
 
 /* ── LOCATION MAP MODAL ANIMATIONS ── */
 @keyframes lmSpin  { to { transform: rotate(360deg); } }
-@keyframes lmPulse { 0%,100%{transform:scale(1);opacity:0.7;} 100%{transform:scale(2.4);opacity:0;} }
-.leaflet-popup-content-wrapper { background:#0f1117!important;border:1px solid #00d4ff!important;border-radius:10px!important; }
-.leaflet-popup-content { color:#e8eaf0!important; }
-.leaflet-popup-tip { background:#0f1117!important; }
+@keyframes lmPulse { 0%{transform:scale(1);opacity:0.8} 100%{transform:scale(2.6);opacity:0} }
+@keyframes lmChipIn{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+.leaflet-popup-content-wrapper { background:#0c1018!important;border:1px solid rgba(0,212,255,0.4)!important;border-radius:10px!important; }
+.leaflet-popup-content { color:#dce8ff!important; }
+.leaflet-popup-tip { background:#0c1018!important; }
 
 </style>
 
@@ -4151,11 +4193,20 @@ function stopMic() {
 }
 
 // ══════════════════════════════════════════════════════
-// LOCATION MAP SYSTEM — Leaflet + OSM (FREE, NO API KEY)
+// LOCATION MAP SYSTEM — v49
+// Prompt se seedha implement: 4-layer geocoding
+//
+// Layer 0: NOIDA_SECTORS bbox         (instant, no API)
+// Layer 1: BigDataCloud               (sector/colony/mohalla)
+// Layer 2: Nominatim zoom=18          (neighbourhood/suburb)
+// Layer 3: Nominatim zoom=14          (city-district fallback)
+//
+// Extra: Overpass API for nearby places (1km)
+// Cost: ₹0 — zero paid APIs
 // ══════════════════════════════════════════════════════
 let _lmMap = null;
 let _lmMarker = null;
-let _lmCircle = null;
+let _lmAccCircle = null;   // GPS accuracy circle
 let _lmLat = null;
 let _lmLon = null;
 
@@ -4166,33 +4217,32 @@ function openLocMap() {
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 
-  // Init map only once
   if (!_lmMap) {
     setTimeout(() => {
-      _lmMap = L.map('lmMap', {
-        center: [20.5937, 78.9629], // Default: India
-        zoom: 4,
-        zoomControl: true,
-      });
-
-      // OpenStreetMap tiles — FREE, no API key
+      // Init Leaflet map with OSM tiles (free, no key)
+      _lmMap = L.map('lmMap', { center: [20.5937, 78.9629], zoom: 4, zoomControl: true });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
+        attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19,
       }).addTo(_lmMap);
 
-      // If we already have location from main app — show it
-      const savedLat = parseFloat(localStorage.getItem('ntai_lastLat'));
-      const savedLon = parseFloat(localStorage.getItem('ntai_lastLon'));
-      const savedLoc = localStorage.getItem('ntai_lastLoc');
-      if (savedLat && savedLon && !isNaN(savedLat)) {
-        _lmLat = savedLat;
-        _lmLon = savedLon;
-        _lmPlaceMarker(savedLat, savedLon, savedLoc || '');
-        document.getElementById('lmAddr').textContent = savedLoc || 'Cached location';
-        document.getElementById('lmNearbyBtn').disabled = false;
-        lmFillCoords(savedLat, savedLon, null);
-      }
+      // If cached location exists — show it instantly
+      try {
+        const lat = parseFloat(localStorage.getItem('ntai_lastLat'));
+        const lon = parseFloat(localStorage.getItem('ntai_lastLon'));
+        if (lat && lon && !isNaN(lat)) {
+          _lmLat = lat; _lmLon = lon;
+          _lmPlaceMarker(lat, lon, localStorage.getItem('ntai_lastLoc') || '');
+          lmFillCoords(lat, lon, null);
+          const loc = localStorage.getItem('ntai_lastLoc') || '';
+          if (loc) {
+            document.getElementById('lmArea').textContent = loc;
+            document.getElementById('lmAreaBar').style.display = 'block';
+            document.getElementById('lmSubtitle').textContent = loc;
+            document.getElementById('lmNearbyBtn').disabled = false;
+          }
+        }
+      } catch(e) {}
     }, 200);
   } else {
     setTimeout(() => _lmMap.invalidateSize(), 100);
@@ -4205,187 +4255,331 @@ function closeLocMap() {
   document.body.style.overflow = '';
 }
 
-// ── Detect GPS from map modal ──
+// ── STEP 1: Browser GPS ──
 function lmDetectGPS() {
   if (!navigator.geolocation) {
-    document.getElementById('lmStatus').textContent = '❌ Geolocation not supported';
+    _lmSetStatus('❌ Geolocation not supported in this browser', 'err');
     return;
   }
-
-  const btn = document.getElementById('lmDetectBtn');
+  const btn  = document.getElementById('lmDetectBtn');
   const icon = document.getElementById('lmBtnIcon');
   const text = document.getElementById('lmBtnText');
   btn.disabled = true;
-  icon.innerHTML = '<span style="display:inline-block;animation:lmSpin 1s linear infinite">⟳</span>';
-  text.textContent = 'Detecting...';
-  document.getElementById('lmStatus').style.color = '#00d4ff';
-  document.getElementById('lmStatus').textContent = '📡 GPS requesting...';
+  icon.innerHTML = '<span style="display:inline-block;animation:lmSpin 0.9s linear infinite">⟳</span>';
+  text.textContent = 'Detecting GPS...';
+  _lmSetStatus('📡 GPS signal माँगा जा रहा है...', 'load');
 
+  // Browser Geolocation API — built-in, totally free
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
       _lmLat = pos.coords.latitude;
       _lmLon = pos.coords.longitude;
       const acc = pos.coords.accuracy;
 
-      // Update coords display
+      // Show coords + accuracy immediately
       lmFillCoords(_lmLat, _lmLon, acc);
+      _lmSetStatus('🌐 Exact area/colony detect हो रही है...', 'load');
 
-      // Place marker on map
+      // Place marker on map NOW (before geocoding completes)
+      _lmPlaceMarker(_lmLat, _lmLon, '📡 Fetching address...', acc);
+
+      // STEP 2: Full 4-layer reverse geocoding
       await lmReverseGeocode(_lmLat, _lmLon);
 
-      // Reset button
+      // Done
       btn.disabled = false;
       icon.textContent = '✅';
-      text.textContent = 'Location Detected!';
-      setTimeout(() => { icon.textContent = '📍'; text.textContent = 'Re-Detect Location'; }, 2000);
-
-      // Enable nearby search
+      text.textContent = 'Re-Detect';
+      setTimeout(() => { icon.textContent = '📍'; text.textContent = 'Detect My Location'; }, 3000);
       document.getElementById('lmNearbyBtn').disabled = false;
-      // appLocName is updated inside lmReverseGeocode() with sector-level name
     },
     (err) => {
       btn.disabled = false;
       icon.textContent = '📍';
       text.textContent = 'Detect My Location';
-      const msgs = {1:'🔒 Permission denied', 2:'📡 GPS unavailable', 3:'⏱️ Timeout'};
-      document.getElementById('lmStatus').style.color = '#ef4444';
-      document.getElementById('lmStatus').textContent = msgs[err.code] || '❌ Error';
+      const msgs = { 1:'🔒 Permission denied — browser settings mein allow karein', 2:'📡 GPS unavailable', 3:'⏱️ Request timed out' };
+      _lmSetStatus(msgs[err.code] || '❌ GPS error', 'err');
     },
     { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
   );
 }
 
-// ── Reverse geocode via Nominatim (FREE) ──
+// ── STEP 2: 4-Layer Reverse Geocoding ──
+// Prompt mein diya gaya exact system implement kiya hai:
+// Layer 1: BigDataCloud (sector/colony detection)
+// Layer 2: Nominatim zoom=18 (neighbourhood)
+// Layer 3: Nominatim zoom=14 (city-district fallback)
 async function lmReverseGeocode(lat, lon) {
-  document.getElementById('lmStatus').textContent = '🌐 Sector/Area detect हो रही है...';
-  try {
-    // ── USE MAIN APP's reverseGeocode() — has BigDataCloud + Noida sector bbox + Nominatim ──
-    // This gives "Sector 63, Noida" instead of just "Ghaziabad, Uttar Pradesh"
-    const display = await reverseGeocode(lat, lon);
-    const fullAddr = window._fullAddress || display || 'Address not found';
 
-    // For Nominatim full details (state, country, pin) — secondary fetch
-    let state = '', country = 'India', pin = '';
-    try {
-      const nr = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`,
-        { headers: { 'Accept-Language': 'en' } }
-      );
-      const nd = await nr.json();
-      const a = nd.address || {};
-      state   = a.state || '';
-      country = a.country || 'India';
-      pin     = a.postcode || '';
-    } catch(e) {}
-
-    // Update map modal UI
-    document.getElementById('lmAddr').textContent = fullAddr;
-    document.getElementById('lmCity').textContent = display + (state ? ', ' + state : '') + ', ' + country;
-    document.getElementById('lmSubtitle').textContent = display + ', ' + country;
-    document.getElementById('lmStatus').style.color = '#10b981';
-    document.getElementById('lmStatus').textContent = '✅ ' + display + (pin ? ' — ' + pin : '');
-
-    // Place/update map marker with accurate address
-    _lmPlaceMarker(lat, lon, fullAddr);
-
-    // ── UPDATE MAIN APP LOCATION BAR with sector-level name ──
-    document.getElementById('appLocName').textContent = display;
-    const locLabel = document.querySelector('.lb-label');
-    if (locLabel) locLabel.textContent = 'CURRENT LOCATION';
-
-    // Save to localStorage & recent list
-    try {
-      localStorage.setItem('ntai_lastLoc', display);
-      localStorage.setItem('ntai_lastLat', lat);
-      localStorage.setItem('ntai_lastLon', lon);
-      if (typeof saveRecentLocation === 'function') saveRecentLocation(display, lat, lon);
-    } catch(e) {}
-
-  } catch(e) {
-    document.getElementById('lmStatus').style.color = '#f59e0b';
-    document.getElementById('lmStatus').textContent = '⚠️ Address lookup failed';
+  // ── Layer 0: Noida sectors instant bbox check ──
+  const NOIDA_SECTORS = [
+    {s:'Sector 62',lat1:28.615,lat2:28.625,lon1:77.365,lon2:77.380},
+    {s:'Sector 63',lat1:28.608,lat2:28.618,lon1:77.370,lon2:77.390},
+    {s:'Sector 64',lat1:28.600,lat2:28.612,lon1:77.370,lon2:77.388},
+    {s:'Sector 18',lat1:28.568,lat2:28.578,lon1:77.320,lon2:77.335},
+    {s:'Sector 15',lat1:28.583,lat2:28.593,lon1:77.310,lon2:77.325},
+    {s:'Sector 16',lat1:28.575,lat2:28.585,lon1:77.315,lon2:77.330},
+    {s:'Sector 50',lat1:28.590,lat2:28.600,lon1:77.350,lon2:77.365},
+    {s:'Sector 51',lat1:28.595,lat2:28.605,lon1:77.355,lon2:77.370},
+    {s:'Sector 137',lat1:28.479,lat2:28.489,lon1:77.370,lon2:77.390},
+  ];
+  const hit = NOIDA_SECTORS.find(n => lat>=n.lat1&&lat<=n.lat2&&lon>=n.lon1&&lon<=n.lon2);
+  if (hit) {
+    _lmFillAddress(hit.s, hit.s + ', Noida', '', 'Uttar Pradesh', 'India', hit.s+', Noida, UP');
+    _lmPlaceMarker(lat, lon, hit.s + ', Noida', null);
+    _lmSetStatus('✅ ' + hit.s + ', Noida — Pinpointed!', 'ok');
+    _lmSyncMainBar(hit.s + ', Noida');
+    return;
   }
+
+  // ── Layer 1: BigDataCloud — best for NCR sectors & colonies ──
+  try {
+    const r = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`
+    );
+    const d = await r.json();
+    const adm = d.localityInfo?.administrative || [];
+    const inf = d.localityInfo?.informative || [];
+    const all = [...adm, ...inf];
+
+    // Find most specific name — sector > block > colony > neigh > suburb
+    const sector = all.find(t => t.name && /sector[\s\-]*\d+/i.test(t.name));
+    const block  = all.find(t => t.name && /block[\s\-]*[A-Z0-9]+/i.test(t.name));
+    // Colony/mohalla from informative tier — skip state/country names
+    const colony = inf.find(t => t.order >= 8 && t.name &&
+      !/india|pradesh|haryana|delhi|national capital|maharashtra|karnataka|tamil|rajasthan|gujarat/i.test(t.name));
+    const neigh  = adm.find(t => t.order >= 6 && t.name && t.name !== d.countryName);
+    const suburb = adm.find(t => t.order === 5 && t.name && t.name !== d.countryName);
+    const cityT  = adm.find(t => t.order === 4 && t.name);
+    const stateT = adm.find(t => t.order === 3 && t.name);
+
+    const area    = (sector||block||colony||neigh||suburb||{}).name || d.locality || '';
+    const city    = cityT?.name || d.city || '';
+    const state   = stateT?.name || d.principalSubdivision || '';
+    const country = d.countryName || 'India';
+    const pin     = d.postcode || '';
+    const isJunk  = /mamura|village|gram\b|gaon/i.test(area);
+
+    if (area && !isJunk && city && area !== city) {
+      _lmFillAddress(area, [area, city].join(', '), pin, state, country,
+        [area, pin, city, state].filter(Boolean).join(', '));
+      _lmPlaceMarker(lat, lon, [area, city, state].filter(Boolean).join(', '), null);
+      _lmSetStatus('✅ ' + area + ', ' + city, 'ok');
+      _lmSyncMainBar(area + ', ' + city);
+      return;
+    }
+    if (city) {
+      _lmFillAddress(city, city, pin, state, country, [pin, city, state].filter(Boolean).join(', '));
+      _lmPlaceMarker(lat, lon, [city, state].filter(Boolean).join(', '), null);
+      _lmSetStatus('✅ ' + city + (state ? ', ' + state : ''), 'ok');
+      _lmSyncMainBar(city + (state ? ', ' + state : ''));
+      return;
+    }
+  } catch(e) {}
+
+  // ── Layer 2: Nominatim zoom=18 — neighbourhood/suburb level ──
+  try {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+      { headers: { 'Accept-Language':'en', 'User-Agent':'NextTurnAI/1.0' } }
+    );
+    const d = await r.json();
+    const a = d.address || {};
+    // Nominatim field priority: neighbourhood > quarter > suburb > city_district
+    const area  = a.neighbourhood || a.quarter || a.suburb || a.city_district || '';
+    const city  = a.city || a.town || a.village || a.county || '';
+    const state = a.state || '';
+    const pin   = a.postcode || '';
+    const full  = d.display_name || '';
+    if (area && city && area !== city) {
+      _lmFillAddress(area, [area, city].join(', '), pin, state, a.country||'India', full||[area,pin,city,state].filter(Boolean).join(', '));
+      _lmPlaceMarker(lat, lon, [area, city].join(', '), null);
+      _lmSetStatus('✅ ' + area + ', ' + city, 'ok');
+      _lmSyncMainBar(area + ', ' + city);
+      return;
+    }
+    if (city) {
+      _lmFillAddress(city, city, pin, state, a.country||'India', full || [pin,city,state].filter(Boolean).join(', '));
+      _lmPlaceMarker(lat, lon, [city, state].join(', '), null);
+      _lmSetStatus('✅ ' + city + (state ? ', ' + state : ''), 'ok');
+      _lmSyncMainBar(city + (state ? ', ' + state : ''));
+      return;
+    }
+  } catch(e) {}
+
+  // ── Layer 3: Nominatim zoom=14 — city-district fallback ──
+  try {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`,
+      { headers: { 'Accept-Language':'en', 'User-Agent':'NextTurnAI/1.0' } }
+    );
+    const d = await r.json();
+    const a = d.address || {};
+    const area  = a.suburb || a.city_district || '';
+    const city  = a.city || a.town || '';
+    const state = a.state || '';
+    const pin   = a.postcode || '';
+    const disp  = (area && city) ? area + ', ' + city : city || area;
+    _lmFillAddress(disp, disp, pin, state, a.country||'India', d.display_name || disp);
+    _lmPlaceMarker(lat, lon, disp, null);
+    _lmSetStatus('✅ ' + disp, 'ok');
+    _lmSyncMainBar(disp);
+    return;
+  } catch(e) {}
+
+  _lmSetStatus('⚠️ Address fetch failed — GPS coordinates saved', 'err');
 }
 
-// ── Place pulsing marker on map ──
-function _lmPlaceMarker(lat, lon, addr) {
-  if (!_lmMap) return;
-  if (_lmMarker) _lmMap.removeLayer(_lmMarker);
-  if (_lmCircle) _lmMap.removeLayer(_lmCircle);
+// ── Fill all address fields in modal ──
+function _lmFillAddress(area, areaCity, pin, state, country, fullAddr) {
+  document.getElementById('lmArea').textContent    = areaCity || area || '—';
+  document.getElementById('lmAreaBar').style.display = 'block';
+  document.getElementById('lmCellArea').style.borderColor = 'rgba(0,212,255,0.2)';
+  document.getElementById('lmPin').textContent     = pin     || '—';
+  document.getElementById('lmState').textContent   = state   || '—';
+  document.getElementById('lmCountry').textContent = country || '—';
+  document.getElementById('lmAddr').textContent    = fullAddr|| '—';
+  document.getElementById('lmSubtitle').textContent = areaCity || area || 'Location detected';
 
+  // Save to app cache
+  try {
+    if (areaCity) localStorage.setItem('ntai_lastLoc', areaCity);
+    localStorage.setItem('ntai_lastLat', _lmLat);
+    localStorage.setItem('ntai_lastLon', _lmLon);
+    if (typeof saveRecentLocation === 'function' && areaCity)
+      saveRecentLocation(areaCity, _lmLat, _lmLon);
+  } catch(e) {}
+}
+
+// ── Sync main app location bar ──
+function _lmSyncMainBar(name) {
+  const el = document.getElementById('appLocName');
+  if (el && name) el.textContent = name;
+  const ddGPS = document.getElementById('ddGPSName');
+  if (ddGPS && name) ddGPS.textContent = name;
+}
+
+// ── Place pulsing marker + accuracy circle ──
+function _lmPlaceMarker(lat, lon, addr, acc) {
+  if (!_lmMap) return;
+  if (_lmMarker)    _lmMap.removeLayer(_lmMarker);
+  if (_lmAccCircle) _lmMap.removeLayer(_lmAccCircle);
+
+  // Custom pulsing marker icon
   const icon = L.divIcon({
     className: '',
-    html: `<div style="position:relative;width:20px;height:20px;">
-      <div style="position:absolute;top:0;left:0;width:20px;height:20px;border:2px solid #00d4ff;border-radius:50%;animation:lmPulse 2s infinite;opacity:0.7;"></div>
-      <div style="position:absolute;top:3px;left:3px;width:14px;height:14px;background:#00d4ff;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(0,212,255,0.8);"></div>
+    html: `<div style="position:relative;width:22px;height:22px;">
+      <div style="position:absolute;inset:0;border:2px solid #00d4ff;border-radius:50%;animation:lmPulse 2s ease-out infinite;opacity:0.7;"></div>
+      <div style="position:absolute;top:4px;left:4px;width:14px;height:14px;background:#00d4ff;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(0,212,255,0.9);"></div>
     </div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
   });
 
   _lmMarker = L.marker([lat, lon], { icon })
     .addTo(_lmMap)
-    .bindPopup(`<div style="font-family:sans-serif;padding:8px 4px;min-width:160px;"><b style="color:#00d4ff;">📍 Your Location</b><br><small style="color:#666;line-height:1.5;">${addr || ''}</small><br><code style="font-size:10px;color:#999;">${lat.toFixed(6)}, ${lon.toFixed(6)}</code></div>`)
+    .bindPopup(`
+      <div style="font-family:sans-serif;padding:10px 6px;min-width:170px;">
+        <div style="font-family:monospace;font-size:0.65rem;color:#00d4ff;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">📍 Your Location</div>
+        <div style="font-size:0.78rem;color:#c8d8f0;line-height:1.5;">${addr||''}</div>
+        <div style="font-family:monospace;font-size:0.62rem;color:#4b5563;margin-top:6px;background:#070910;padding:4px 7px;border-radius:5px;">${lat.toFixed(6)}° N · ${lon.toFixed(6)}° E</div>
+      </div>`)
     .openPopup();
 
-  _lmMap.flyTo([lat, lon], 15, { duration: 1.2 });
+  // Accuracy circle — shows GPS precision visually on map
+  if (acc && acc < 5000) {
+    _lmAccCircle = L.circle([lat, lon], {
+      radius: acc,
+      color: '#00d4ff',
+      fillColor: '#00d4ff',
+      fillOpacity: 0.04,
+      weight: 1,
+      dashArray: '4 4',
+    }).addTo(_lmMap);
+  }
+
+  _lmMap.flyTo([lat, lon], 15, { duration: 1.3 });
 }
 
-// ── Fill coord display ──
+// ── Fill lat/lon/accuracy display ──
 function lmFillCoords(lat, lon, acc) {
   document.getElementById('lmLat').textContent = lat.toFixed(6) + '°';
   document.getElementById('lmLon').textContent = lon.toFixed(6) + '°';
-  if (acc !== null) {
-    const accEl = document.getElementById('lmAcc');
-    accEl.textContent = '± ' + Math.round(acc) + 'm ' + (acc < 20 ? '(HIGH)' : acc < 100 ? '(MED)' : '(LOW)');
-    accEl.style.color = acc < 20 ? '#10b981' : acc < 100 ? '#f59e0b' : '#ef4444';
+  if (acc !== null && acc !== undefined) {
+    const el = document.getElementById('lmAcc');
+    if (acc < 20) {
+      el.textContent = '± ' + Math.round(acc) + 'm (HIGH)';
+      el.style.color = '#10b981';
+    } else if (acc < 100) {
+      el.textContent = '± ' + Math.round(acc) + 'm (MED)';
+      el.style.color = '#f59e0b';
+    } else {
+      el.textContent = '± ' + Math.round(acc) + 'm (LOW)';
+      el.style.color = '#ef4444';
+    }
   }
 }
 
-// ── Search nearby via Overpass API (FREE) ──
+// ── Status bar helper ──
+function _lmSetStatus(msg, type) {
+  const el = document.getElementById('lmStatus');
+  el.textContent = msg;
+  if (type === 'ok')   { el.style.color = '#10b981'; el.style.borderColor = 'rgba(16,185,129,0.3)'; el.style.background = 'rgba(16,185,129,0.05)'; }
+  else if (type === 'load') { el.style.color = '#00d4ff'; el.style.borderColor = 'rgba(0,212,255,0.25)'; el.style.background = 'rgba(0,212,255,0.04)'; }
+  else if (type === 'err')  { el.style.color = '#ef4444'; el.style.borderColor = 'rgba(239,68,68,0.3)';  el.style.background = 'rgba(239,68,68,0.05)'; }
+  else { el.style.color = '#3d5070'; el.style.borderColor = '#1a2540'; el.style.background = '#070910'; }
+}
+
+// ── Nearby Places — Overpass API (FREE, no key) ──
 async function lmSearchNearby() {
   if (!_lmLat || !_lmLon) return;
   const list = document.getElementById('lmNearbyList');
   const btn  = document.getElementById('lmNearbyBtn');
-  list.innerHTML = '<span style="font-size:0.75rem;color:#4b5563;font-family:monospace;">⟳ Searching...</span>';
+  list.innerHTML = '<span style="font-size:0.72rem;color:#00d4ff;font-family:monospace;">⟳ Searching via Overpass API...</span>';
   btn.disabled = true;
 
   try {
-    const query = `[out:json][timeout:10];(node["amenity"](around:1000,${_lmLat},${_lmLon});node["shop"](around:1000,${_lmLat},${_lmLon}););out body 20;`;
+    // Overpass QL query — named amenities + shops within 1000m
+    const q = `[out:json][timeout:12];(node["amenity"](around:1000,${_lmLat},${_lmLon});node["shop"](around:1000,${_lmLat},${_lmLon});node["leisure"](around:1000,${_lmLat},${_lmLon}););out body 25;`;
     const res = await fetch('https://overpass-api.de/api/interpreter', {
       method: 'POST',
-      body: 'data=' + encodeURIComponent(query),
+      body: 'data=' + encodeURIComponent(q),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
     const data = await res.json();
-    const places = (data.elements || []).filter(p => p.tags && p.tags.name).slice(0, 16);
+    const places = (data.elements||[]).filter(p => p.tags?.name).slice(0, 20);
 
     if (!places.length) {
-      list.innerHTML = '<span style="font-size:0.75rem;color:#4b5563;">No named places found nearby</span>';
+      list.innerHTML = '<span style="font-size:0.72rem;color:#3d5070;">No named places found within 1 km</span>';
       return;
     }
 
-    const emojis = {restaurant:'🍽️',cafe:'☕',fast_food:'🍔',hospital:'🏥',pharmacy:'💊',school:'🏫',bank:'🏦',atm:'💳',supermarket:'🛒',shop:'🛍️',fuel:'⛽',hotel:'🏨',park:'🌳',gym:'💪'};
+    const EM = {restaurant:'🍽️',cafe:'☕',fast_food:'🍔',bar:'🍺',hospital:'🏥',clinic:'🏥',
+      pharmacy:'💊',school:'🏫',college:'🎓',bank:'🏦',atm:'💳',fuel:'⛽',
+      supermarket:'🛒',convenience:'🏪',park:'🌳',gym:'💪',hotel:'🏨',
+      place_of_worship:'🕌',police:'👮',post_office:'📮'};
+
     list.innerHTML = '';
-    places.forEach(p => {
-      const type = p.tags.amenity || p.tags.shop || 'place';
-      const emoji = emojis[type] || '📍';
-      const dist = Math.round(lmHaversine(_lmLat, _lmLon, p.lat, p.lon));
-      const chip = document.createElement('div');
-      chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:5px 9px;background:rgba(255,255,255,0.04);border:1px solid #1e2230;border-radius:20px;cursor:pointer;font-size:0.72rem;color:#9ca3af;transition:all 0.15s;';
-      chip.innerHTML = `${emoji} <span style="color:#e8eaf0;">${p.tags.name}</span> <span style="color:#4b5563;font-size:0.62rem;">${dist}m</span>`;
-      chip.onmouseover = () => chip.style.borderColor = '#00d4ff';
-      chip.onmouseout  = () => chip.style.borderColor = '#1e2230';
+    places.forEach((p, i) => {
+      const type  = p.tags.amenity || p.tags.shop || p.tags.leisure || 'place';
+      const emoji = EM[type] || '📍';
+      const dist  = Math.round(lmHaversine(_lmLat, _lmLon, p.lat, p.lon));
+      const chip  = document.createElement('div');
+      chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:6px 10px;background:rgba(255,255,255,0.03);border:1px solid #1a2540;border-radius:20px;cursor:pointer;font-size:0.7rem;color:#7a90b8;transition:all 0.15s;animation:lmChipIn 0.2s ease both;';
+      chip.style.animationDelay = (i * 0.04) + 's';
+      chip.innerHTML = `${emoji} <span style="color:#dce8ff;font-weight:500;">${p.tags.name}</span> <span style="color:#3d5070;font-size:0.6rem;">${dist}m</span>`;
+      chip.onmouseover = () => { chip.style.borderColor = '#00d4ff'; chip.style.background = 'rgba(0,212,255,0.05)'; };
+      chip.onmouseout  = () => { chip.style.borderColor = '#1a2540'; chip.style.background = 'rgba(255,255,255,0.03)'; };
       chip.onclick = () => {
         _lmMap.flyTo([p.lat, p.lon], 17);
         L.popup().setLatLng([p.lat, p.lon])
-          .setContent(`<b>${emoji} ${p.tags.name}</b><br><small>${type}</small>`)
+          .setContent(`<div style="padding:8px 4px;font-family:sans-serif;"><b style="color:#00d4ff;">${emoji} ${p.tags.name}</b><br><small style="color:#666;">${type} · ${dist}m away</small></div>`)
           .openOn(_lmMap);
       };
       list.appendChild(chip);
     });
   } catch(e) {
-    list.innerHTML = '<span style="font-size:0.75rem;color:#ef4444;">Search failed</span>';
+    list.innerHTML = '<span style="font-size:0.72rem;color:#ef4444;">❌ Search failed — internet check karein</span>';
   } finally {
     btn.disabled = false;
     btn.textContent = '↻ Refresh';
