@@ -2025,7 +2025,7 @@ function finishCustOnboard() {
   // Trigger location detect
   refreshAppLoc();
   // Also immediately try weather from IP (fast, no GPS needed)
-  setTimeout(() => { if (!_weatherLat) _loadWeatherFromIP('Your Location'); }, 1500);
+  setTimeout(() => { if (!_weatherLat) _loadWeatherFromIP(); }, 2000);
 }
 
 function loadCustProfile() {
@@ -2425,25 +2425,41 @@ function refreshAppLoc(forceRefresh) {
   btn.textContent = '⏳';
   document.getElementById('appLocName').textContent = '📡 Locating...';
 
-  // Try GPS first, fallback to IP location
+  // GPS denied → use IP coords ONLY for weather, show GPS prompt
   const tryIPLocation = async () => {
-    const ipLoc = await getLocationByIP();
-    if (ipLoc) {
-      _cachedLocation = ipLoc;
-      document.getElementById('appLocName').textContent = ipLoc;
-      try { localStorage.setItem('ntai_lastLoc', ipLoc); } catch(e){}
-      btn.textContent = '📍';
-      toast('📍 ' + ipLoc, 'ok');
-      // Try weather with IP location coords
-      try {
-        const ipr = await fetch('https://ipapi.co/json/');
-        const ipd = await ipr.json();
-        if (ipd.latitude) loadWeather(ipd.latitude, ipd.longitude, ipLoc);
-      } catch(e) {}
-    } else {
-      document.getElementById('appLocName').textContent = saved || 'New Delhi';
-      btn.textContent = '🔄';
-    }
+    try {
+      const ipr = await fetch('https://ipapi.co/json/');
+      const ipd = await ipr.json();
+      if (ipd && ipd.latitude) {
+        // Load weather silently with IP coords
+        loadWeather(ipd.latitude, ipd.longitude, ipd.city || 'Nearby');
+        // For location name — use BigDataCloud with IP coords (more accurate than ipapi city)
+        const bgRes = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${ipd.latitude}&longitude=${ipd.longitude}&localityLanguage=en`
+        );
+        const bgD = await bgRes.json();
+        const admin = (bgD.localityInfo && bgD.localityInfo.administrative) || [];
+        const inform = (bgD.localityInfo && bgD.localityInfo.informative) || [];
+        const sectorT = [...admin,...inform].find(t => t.name && /sector[\s\-]*\d+/i.test(t.name));
+        const cityT = admin.find(t => t.order === 4 && t.name);
+        const localT = admin.find(t => t.order >= 5 && t.name);
+        const locName = (sectorT || localT || {}).name
+          ? ((sectorT || localT).name + ', ' + ((cityT||{}).name || bgD.city || ''))
+          : (bgD.city || ipd.city || '');
+        if (locName) {
+          _cachedLocation = locName;
+          document.getElementById('appLocName').textContent = locName;
+          try { localStorage.setItem('ntai_lastLoc', locName);
+                localStorage.setItem('ntai_lastLat', ipd.latitude);
+                localStorage.setItem('ntai_lastLon', ipd.longitude); } catch(e){}
+          btn.textContent = '📍';
+          return;
+        }
+      }
+    } catch(e) {}
+    // Total fallback
+    document.getElementById('appLocName').textContent = saved || '📡 GPS Allow करें';
+    btn.textContent = '🔄';
   };
 
   if (!navigator.geolocation) {
@@ -2462,7 +2478,7 @@ function refreshAppLoc(forceRefresh) {
       // GPS failed/denied — try IP location silently
       await tryIPLocation();
     },
-    { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
   );
 }
 
@@ -3101,9 +3117,12 @@ window.addEventListener('load', () => {
   if (_savedLoc) {
     document.getElementById('appLocName').textContent = _savedLoc;
     _cachedLocation = _savedLoc;
-    // Auto-load weather from cached coordinates
-    if (_savedLat && _savedLon && !isNaN(_savedLat)) {
+    // Auto-load weather from cached GPS coordinates (not IP)
+    if (_savedLat && _savedLon && !isNaN(_savedLat) && !isNaN(_savedLon)) {
       loadWeather(_savedLat, _savedLon, _savedLoc);
+    } else {
+      // No cached GPS — load from IP coords
+      setTimeout(_loadWeatherFromIP, 500);
     }
     // Silent background GPS refresh every 5 minutes
     setTimeout(() => refreshAppLoc(true), 300000);
@@ -3537,37 +3556,14 @@ async function fetchWeather(lat, lon, locName) {
 
 // Load weather using IP-based coordinates (when GPS not available)
 async function _loadWeatherFromIP(locName) {
-  // Don't reload if already loaded
-  if (_weatherLat) return;
   try {
-    document.getElementById('wDesc').textContent = 'Loading weather...';
-    document.getElementById('wLoc').textContent = locName || 'Your location';
-    const res = await fetch('https://ipapi.co/json/');
-    const d = await res.json();
-    if (d && d.latitude && d.longitude) {
-      await fetchWeather(d.latitude, d.longitude, locName || d.city);
-      _weatherLat = d.latitude;
-      _weatherLon = d.longitude;
-    } else {
-      // Try ip-api as backup
-      const res2 = await fetch('https://ip-api.com/json/?fields=lat,lon,city');
-      const d2 = await res2.json();
-      if (d2 && d2.lat) {
-        await fetchWeather(d2.lat, d2.lon, locName || d2.city);
-        _weatherLat = d2.lat;
-        _weatherLon = d2.lon;
-      }
+    const r = await fetch('https://ipapi.co/json/');
+    const d = await r.json();
+    if (d && d.latitude) {
+      const name = locName || d.city || 'Nearby';
+      loadWeather(d.latitude, d.longitude, name);
     }
-  } catch(e) {
-    document.getElementById('wDesc').textContent = 'Weather unavailable';
-  }
-}
-
-async function loadWeather(lat, lon, locName) {
-  _weatherLat = lat;
-  _weatherLon = lon;
-  document.getElementById('wDesc').textContent = 'Loading...';
-  await fetchWeather(lat, lon, locName);
+  } catch(e) {}
 }
 
 // ══════════════════════════════════════
