@@ -318,7 +318,7 @@ header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;paddin
 .greeting-sub{font-family:'Noto Sans Devanagari',sans-serif;font-size:0.82rem;color:var(--mid);margin-top:2px;}
 .user-avatar-sm{width:40px;height:40px;background:linear-gradient(135deg,var(--accent3),var(--accent));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;}
 
-.loc-bar{margin:14px 18px 0;background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color 0.2s;}
+.loc-bar{margin:0;background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color 0.2s;}
 .loc-bar:hover{border-color:rgba(0,212,255,0.3);}
 .lb-icon{font-size:1rem;}
 .lb-info{flex:1;}
@@ -825,89 +825,6 @@ body {
 .react-box.go{background:rgba(16,185,129,0.2);border-color:var(--green);color:var(--green);font-size:1.4rem;}
 
 
-/* ── WEATHER WIDGET ── */
-.weather-bar{
-  margin:0 16px 12px;
-  background:linear-gradient(135deg,rgba(14,165,233,0.12),rgba(99,102,241,0.08));
-  border:1px solid rgba(14,165,233,0.2);
-  border-radius:16px;padding:12px 16px;
-  cursor:pointer;transition:all 0.2s;
-}
-.weather-bar:hover{border-color:rgba(14,165,233,0.4);}
-.weather-top{display:flex;align-items:center;justify-content:space-between;}
-.weather-left{display:flex;align-items:center;gap:10px;}
-.weather-icon{font-size:2rem;line-height:1;}
-.weather-temp{font-size:1.8rem;font-weight:700;color:#7dd3fc;font-family:'Space Mono',monospace;line-height:1;}
-.weather-unit{font-size:0.7rem;color:#64748b;font-family:'Space Mono',monospace;}
-.weather-desc{font-size:0.75rem;color:#94a3b8;margin-top:2px;text-transform:capitalize;}
-.weather-right{text-align:right;}
-.weather-loc{font-size:0.72rem;color:#94a3b8;max-width:130px;text-align:right;line-height:1.4;}
-.weather-time{font-size:0.62rem;color:#475569;font-family:'Space Mono',monospace;margin-top:2px;}
-.weather-details{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(14,165,233,0.1);}
-.wd-item{text-align:center;}
-.wd-val{font-size:0.88rem;font-weight:700;color:#e2e8f0;font-family:'Space Mono',monospace;}
-.wd-lbl{font-size:0.58rem;color:#475569;text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;}
-.weather-loading{text-align:center;color:#475569;font-size:0.8rem;padding:8px 0;}
-.weather-forecast{display:flex;gap:6px;margin-top:10px;overflow-x:auto;padding-bottom:2px;}
-.wf-day{
-  flex-shrink:0;background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.12);
-  border-radius:10px;padding:7px 8px;text-align:center;min-width:50px;
-}
-.wf-day-name{font-size:0.6rem;color:#64748b;font-family:'Space Mono',monospace;font-weight:700;}
-.wf-icon{font-size:1.1rem;margin:3px 0;}
-.wf-temp{font-size:0.75rem;font-weight:700;color:#7dd3fc;}
-.wf-rain{font-size:0.58rem;color:#94a3b8;}
-
-
-/* ── LOCATION DROPDOWN ── */
-.loc-bar{position:relative;cursor:pointer;}
-.loc-dropdown{
-  display:none;position:absolute;
-  left:16px;right:16px;
-  top:auto;
-  background:var(--surf);
-  border:1px solid var(--border);
-  border-radius:16px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.4);
-  z-index:500;
-  overflow:hidden;
-  margin-top:4px;
-}
-.loc-dropdown.open{display:block;animation:ddSlide 0.2s ease;}
-@keyframes ddSlide{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
-
-.loc-dd-item{
-  display:flex;align-items:center;gap:12px;
-  padding:12px 16px;cursor:pointer;
-  transition:background 0.15s;
-  border-bottom:1px solid rgba(255,255,255,0.04);
-}
-.loc-dd-item:hover{background:var(--surf2);}
-.loc-dd-gps{background:rgba(0,212,255,0.04);}
-.loc-dd-gps:hover{background:rgba(0,212,255,0.08);}
-.loc-dd-icon{font-size:1.2rem;flex-shrink:0;}
-.loc-dd-info{flex:1;min-width:0;}
-.loc-dd-label{font-size:0.58rem;font-weight:700;letter-spacing:1px;color:var(--accent);font-family:'Space Mono',monospace;text-transform:uppercase;}
-.loc-dd-name{font-size:0.85rem;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
-.loc-dd-sub{font-size:0.68rem;color:var(--dim);margin-top:1px;}
-.loc-dd-badge{font-size:0.55rem;font-weight:700;color:var(--green);border:1px solid var(--green);padding:2px 6px;border-radius:6px;font-family:'Space Mono',monospace;flex-shrink:0;}
-.loc-dd-section{
-  font-size:0.62rem;font-weight:700;letter-spacing:1px;
-  color:var(--dim);padding:8px 16px 6px;
-  text-transform:uppercase;font-family:'Space Mono',monospace;
-  background:var(--surf2);
-}
-.loc-dd-search-row{padding:10px 12px;border-top:1px solid var(--border);}
-.loc-dd-search{
-  width:100%;background:var(--surf2);
-  border:1px solid var(--border);border-radius:10px;
-  padding:9px 12px;color:var(--text);font-size:0.85rem;
-  outline:none;box-sizing:border-box;
-}
-.loc-dd-search:focus{border-color:var(--accent);}
-.loc-dd-del{font-size:0.75rem;color:var(--dim);cursor:pointer;padding:4px;flex-shrink:0;}
-.loc-dd-del:hover{color:#f87171;}
-.loc-dd-empty{text-align:center;padding:16px;color:var(--dim);font-size:0.8rem;}
 
 /* ══ CUSTOMER NOTIFICATION MODAL ══ */
 .notif-modal-backdrop{
@@ -1387,75 +1304,38 @@ body {
       </div>
     </div>
 
-    <!-- Location Bar with Dropdown -->
-    <div class="loc-bar" onclick="toggleLocDropdown()" id="locBar">
-      <div class="lb-icon">📍</div>
-      <div class="lb-info">
-        <div class="lb-label" id="locLabel">CURRENT LOCATION</div>
-        <div class="lb-name" id="appLocName">Location detect हो रही है...</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <div id="appLocBtn" onclick="event.stopPropagation();refreshAppLoc(true)" 
-             style="font-size:0.9rem;cursor:pointer;padding:4px;">🔄</div>
-        <div id="locArrow" style="font-size:0.75rem;color:var(--dim);transition:transform 0.2s;">▼</div>
-      </div>
-    </div>
-
-    <!-- Location Dropdown -->
-    <div class="loc-dropdown" id="locDropdown">
-      <!-- Current GPS -->
-      <div class="loc-dd-item loc-dd-gps" onclick="pickLocGPS()">
-        <div class="loc-dd-icon">📡</div>
-        <div class="loc-dd-info">
-          <div class="loc-dd-label">LIVE GPS LOCATION</div>
-          <div class="loc-dd-name" id="ddGPSName">Detecting...</div>
+    <!-- ── LOCATION BAR ── -->
+    <div id="locWrapper">
+      <div class="loc-bar" id="locBar" onclick="toggleLocDropdown()">
+        <div class="lb-icon">📍</div>
+        <div class="lb-info">
+          <div class="lb-label">CURRENT LOCATION</div>
+          <div class="lb-name" id="appLocName">Location detect हो रही है...</div>
         </div>
-        <div class="loc-dd-badge">LIVE</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <span id="appLocBtn" onclick="event.stopPropagation();refreshAppLoc(true)" style="cursor:pointer;color:var(--dim);font-size:0.9rem;">🔄</span>
+          <span id="locArrow" style="font-size:0.7rem;color:var(--dim);transition:transform 0.2s;display:inline-block;">▼</span>
+        </div>
       </div>
-      <!-- Divider -->
-      <div class="loc-dd-section">📌 Recent Locations</div>
-      <!-- Recent locations list -->
-      <div id="locRecentList"></div>
-      <!-- Search -->
-      <div class="loc-dd-search-row">
-        <input class="loc-dd-search" id="locSearchInp" 
-               placeholder="🔍 City या Sector search करें..." 
-               oninput="locSearch(this.value)"
-               onclick="event.stopPropagation()">
-      </div>
-      <div id="locSearchResults"></div>
-    </div>
-
-    <!-- Nearby areas bar -->
-    <div id="nearbyAreasBar" style="display:none;margin:4px 16px 0;font-size:0.68rem;color:var(--dim);font-family:'Space Mono',monospace;padding:5px 10px;background:rgba(0,212,255,0.04);border-radius:8px;border:1px solid rgba(0,212,255,0.08);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-
-    <!-- ── WEATHER WIDGET ── -->
-    <div class="weather-bar" id="weatherBar" onclick="toggleWeatherDetails()">
-      <div class="weather-top">
-        <div class="weather-left">
-          <div class="weather-icon" id="wIcon">🌡️</div>
-          <div>
-            <div class="weather-temp" id="wTemp">--<span class="weather-unit">°C</span></div>
-            <div class="weather-desc" id="wDesc">Loading weather...</div>
+      <!-- Dropdown -->
+      <div id="locDropdown">
+        <div class="loc-dd-item loc-dd-gps" onclick="pickLocGPS()">
+          <div class="loc-dd-icon">📡</div>
+          <div class="loc-dd-info">
+            <div class="loc-dd-label">LIVE GPS LOCATION</div>
+            <div class="loc-dd-name" id="ddGPSName">Tap करें — GPS detect होगी</div>
           </div>
+          <div class="loc-dd-badge">LIVE</div>
         </div>
-        <div class="weather-right">
-          <div class="weather-loc" id="wLoc">Detecting...</div>
-          <div class="weather-time" id="wTime"></div>
+        <div class="loc-dd-section">📌 Recent Locations</div>
+        <div id="locRecentList"></div>
+        <div class="loc-dd-search-row">
+          <input class="loc-dd-search" id="locSearchInp"
+            placeholder="🔍 City या Sector search करें..."
+            oninput="locSearch(this.value)"
+            onclick="event.stopPropagation()">
         </div>
-      </div>
-      <div id="weatherDetails" style="display:block;">
-        <div class="weather-details">
-          <div class="wd-item"><div class="wd-val" id="wHumid">--%</div><div class="wd-lbl">Humidity</div></div>
-          <div class="wd-item"><div class="wd-val" id="wWind">-- km/h</div><div class="wd-lbl">Wind</div></div>
-          <div class="wd-item"><div class="wd-val" id="wFeels">--°</div><div class="wd-lbl">Feels Like</div></div>
-        </div>
-        <div class="weather-details" style="margin-top:4px;">
-          <div class="wd-item"><div class="wd-val" id="wHigh">--°</div><div class="wd-lbl">High</div></div>
-          <div class="wd-item"><div class="wd-val" id="wLow">--°</div><div class="wd-lbl">Low</div></div>
-          <div class="wd-item"><div class="wd-val" id="wRain">--%</div><div class="wd-lbl">Rain</div></div>
-        </div>
-        <div class="weather-forecast" id="wForecast"></div>
+        <div id="locSearchResults"></div>
       </div>
     </div>
 
@@ -2106,7 +1986,6 @@ function finishCustOnboard() {
   // Trigger location detect
   refreshAppLoc();
   // Also immediately try weather from IP (fast, no GPS needed)
-  setTimeout(() => { if (!_weatherLat) _loadWeatherFromIP(); }, 2000);
 }
 
 function loadCustProfile() {
@@ -2450,8 +2329,7 @@ async function setLocationDisplay(lat, lon) {
   }
 
   // Load weather
-  loadWeather(lat, lon, display);
-
+  
   // Load nearby areas (async, non-blocking)
   getNearbyAreas(lat, lon).then(areas => {
     if (areas.length > 0) {
@@ -2499,7 +2377,6 @@ function refreshAppLoc(forceRefresh) {
     document.getElementById('appLocName').textContent = saved;
     _cachedLocation = saved;
     // Still load weather even from cache — use IP for coords
-    _loadWeatherFromIP(saved);
     return;
   }
 
@@ -2513,7 +2390,6 @@ function refreshAppLoc(forceRefresh) {
       const ipd = await ipr.json();
       if (ipd && ipd.latitude) {
         // Load weather silently with IP coords
-        loadWeather(ipd.latitude, ipd.longitude, ipd.city || 'Nearby');
         // For location name — use BigDataCloud with IP coords (more accurate than ipapi city)
         const bgRes = await fetch(
           `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${ipd.latitude}&longitude=${ipd.longitude}&localityLanguage=en`
@@ -3199,12 +3075,7 @@ window.addEventListener('load', () => {
     document.getElementById('appLocName').textContent = _savedLoc;
     _cachedLocation = _savedLoc;
     // Auto-load weather from cached GPS coordinates (not IP)
-    if (_savedLat && _savedLon && !isNaN(_savedLat) && !isNaN(_savedLon)) {
-      loadWeather(_savedLat, _savedLon, _savedLoc);
-    } else {
-      // No cached GPS — load from IP coords
-      setTimeout(_loadWeatherFromIP, 500);
-    }
+  
     // Silent background GPS refresh every 5 minutes
     setTimeout(() => refreshAppLoc(true), 300000);
   } else {
@@ -3284,6 +3155,51 @@ window.addEventListener('load', () => {
 .ch-mic:hover{border-color:var(--red);}
 .ch-mic.on{background:rgba(239,68,68,0.12);border-color:var(--red);animation:micPulse 1s infinite;}
 @keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
+
+/* ── LOCATION WRAPPER + BAR ── */
+#locWrapper{position:relative;margin:12px 16px 0;}
+.loc-bar{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color 0.2s;}
+.loc-bar:hover{border-color:rgba(0,212,255,0.3);}
+.lb-icon{font-size:1rem;flex-shrink:0;}
+.lb-info{flex:1;min-width:0;}
+.lb-label{font-size:0.6rem;font-weight:700;letter-spacing:1px;color:var(--dim);text-transform:uppercase;font-family:'Space Mono',monospace;}
+.lb-name{font-size:0.92rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+
+/* ── LOCATION DROPDOWN ── */
+#locDropdown{
+  display:none;
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0;right:0;
+  background:#0f1117;
+  border:1px solid rgba(0,212,255,0.2);
+  border-radius:14px;
+  box-shadow:0 16px 48px rgba(0,0,0,0.7);
+  z-index:9999;
+  overflow:hidden;
+  max-height:70vh;
+  overflow-y:auto;
+}
+#locDropdown.open{display:block;animation:ddFade 0.18s ease;}
+@keyframes ddFade{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+
+.loc-dd-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.15s;}
+.loc-dd-item:hover,.loc-dd-item:active{background:rgba(255,255,255,0.04);}
+.loc-dd-gps{background:rgba(0,212,255,0.04);}
+.loc-dd-icon{font-size:1.15rem;flex-shrink:0;}
+.loc-dd-info{flex:1;min-width:0;}
+.loc-dd-label{font-size:0.58rem;font-weight:700;letter-spacing:1px;color:var(--accent);font-family:'Space Mono',monospace;text-transform:uppercase;}
+.loc-dd-name{font-size:0.88rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.loc-dd-sub{font-size:0.68rem;color:var(--dim);margin-top:1px;}
+.loc-dd-badge{font-size:0.55rem;font-weight:700;color:var(--green);border:1px solid var(--green);padding:2px 7px;border-radius:6px;font-family:'Space Mono',monospace;flex-shrink:0;}
+.loc-dd-section{font-size:0.6rem;font-weight:700;letter-spacing:1px;color:var(--dim);padding:8px 16px 6px;text-transform:uppercase;font-family:'Space Mono',monospace;background:var(--surf2);}
+.loc-dd-del{font-size:0.8rem;color:var(--dim);cursor:pointer;padding:4px 6px;flex-shrink:0;border-radius:6px;}
+.loc-dd-del:hover{color:#f87171;background:rgba(239,68,68,0.1);}
+.loc-dd-empty{text-align:center;padding:16px;color:var(--dim);font-size:0.8rem;line-height:1.6;}
+.loc-dd-search-row{padding:10px 12px;border-top:1px solid var(--border);}
+.loc-dd-search{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-size:0.85rem;outline:none;box-sizing:border-box;font-family:'Rajdhani',sans-serif;}
+.loc-dd-search:focus{border-color:var(--accent);}
+
 </style>
 
 <!-- FAB Button -->
@@ -3554,99 +3470,6 @@ function smartReply(input) {
 
 
 
-// ══════════════════════════════════════
-// WEATHER ENGINE — OpenMeteo (no API key)
-// ══════════════════════════════════════
-let _weatherLat = null;
-let _weatherLon = null;
-let _weatherDetailsOpen = false;
-
-const WMO_ICONS = {
-  0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
-  45:'🌫️', 48:'🌫️',
-  51:'🌦️', 53:'🌧️', 55:'🌧️',
-  61:'🌧️', 63:'🌧️', 65:'🌧️',
-  71:'❄️', 73:'❄️', 75:'❄️',
-  80:'🌦️', 81:'🌧️', 82:'⛈️',
-  95:'⛈️', 96:'⛈️', 99:'⛈️'
-};
-const WMO_DESC = {
-  0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
-  45:'Foggy', 48:'Freezing fog',
-  51:'Light drizzle', 53:'Drizzle', 55:'Heavy drizzle',
-  61:'Slight rain', 63:'Moderate rain', 65:'Heavy rain',
-  71:'Slight snow', 73:'Moderate snow', 75:'Heavy snow',
-  80:'Slight showers', 81:'Rain showers', 82:'Violent showers',
-  95:'Thunderstorm', 96:'Thunderstorm + hail', 99:'Heavy thunderstorm'
-};
-const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-
-function toggleWeatherDetails() {
-  _weatherDetailsOpen = !_weatherDetailsOpen;
-  document.getElementById('weatherDetails').style.display = _weatherDetailsOpen ? 'block' : 'none';
-}
-
-async function fetchWeather(lat, lon, locName) {
-  try {
-    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat +
-      '&longitude=' + lon +
-      '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation_probability' +
-      '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
-      '&timezone=Asia%2FKolkata&forecast_days=6';
-
-    const res = await fetch(url);
-    const d = await res.json();
-    const c = d.current;
-    const daily = d.daily;
-
-    // Current weather
-    const code = c.weather_code;
-    document.getElementById('wIcon').textContent = WMO_ICONS[code] || '🌡️';
-    document.getElementById('wTemp').innerHTML = Math.round(c.temperature_2m) + '<span class="weather-unit">°C</span>';
-    document.getElementById('wDesc').textContent = WMO_DESC[code] || 'Clear';
-    document.getElementById('wLoc').textContent = locName || 'Your location';
-    document.getElementById('wTime').textContent = 'Updated ' + new Date().toLocaleTimeString('hi-IN',{hour:'2-digit',minute:'2-digit'});
-
-    // Details
-    document.getElementById('wHumid').textContent = c.relative_humidity_2m + '%';
-    document.getElementById('wWind').textContent = Math.round(c.wind_speed_10m) + ' km/h';
-    document.getElementById('wFeels').textContent = Math.round(c.apparent_temperature) + '°';
-    document.getElementById('wHigh').textContent = Math.round(daily.temperature_2m_max[0]) + '°';
-    document.getElementById('wLow').textContent = Math.round(daily.temperature_2m_min[0]) + '°';
-    document.getElementById('wRain').textContent = (c.precipitation_probability || 0) + '%';
-
-    // 5-day forecast
-    const fBox = document.getElementById('wForecast');
-    fBox.innerHTML = '';
-    for (let i = 1; i < 6; i++) {
-      const date = new Date(daily.time[i]);
-      const fc = document.createElement('div');
-      fc.className = 'wf-day';
-      fc.innerHTML = '<div class="wf-day-name">' + DAYS[date.getDay()] + '</div>' +
-        '<div class="wf-icon">' + (WMO_ICONS[daily.weather_code[i]] || '🌡️') + '</div>' +
-        '<div class="wf-temp">' + Math.round(daily.temperature_2m_max[i]) + '°/' + Math.round(daily.temperature_2m_min[i]) + '°</div>' +
-        '<div class="wf-rain">💧' + daily.precipitation_probability_max[i] + '%</div>';
-      fBox.appendChild(fc);
-    }
-
-  } catch(e) {
-    document.getElementById('wDesc').textContent = 'Weather unavailable';
-  }
-}
-
-
-// Load weather using IP-based coordinates (when GPS not available)
-async function _loadWeatherFromIP(locName) {
-  try {
-    const r = await fetch('https://ipapi.co/json/');
-    const d = await r.json();
-    if (d && d.latitude) {
-      const name = locName || d.city || 'Nearby';
-      loadWeather(d.latitude, d.longitude, name);
-    }
-  } catch(e) {}
-}
-
 
 // ══════════════════════════════════════
 // LOCATION DROPDOWN SYSTEM
@@ -3723,8 +3546,7 @@ function pickRecentLoc(name, lat, lon) {
     localStorage.setItem('ntai_lastLat', lat);
     localStorage.setItem('ntai_lastLon', lon);
   } catch(e) {}
-  loadWeather(lat, lon, name);
-  toast('📍 ' + name, 'ok');
+    toast('📍 ' + name, 'ok');
   // Move to top of recent
   saveRecentLocation(name, lat, lon);
 }
@@ -3821,8 +3643,7 @@ function pickSearchLoc(name, lat, lon) {
     localStorage.setItem('ntai_lastLat', lat);
     localStorage.setItem('ntai_lastLon', lon);
   } catch(e) {}
-  loadWeather(lat, lon, name);
-  saveRecentLocation(name, parseFloat(lat), parseFloat(lon));
+    saveRecentLocation(name, parseFloat(lat), parseFloat(lon));
   toast('📍 ' + name, 'ok');
 }
 
