@@ -3294,13 +3294,17 @@ function hideTypingDots() {
 
 function renderChips() {
   const box = document.getElementById('chChips');
+  if (!box) return;
   box.innerHTML = '';
+  box.style.display = 'flex';
   (CHIPS[botLang]||CHIPS.hi).forEach(c => {
     const b = document.createElement('button');
     b.className = 'chip'; b.textContent = c;
     b.onclick = () => { chipSend(c); };
     box.appendChild(b);
   });
+  // Scroll chips into view after reply
+  setTimeout(() => box.scrollIntoView({behavior:'smooth', block:'nearest'}), 100);
 }
 
 // ── Open / Close ──
@@ -3382,8 +3386,9 @@ async function chatSend(directText) {
     }
   } catch(e){}
 
-  if (stat)  stat.textContent = botLang==='hi' ? '● Online — मदद के लिए तैयार' : '● Online — Ready to help';
-  if (chips) chips.style.display = 'flex';
+  if (stat) stat.textContent = botLang==='hi' ? '● Online — मदद के लिए तैयार' : '● Online — Ready to help';
+  // Always re-render chips after every reply so user can ask more
+  renderChips();
 }
 
 function smartReply(input) {
