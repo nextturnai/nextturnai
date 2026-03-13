@@ -1698,39 +1698,67 @@ function clearAppCat() {
 }
 
 async function reverseGeocode(lat, lon) {
+  // ── Method 1: BigDataCloud (best for India, locality level, free, no key) ──
   try {
-    // zoom=18 = building level, zoom=16 = street level
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
-      { headers: { 'Accept-Language': 'hi,en', 'User-Agent': 'NextTurnAI/1.0' } }
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=hi`
+    );
+    const d = await res.json();
+    // Returns: locality (colony/sector), localityInfo, city, principalSubdivision
+    const parts = [
+      d.locality,                    // e.g. "Sector 12" / "Sarvodaya Nagar"
+      d.city || d.principalSubdivision  // e.g. "Ghaziabad"
+    ].filter(p => p && p.trim());
+
+    if (parts.length >= 1 && parts[0] && parts[0] !== d.countryName) {
+      return parts.join(', ');
+    }
+  } catch(e) {}
+
+  // ── Method 2: Nominatim with display_name smart parse ──
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1&namedetails=1`,
+      { headers: { 'Accept-Language': 'hi' } }
     );
     const data = await res.json();
     const a = data.address || {};
 
-    // Build Ola/Uber style: "House No, Road, Colony, City"
-    const lineParts = [
-      a.house_number,                                          // plot/door number
-      a.road || a.pedestrian || a.path || a.footway,          // road/gali name
-      a.neighbourhood || a.quarter || a.allotments,           // colony/mohalla
-      a.suburb || a.residential || a.village || a.town        // area
-        || a.city_district || a.county,
-    ].filter(Boolean);
+    // Priority order for Indian addresses
+    const locality =
+      a.neighbourhood || a.quarter ||
+      a.suburb        || a.residential ||
+      a.village       || a.hamlet ||
+      a.allotments    || a.industrial ||
+      a.road          || a.pedestrian;
 
-    // City for context
-    const city = a.city || a.state_district || a.county || '';
+    const area =
+      a.city || a.town || a.municipality ||
+      a.city_district  || a.state_district;
 
-    if (lineParts.length >= 2) {
-      // Show max 3 parts + city if different
-      const addr = lineParts.slice(0, 3).join(', ');
-      return city && !addr.toLowerCase().includes(city.toLowerCase())
-        ? addr + ', ' + city
-        : addr;
-    }
-    // Fallback: first 4 parts of display_name
-    return data.display_name.split(',').slice(0, 4).join(',').trim();
-  } catch(e) {
-    return null;
-  }
+    const parts = [locality, area].filter(Boolean);
+
+    if (parts.length >= 1) return parts.join(', ');
+
+    // Smart parse display_name — skip pincode, country, state
+    const skip = ['india','uttar pradesh','haryana','delhi','maharashtra',
+                  'rajasthan','karnataka','tamil','telangana','gujarat'];
+    const cleaned = data.display_name.split(',')
+      .map(s => s.trim())
+      .filter(s => s && !/^\d{6}$/.test(s) && !skip.some(k => s.toLowerCase().includes(k)))
+      .slice(0, 3);
+    if (cleaned.length) return cleaned.join(', ');
+
+  } catch(e) {}
+
+  // ── Method 3: ipapi city fallback ──
+  try {
+    const r = await fetch('https://ipapi.co/json/');
+    const d = await r.json();
+    if (d.city) return d.city + (d.region ? ', ' + d.region : '');
+  } catch(e) {}
+
+  return null;
 }
 
 // Save location in memory to avoid repeated asks
