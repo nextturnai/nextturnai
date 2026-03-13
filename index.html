@@ -2272,13 +2272,7 @@ async function reverseGeocode(lat, lon) {
 
   } catch(e) {}
 
-  // ── STEP 3: IP fallback ──
-  try {
-    const r = await fetch('https://ipapi.co/json/');
-    const d = await r.json();
-    if (d.city) return d.city + (d.postal ? ' - ' + d.postal : '');
-  } catch(e) {}
-
+  // STEP 3: No IP fallback — GPS required for accuracy
   return null;
 }
 
@@ -2344,29 +2338,6 @@ async function setLocationDisplay(lat, lon) {
   return display;
 }
 
-// IP-based location fallback (no permission needed, city level)
-async function getLocationByIP() {
-  try {
-    const res = await fetch('https://ipapi.co/json/');
-    const d = await res.json();
-    if (d && d.city) {
-      // Show: City - Pincode (skip long state names)
-      const parts = [];
-      if (d.city) parts.push(d.city);
-      if (d.postal) parts.push(d.postal);
-      return parts.join(' - ');
-    }
-  } catch(e) {}
-  try {
-    const res2 = await fetch('https://ip-api.com/json/?fields=city,zip,district,lat,lon');
-    const d2 = await res2.json();
-    if (d2 && d2.city) {
-      const parts = [d2.city, d2.zip].filter(Boolean);
-      return parts.join(' - ');
-    }
-  } catch(e) {}
-  return null;
-}
 
 function refreshAppLoc(forceRefresh) {
   const btn = document.getElementById('appLocBtn');
@@ -2383,40 +2354,19 @@ function refreshAppLoc(forceRefresh) {
   btn.textContent = '⏳';
   document.getElementById('appLocName').textContent = '📡 Locating...';
 
-  // GPS denied → use IP coords ONLY for weather, show GPS prompt
+  // GPS denied/failed → show prompt only, never show wrong IP city
   const tryIPLocation = async () => {
-    try {
-      const ipr = await fetch('https://ipapi.co/json/');
-      const ipd = await ipr.json();
-      if (ipd && ipd.latitude) {
-        // Load weather silently with IP coords
-        // For location name — use BigDataCloud with IP coords (more accurate than ipapi city)
-        const bgRes = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${ipd.latitude}&longitude=${ipd.longitude}&localityLanguage=en`
-        );
-        const bgD = await bgRes.json();
-        const admin = (bgD.localityInfo && bgD.localityInfo.administrative) || [];
-        const inform = (bgD.localityInfo && bgD.localityInfo.informative) || [];
-        const sectorT = [...admin,...inform].find(t => t.name && /sector[\s\-]*\d+/i.test(t.name));
-        const cityT = admin.find(t => t.order === 4 && t.name);
-        const localT = admin.find(t => t.order >= 5 && t.name);
-        const locName = (sectorT || localT || {}).name
-          ? ((sectorT || localT).name + ', ' + ((cityT||{}).name || bgD.city || ''))
-          : (bgD.city || ipd.city || '');
-        if (locName) {
-          _cachedLocation = locName;
-          document.getElementById('appLocName').textContent = locName;
-          try { localStorage.setItem('ntai_lastLoc', locName);
-                localStorage.setItem('ntai_lastLat', ipd.latitude);
-                localStorage.setItem('ntai_lastLon', ipd.longitude); } catch(e){}
-          btn.textContent = '📍';
-          return;
-        }
-      }
-    } catch(e) {}
-    // Total fallback
-    document.getElementById('appLocName').textContent = saved || '📡 GPS Allow करें';
-    btn.textContent = '🔄';
+    // Show GPS permission prompt — don't use IP for address (too inaccurate in India)
+    const locEl = document.getElementById('appLocName');
+    if (locEl) {
+      locEl.textContent = '📡 GPS Allow करें — सटीक location के लिए';
+      locEl.style.fontSize = '0.78rem';
+      locEl.style.color = 'var(--accent)';
+    }
+    if (btn) btn.textContent = '📍';
+    // Update dropdown GPS name too
+    const ddGPS = document.getElementById('ddGPSName');
+    if (ddGPS) ddGPS.textContent = 'Browser GPS allow करें';
   };
 
   if (!navigator.geolocation) {
@@ -3071,15 +3021,19 @@ window.addEventListener('load', () => {
   const _savedLat = (()=>{ try{ return parseFloat(localStorage.getItem('ntai_lastLat')); }catch(e){return null;} })();
   const _savedLon = (()=>{ try{ return parseFloat(localStorage.getItem('ntai_lastLon')); }catch(e){return null;} })();
 
-  if (_savedLoc) {
+  if (_savedLoc && _savedLat && !isNaN(_savedLat)) {
+    // Returning user — valid GPS cache hai
     document.getElementById('appLocName').textContent = _savedLoc;
     _cachedLocation = _savedLoc;
-    // Auto-load weather from cached GPS coordinates (not IP)
-  
-    // Silent background GPS refresh every 5 minutes
-    setTimeout(() => refreshAppLoc(true), 300000);
+    // Background GPS refresh silently after 5 min
+    setTimeout(() => refreshAppLoc(false), 300000);
   } else {
-    // First time — ask for location
+    // New user — GPS prompt immediately dikhao
+    const locEl = document.getElementById('appLocName');
+    if (locEl) {
+      locEl.textContent = '📡 GPS Allow करें';
+      locEl.style.color = 'var(--accent)';
+    }
     refreshAppLoc(true);
   }
 
